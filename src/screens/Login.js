@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { 
   View, 
   Text,
-  Button, 
   Image,
   ScrollView,
   StyleSheet,
@@ -12,7 +11,8 @@ import {
 //import { Hideo } from 'react-native-textinput-effects';
 //import Icon from 'react-native-vector-icons/FontAwesome';
 
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { Button } from 'react-native-elements';
+//import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import tracksomeLogo from '../images/tracksome-logo-684w.png';
 import MDInput from '../components/common/mdInput';
 //import DefaultInput from '../components/common/DefaultInput';
@@ -112,13 +112,19 @@ class Login extends Component {
             Or you could just take this app for a test drive by clicking the button below.
             </Text>
           </View>
-          <View style={{ flex: 1 }}>
-              <Button 
-                style={styles.funStyle} 
-                title="Take a Test Drive (no Saving)" 
-                onPress={this.testDriveHandler} 
-              />
-          </View>
+          <Button
+            color={AppColors.mainDarkColor}
+            buttonStyle={styles.funStyle}
+            containerViewStyle={styles.buttonContainerStyle}
+            //icon={{ name: 'envira', type: 'font-awesome' }}
+            fontSize={16}
+            borderRadius={5}
+            fontWeight='700'
+            title='Take a Test Drive (no Saving)' 
+            onPress={this.testDriveHandler}
+            icon={{ name: 'cached' }}
+            large
+          />
         </ScrollView>
       </ImageBackground>
     );
@@ -160,12 +166,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignItems: 'center'
   },
-  buttonStyle: {
-    margin: 15
+  buttonContainerStyle: {
+    flex: 1,
+    borderRadius: 5,
+    alignItems: 'center'
   },
   funStyle: {
-    width: '80%',
-    color: AppColors.mainDarkColor,
+    width: '90%',
     backgroundColor: AppColors.accentColor
   },
   title: {
