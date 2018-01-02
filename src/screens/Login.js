@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Alert, Component } from 'react';
 import { 
   View, 
   Text,
@@ -8,18 +8,15 @@ import {
   Dimensions, 
   ImageBackground } from 'react-native';
 
-//import { Hideo } from 'react-native-textinput-effects';
 //import Icon from 'react-native-vector-icons/FontAwesome';
+//import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import { Button } from 'react-native-elements';
-//import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import tracksomeLogo from '../images/tracksome-logo-684w.png';
 import MDInput from '../components/common/mdInput';
-//import DefaultInput from '../components/common/DefaultInput';
 import splashBackgroundImage from '../images/login-splash-screen-1080w.jpg';
 import AppColors from '../templates/appColors';
-
-//import loadMainTabs from './loadMainTabs';
+import OpenMainTabs from './OpenMainTabs';
 
 class Login extends Component {
   constructor(props) {
@@ -43,26 +40,28 @@ class Login extends Component {
   }
   
   loginHandler = () => {
-      alert('Screen Height:' + this.state.scrHeight + '  Orientation: ' + 
-        this.state.viewMode);
-      //loadMainTabs();
+      //Alert.alert('Pressed the Login button');
+      //Alert.alert('Screen Height:' + this.state.scrHeight + '  Orientation: ' + 
+      //  this.state.viewMode);
+      OpenMainTabs();
   }
 
   signupHandler = () => {
-      alert('Screen Height:' + this.state.scrHeight + '  Orientation: ' + 
-        this.state.viewMode);
-      //loadMainTabs();
+      Alert.alert('Pressed the Signup button');
+      //Alert.alert('Screen Height:' + this.state.scrHeight + '  Orientation: ' + 
+      //  this.state.viewMode);
+      //OpenMainTabs();
   }
 
   testDriveHandler = () => {
-      alert('Going to the fun part.  Screen Height:' + this.state.scrHeight + '  Orientation: ' + 
-        this.state.viewMode);
-      //loadMainTabs();
+      //Alert.alert('Going to the fun part.  Screen Height:' + this.state.scrHeight 
+      //  + '  Orientation: ' +  this.state.viewMode);
+      OpenMainTabs();
   }
 
   loginWithFacebook = () => {
-      alert('Pressed the Facebook button');
-      //loadMainTabs();
+      Alert.alert('Pressed the Facebook button');
+      //OpenMainTabs();
   }
 
   handleTextChange(text) {
@@ -80,9 +79,9 @@ class Login extends Component {
               style={this.state.viewMode === 'portrait' ? 
                 styles.logoPortrait : styles.logoLandscape} 
             />
+            <Text style={styles.title}>Login / Signup</Text>
           </View>
           <View style={styles.container}>
-            <Text style={styles.title}>Login / Signup</Text>
             <MDInput 
               label='Email'
               placeholder='Your Email Address please ... '
@@ -99,7 +98,7 @@ class Login extends Component {
             />
             <MDInput 
               label='Confirm Password'
-              placeholder='Again again please (to verify) ... '
+              placeholder='And again please (to verify) ... '
               //secureTextEntry
               //value={this.state.password}
             />
