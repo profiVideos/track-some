@@ -87,7 +87,8 @@ class Login extends Component {
             <Text style={styles.title}>Login / Signup</Text>
           </View>
           <View style={styles.container}>
-            <MDInput 
+            <MDInput
+              darkInput
               label='Email'
               placeholder='Your Email Address please ... '
               keyboardType='email-address'
@@ -96,12 +97,14 @@ class Login extends Component {
               validEmailCheck
             />
             <MDInput 
+              darkInput
               label='Password'
               placeholder='Password please (min. 8 chars) ... '
               secureTextEntry
               //value={this.state.password}
             />
             <MDInput 
+              darkInput
               label='Confirm Password'
               placeholder='And again please (to verify) ... '
               //secureTextEntry

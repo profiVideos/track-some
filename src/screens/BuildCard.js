@@ -9,6 +9,7 @@ import {
   TouchableNativeFeedback } from 'react-native';
 import ImagePicker from 'react-native-image-crop-picker';
 import { Button } from 'react-native-elements';
+import MDInput from '../components/common/mdInput';
 import selectCameraImage from '../images/Source-Camera.jpg';
 import selectFolderImage from '../images/Source-Folder.jpg';
 import AppColors from '../templates/appColors';
@@ -41,9 +42,9 @@ class BuildCard extends Component {
     };
   }
 
-/*
-  componentWillMount() {
-    console.log(`removed tmp image ${image.uri} from tmp directory`);
+/*componentWillMount() {
+    console.log(this.props.Navigator);
+    //console.log(`removed tmp image ${image.uri} from tmp directory`);
   }
 */
 
@@ -90,7 +91,19 @@ class BuildCard extends Component {
   }
 
   doSomeFunction() {
-    Alert.alert('About to do something');
+    //Alert.alert('About to do something');
+    this.props.navigator.setSubTitle({
+      subtitle: 'Connecting...'
+    });
+    /*
+    this.props.navigator.toggleTabs({
+      to: 'hidden',
+      animated: true
+    });
+    this.props.navigator.setTitle({
+      title: 'Dynamic Title'
+    });
+    */
   }
 
   renderImage(image) {
@@ -122,7 +135,7 @@ class BuildCard extends Component {
                 <TouchableNativeFeedback onPress={() => this.doSomeFunction()}>
                   <View style={styles.imageContainer}>
                     <Image style={styles.imageStyle} source={selectCameraImage} />
-                    <Text style={styles.buttonText}>Shoot a Photo</Text>
+                    <Text style={styles.buttonText}>Create a Photo</Text>
                   </View>
                 </TouchableNativeFeedback>
               </View>
@@ -130,7 +143,7 @@ class BuildCard extends Component {
                 <TouchableNativeFeedback onPress={() => this.doSomeFunction()}>
                   <View style={styles.imageContainer}>
                     <Image style={styles.imageStyle} source={selectFolderImage} />
-                    <Text style={styles.buttonText}>Choose a Photo</Text>
+                    <Text style={styles.buttonText}>Choose an Image</Text>
                   </View>
                 </TouchableNativeFeedback>
               </View>
@@ -139,6 +152,14 @@ class BuildCard extends Component {
 
           <View style={styles.cardContainer}>
             <Text style={styles.normalText}>Markus is here!</Text>
+            <MDInput
+              style={styles.inputStyle}
+              label='Item Title'
+              placeholder='Please enter a name for this item ... '
+              //value={this.state.emailAddr}
+              //onChangeText={value => this.handleTextChange(value)}
+            />
+
             <Button title="Get an Image to Crop" onPress={() => this.pickSingle(true)} />
           </View>
 
@@ -195,6 +216,10 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 1, height: 3 },
     shadowOpacity: 0.85,
     resizeMode: 'contain'
+  },
+  inputStyle: {
+    color: '#111111',
+    width: '100%'
   },
   buttonText: {
     alignSelf: 'center',

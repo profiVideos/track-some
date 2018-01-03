@@ -42,6 +42,7 @@ const OpenMainTabs = () => {
           tabsStyle: {
               tabBarButtonColor: '#ff0000'
             },
+          passProps: {},            
           animationType: 'fade'
         });
     });
