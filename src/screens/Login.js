@@ -148,6 +148,7 @@ class Login extends Component {
 
 /*
 const AppColors = {
+  paperColor: '#e2e2e2',      // ... off white ...
   hiliteColor: '#fff8b2',     // ... light yellow ...
   accentColor: '#dea140',     // ... medium orange ...
   mainLiteColor: '#a32b26',   // ... medium red ...
@@ -156,6 +157,16 @@ const AppColors = {
 */
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 3,
+    marginBottom: 25,
+    alignItems: 'center'
+  },
+  text: {
+    color: '#f2f2f2',
+    margin: 20,
+    textAlign: 'center'
+  },
   input: {
     color: '#111111',
     width: '80%'
@@ -203,16 +214,6 @@ const styles = StyleSheet.create({
   logoContainer: {
     flex: 2,
     alignItems: 'center'
-  },
-  container: {
-    flex: 3,
-    marginBottom: 25,
-    alignItems: 'center'
-  },
-  text: {
-    color: '#f2f2f2',
-    margin: 20,
-    textAlign: 'center'
   }
 });
 
