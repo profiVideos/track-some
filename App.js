@@ -4,6 +4,8 @@ import Login from './src/screens/Login';
 import BuildThumbnails from './src/screens/BuildThumbs';
 import ShowThumbnails from './src/screens/ShowThumbs';
 
+console.disableYellowBox = true;
+
 // ... register screens ...
 Navigation.registerComponent('tracksome.Login', () => Login);
 Navigation.registerComponent('tracksome.BuildThumbnails', () => BuildThumbnails);

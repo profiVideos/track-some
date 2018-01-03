@@ -39,6 +39,7 @@ class mdInput extends React.Component {
           labelActiveColor={AppColors.accentColor}
           labelActiveScale={0.75}
           autoCorrect={false}
+          disableFullscreenUI
           underlineActiveColor={AppColors.accentColor} 
           underlineColorAndroid='transparent'
           {...this.props}

@@ -1,8 +1,9 @@
-import React, { Alert, Component } from 'react';
+import React, { Component } from 'react';
 import { 
   View, 
   Text,
   Image,
+  Alert,
   ScrollView,
   StyleSheet,
   Dimensions, 
@@ -30,7 +31,7 @@ class Login extends Component {
       });
     });
   }
-
+  
   state = {
     toggled: false,
     emailAddr: 'markus@profiphotos.com',
@@ -39,29 +40,33 @@ class Login extends Component {
     viewMode: this.scrHeight > this.scrWidth ? 'portrait' : 'landscape'
   }
   
+  componentWillMount() {
+    //OpenMainTabs();
+  }
+  
   loginHandler = () => {
-      //Alert.alert('Pressed the Login button');
-      //Alert.alert('Screen Height:' + this.state.scrHeight + '  Orientation: ' + 
-      //  this.state.viewMode);
-      OpenMainTabs();
+    //Alert.alert('Pressed the Login button');
+    //Alert.alert('Screen Height:' + this.state.scrHeight + '  Orientation: ' + 
+    //  this.state.viewMode);
+    OpenMainTabs();
   }
 
   signupHandler = () => {
-      Alert.alert('Pressed the Signup button');
-      //Alert.alert('Screen Height:' + this.state.scrHeight + '  Orientation: ' + 
-      //  this.state.viewMode);
-      //OpenMainTabs();
+    Alert.alert('Pressed the Signup button');
+    //Alert.alert('Screen Height:' + this.state.scrHeight + '  Orientation: ' + 
+    //  this.state.viewMode);
+    //OpenMainTabs();
   }
 
   testDriveHandler = () => {
-      //Alert.alert('Going to the fun part.  Screen Height:' + this.state.scrHeight 
-      //  + '  Orientation: ' +  this.state.viewMode);
-      OpenMainTabs();
+    Alert.alert('Going to the fun part.  Screen Height:' + this.state.scrHeight 
+      + '  Orientation: ' + this.state.viewMode);
+    //OpenMainTabs();
   }
 
   loginWithFacebook = () => {
-      Alert.alert('Pressed the Facebook button');
-      //OpenMainTabs();
+    Alert.alert('Pressed the Facebook button');
+    //OpenMainTabs();
   }
 
   handleTextChange(text) {
@@ -110,20 +115,20 @@ class Login extends Component {
             If you've never signed up before, there are some benefits to doing so.  
             Or you could just take this app for a test drive by clicking the button below.
             </Text>
+            <Button
+              color={AppColors.mainDarkColor}
+              buttonStyle={styles.funStyle}
+              containerViewStyle={styles.buttonContainerStyle}
+              //icon={{ name: 'envira', type: 'font-awesome' }}
+              fontSize={16}
+              borderRadius={5}
+              fontWeight='700'
+              title='Take a Test Drive (no Saving)' 
+              onPress={this.testDriveHandler}
+              icon={{ name: 'cached' }}
+              large
+            />
           </View>
-          <Button
-            color={AppColors.mainDarkColor}
-            buttonStyle={styles.funStyle}
-            containerViewStyle={styles.buttonContainerStyle}
-            //icon={{ name: 'envira', type: 'font-awesome' }}
-            fontSize={16}
-            borderRadius={5}
-            fontWeight='700'
-            title='Take a Test Drive (no Saving)' 
-            onPress={this.testDriveHandler}
-            icon={{ name: 'cached' }}
-            large
-          />
         </ScrollView>
       </ImageBackground>
     );
@@ -171,7 +176,6 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   funStyle: {
-    width: '90%',
     backgroundColor: AppColors.accentColor
   },
   title: {
@@ -202,6 +206,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 3,
+    marginBottom: 25,
     alignItems: 'center'
   },
   text: {
