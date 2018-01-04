@@ -15,6 +15,7 @@ const AppColors = {
 const OpenMainTabs = () => {
     Promise.all([
         getImageSource('md-map', 30),
+        getImageSource('md-map', 30),
         getImageSource('ios-share-alt', 30)
     ]).then(sources => {
         Navigation.startTabBasedApp({
@@ -27,20 +28,26 @@ const OpenMainTabs = () => {
           },
           tabs: [
             {
+              screen: 'tracksome.EditCategories',
+              label: 'Categories',
+              title: 'Maintain Categories',
+              icon: sources[0]
+            },
+            {
               screen: 'tracksome.BuildCard',
               label: 'Build Card',
               title: 'New Card',
-              icon: sources[0]
+              icon: sources[1]
             },
             {
               screen: 'tracksome.ShowCard',
               label: 'Show Card',
               title: 'Show Card',
-              icon: sources[1]
+              icon: sources[2]
             }
           ],
           tabsStyle: {
-              tabBarButtonColor: '#ff0000'
+              tabBarButtonColor: 'orange'
             },
           passProps: {},            
           animationType: 'fade'

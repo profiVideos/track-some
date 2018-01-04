@@ -3,6 +3,8 @@ import { Navigation } from 'react-native-navigation';
 import Login from './src/screens/Login';
 import BuildCard from './src/screens/BuildCard';
 import ShowCard from './src/screens/ShowCard';
+import EditCategories from './src/screens/EditCategories';
+import OpenMainTabs from './src/screens/OpenMainTabs';
 
 console.disableYellowBox = true;
 
@@ -10,8 +12,13 @@ console.disableYellowBox = true;
 Navigation.registerComponent('tracksome.Login', () => Login);
 Navigation.registerComponent('tracksome.BuildCard', () => BuildCard);
 Navigation.registerComponent('tracksome.ShowCard', () => ShowCard);
+Navigation.registerComponent('tracksome.EditCategories', () => EditCategories);
+
+OpenMainTabs();
 
 // ... start a Navigation App ...
+
+/*
 Navigation.startSingleScreenApp({
   screen: {
     screen: 'tracksome.Login',
@@ -24,3 +31,5 @@ Navigation.startSingleScreenApp({
   },
   animationType: 'fade'
 });
+
+*/

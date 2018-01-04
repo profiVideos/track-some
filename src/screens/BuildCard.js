@@ -30,7 +30,7 @@ class BuildCard extends Component {
     screenBackgroundColor: AppColors.paperColor,
     navBarTextColor: AppColors.accentColor,
     navBarBackgroundColor: AppColors.mainDarkColor,
-    navBarTranslucent: true
+    navBarTranslucent: false
   };
 
   constructor(props) {
@@ -91,11 +91,11 @@ class BuildCard extends Component {
   }
 
   doSomeFunction() {
-    //Alert.alert('About to do something');
+    Alert.alert('About to do something');
+    /*
     this.props.navigator.setSubTitle({
       subtitle: 'Connecting...'
     });
-    /*
     this.props.navigator.toggleTabs({
       to: 'hidden',
       animated: true
@@ -130,6 +130,19 @@ class BuildCard extends Component {
           <ScrollView>
 
           <View style={styles.cardContainer}>
+            <Text style={styles.normalText}>Markus is here!</Text>
+            <MDInput
+              style={styles.inputStyle}
+              label='Item Title'
+              placeholder='Please enter a name for this item ... '
+              //value={this.state.emailAddr}
+              //onChangeText={value => this.handleTextChange(value)}
+            />
+
+            <Button title="Get an Image to Crop" onPress={() => this.pickSingle(true)} />
+          </View>
+
+          <View style={styles.cardContainer}>
             <View style={styles.buttonRow}>
               <View style={styles.columnContainer}>         
                 <TouchableNativeFeedback onPress={() => this.doSomeFunction()}>
@@ -148,19 +161,6 @@ class BuildCard extends Component {
                 </TouchableNativeFeedback>
               </View>
             </View>
-          </View>
-
-          <View style={styles.cardContainer}>
-            <Text style={styles.normalText}>Markus is here!</Text>
-            <MDInput
-              style={styles.inputStyle}
-              label='Item Title'
-              placeholder='Please enter a name for this item ... '
-              //value={this.state.emailAddr}
-              //onChangeText={value => this.handleTextChange(value)}
-            />
-
-            <Button title="Get an Image to Crop" onPress={() => this.pickSingle(true)} />
           </View>
 
           </ScrollView>
