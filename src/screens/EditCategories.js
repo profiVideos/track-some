@@ -10,6 +10,10 @@ import {
   StyleSheet 
 } from 'react-native';
 //import { Button } from 'react-native-elements';
+//import EmojiPicker from 'react-native-simple-emoji-picker';  ... 1) broken ...
+//import Emoticons from 'react-native-emoticons';  ... 2) also broken ...
+//import EmojiPicker from 'react-native-emoji-picker';   // ... 3) also broken ProcTypes ...
+import { Icon } from 'native-base';   // ... Uses Ionicons from React Native Vector Icons ...
 import AppColors from '../templates/appColors';
 import MDInput from '../components/common/mdInput';
 //import CategoryList from '../components/CategoryList';
@@ -49,6 +53,14 @@ class EditCategories extends Component {
     viewMode: this.scrHeight > this.scrWidth ? 'portrait' : 'landscape'
   }
 
+  onBackspacePress() {
+    Alert.alert('Backspace was pressed!');
+  }
+
+  onEmojiSelected() {
+    Alert.alert('Emoticon was selected!');
+  }
+
   itemNameChanged(text) {
     this.setState({ itemName: text });
   }
@@ -84,6 +96,9 @@ class EditCategories extends Component {
               value={this.state.itemName}
               onChangeText={text => this.itemNameChanged(text)}
             />
+            <Icon name='home' />
+            <Icon ios='ios-menu' android="md-menu" style={{ fontSize: 80, color: 'red' }} />
+            <Icon ios='ios-book' android="md-book" style={{ fontSize: 80, color: 'blue' }} />
             <MDInput
               label='Icon (optional)'
               placeholder='How about a nice Icon for this category? '
@@ -136,6 +151,11 @@ const styles = StyleSheet.create({
 });
 
 /*
+
+            <EmojiPicker 
+              onEmojiSelected={this.onEmojiSelected}
+            />            
+
               onChangeText={icon => this.itemIconChanged(icon)}
               onChangeText={icon => this.setState({ itemIcon: icon })}
               onChangeText={text => this.setState({ itemName: text })}
@@ -208,5 +228,15 @@ const AppColors = {
       <View style={this.state.itemsLoaded ? null : styles.buttonContainer}>
         {content}
       </View>
+
+            ... also had problems with React.PropTypes.func
+            <Emoticons
+               onEmoticonPress={this.onEmoticonPress.bind(this)}
+               onBackspacePress={this.onBackspacePress.bind(this)}
+               show
+               concise
+               showHistoryBar
+               showPlusBar
+            />            
 
 */
