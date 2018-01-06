@@ -14,9 +14,9 @@ const AppColors = {
 
 const OpenMainTabs = () => {
     Promise.all([
-        getImageSource('md-map', 30),
-        getImageSource('md-map', 30),
-        getImageSource('ios-share-alt', 30)
+        getImageSource('logo-buffer', 30),    // ... categories ...
+        getImageSource('md-paper', 30),       // ... build card ...
+        getImageSource('ios-desktop', 30)     // ... show card ...
     ]).then(sources => {
         Navigation.startTabBasedApp({
           appStyle: {

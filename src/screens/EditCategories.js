@@ -90,15 +90,13 @@ class EditCategories extends Component {
         <View style={styles.outerContainer}>
           <View style={styles.container}>
             <Text style={styles.textHeading}>Enter a new Category</Text>
+            <Icon ios='ios-book' android="md-book" style={{ fontSize: 48, color: 'blue' }} />
             <MDInput
               label='Category Name'
               placeholder='Something short to describe this category ... '
               value={this.state.itemName}
               onChangeText={text => this.itemNameChanged(text)}
             />
-            <Icon name='home' />
-            <Icon ios='ios-menu' android="md-menu" style={{ fontSize: 80, color: 'red' }} />
-            <Icon ios='ios-book' android="md-book" style={{ fontSize: 80, color: 'blue' }} />
             <MDInput
               label='Icon (optional)'
               placeholder='How about a nice Icon for this category? '
