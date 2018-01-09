@@ -36,10 +36,10 @@ export const removeCategory = (catId) => {
   };
 };
 
-export const selectCategory = (categoryDetails) => {
+export const selectCategory = (catId) => {
   return {
     type: SELECT_CATEGORY,
-    payload: categoryDetails
+    payload: catId
   };
 };
 

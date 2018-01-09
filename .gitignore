@@ -41,6 +41,10 @@ buck-out/
 \.buckd/
 *.keystore
 
+# ... tracksome support/test files ...
+src/store/data/characters.json
+layout/Screenshots/notImportant/
+
 # fastlane
 #
 # It is recommended to not store the screenshots in the git repo. Instead, use fastlane to re-generate the

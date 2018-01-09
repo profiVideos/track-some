@@ -7,12 +7,12 @@ const CategoryList = props => {
   return (
     <FlatList
       style={styles.listContainer}
-      data={props.categories}
-      renderItem={(info) => (
+      data={props.data}
+      renderItem={(item) => (
         <CategoryItem
-          categoryName={info.item.name}
-          categoryIcon={info.item.icon}
-          onItemPressed={() => props.onItemSelected(info.item.key)}
+          categoryName={item.name}
+          categoryIcon={item.icon}
+          onItemPressed={() => props.onItemSelected(item.key)}
         />
       )}
     />

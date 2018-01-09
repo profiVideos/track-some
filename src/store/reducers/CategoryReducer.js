@@ -4,14 +4,14 @@ import {
   NEW_CATEGORY,
   ADD_CATEGORY, 
   UPDATE_CATEGORY, 
-//  REMOVE_CATEGORY,
+  REMOVE_CATEGORY,
   SELECT_CATEGORY,
   UNSELECT_CATEGORY,
 //  INITIAL_CATEGORIES
 } from '../actions/actionTypes';
 
 const initialState = {
-  categories: '',
+  itemList: [],
   detailView: false,
   catSelected: null,
   catId: '',
@@ -20,9 +20,11 @@ const initialState = {
   loading: false
 };
 
-export default (state = initialState, action) => {
-  console.log('inside CategoryReducer - Action is ... ');
-  console.log(state, action);
+const CategoryReducer = (state = initialState, action) => {
+  //console.log('---------------------------------------');
+  //console.log('inside CategoryReducer - State & Action = ');
+  //console.log(state, action);
+  //console.log('---------------------------------------');
   switch (action.type) {
 
     case NEW_CATEGORY:
@@ -36,8 +38,21 @@ export default (state = initialState, action) => {
     case ADD_CATEGORY:
       return {
         ...state,
-        ...action.newCategory     // ... MG ??? Where is this defined ??? ...
+        itemList: state.itemList.concat({
+          key: Math.random(),
+          name: action.payload.catDesc,
+          icon: action.payload.catIcon
+        })
       };
+
+/*
+        itemList: state.itemList.concat({  // ... need to add this to the list of categories ...
+          catId: action.payload.catId,
+          catName: action.payload.catDesc,
+          catIcon: action.payload.catIcon
+        })
+*/
+
 
     case UPDATE_CATEGORY:
       return {
@@ -45,11 +60,22 @@ export default (state = initialState, action) => {
         [action.payload.prop]: action.payload.value
       };
 
+    case REMOVE_CATEGORY:
+      return {
+        ...state,
+        categories: state.categories.filter(category => {
+          return category.catId !== action.payload.catId;
+        }),
+        catSelected: null
+      };
+
     case SELECT_CATEGORY:
       return {
         ...state,
         detailView: true,
-        catSelected: action.payload
+        catSelected: state.categories.find(category => {
+          return category.catId === action.payload.catId;
+        })
       };
 
     case UNSELECT_CATEGORY:
@@ -71,3 +97,5 @@ export default (state = initialState, action) => {
   
   }
 };
+
+export default CategoryReducer;

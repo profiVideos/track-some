@@ -1,29 +1,25 @@
 import { Navigation } from 'react-native-navigation';
+import { Provider } from 'react-redux';
 
 import Login from './src/screens/Login';
 import BuildCard from './src/screens/BuildCard';
 import ShowCard from './src/screens/ShowCard';
 import EditCategories from './src/screens/EditCategories';
 import OpenMainTabs from './src/screens/OpenMainTabs';
+import loadStoreConfig from './src/store/loadStoreConfig';
 
+const store = loadStoreConfig();
 console.disableYellowBox = true;
 
-// ... setup our store, reducers and enhancers ...
-/*
-import { createStore, compose } from 'redux';
-import rootReducer from './store/reducers/index';
-
-const enhancers = compose(
-  window.devToolsExtension ? window.devToolsExtension() : f => f
-);
-const store = createStore(rootReducer, defaultState, enhancers);
-*/
-
 // ... register screens ...
-Navigation.registerComponent('tracksome.Login', () => Login);
-Navigation.registerComponent('tracksome.BuildCard', () => BuildCard);
-Navigation.registerComponent('tracksome.ShowCard', () => ShowCard);
-Navigation.registerComponent('tracksome.EditCategories', () => EditCategories);
+Navigation.registerComponent('tracksome.Login', () => Login, 
+  store, Provider);
+Navigation.registerComponent('tracksome.BuildCard', () => BuildCard, 
+  store, Provider);
+Navigation.registerComponent('tracksome.ShowCard', () => ShowCard, 
+  store, Provider);
+Navigation.registerComponent('tracksome.EditCategories', () => EditCategories, 
+  store, Provider);
 
 OpenMainTabs();
 

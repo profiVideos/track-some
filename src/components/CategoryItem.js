@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 const CategoryItem = props => (
   <TouchableOpacity onPress={props.onItemPressed}>
     <View style={styles.categoryItem}>
-      <Image resizeMode="cover" source={props.categoryIcon} style={styles.categoryIcon} />
+      <Text style={{ color: '#000' }}>{props.categoryIcon}</Text>
       <Text>{props.categoryName}</Text>
     </View>
   </TouchableOpacity>
@@ -27,3 +27,7 @@ const styles = StyleSheet.create({
 });
 
 export default CategoryItem;
+
+/*
+      <Image resizeMode="cover" source={props.categoryIcon} style={styles.categoryIcon} />
+*/

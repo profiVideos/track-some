@@ -3,12 +3,14 @@ import { combineReducers } from 'redux';
 //import CardReducer from './CardReducer';
 //import LoginReducer from './LoginReducer';
 import CategoryReducer from './CategoryReducer';
+import Characters from './Characters';
 
 const rootReducer = combineReducers({
   //tag: TagReducer,
   //card: CardReducer,
   //login: LoginReducer,
-  category: CategoryReducer
+  characters: Characters,
+  categories: CategoryReducer
 });
 
 export default rootReducer;

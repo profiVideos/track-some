@@ -4,19 +4,28 @@ import {
   View,
   Alert,
   Button,
+  FlatList,
+  //ListItem,
   Dimensions, 
   //Animated,
-  ScrollView,
+  //ScrollView,
   StyleSheet 
 } from 'react-native';
+import { connect } from 'react-redux';
+
 //import { Button } from 'react-native-elements';
 //import EmojiPicker from 'react-native-simple-emoji-picker';  ... 1) broken ...
 //import Emoticons from 'react-native-emoticons';  ... 2) also broken ...
 //import EmojiPicker from 'react-native-emoji-picker';   // ... 3) also broken ProcTypes ...
-import { Icon } from 'native-base';   // ... Uses Ionicons from React Native Vector Icons ...
+//import { Icon } from 'native-base';   // ... Uses Ionicons from React Native Vector Icons ...
 import AppColors from '../templates/appColors';
 import MDInput from '../components/common/mdInput';
+import { addCategory } from '../store/actions';
+// ... following two lines are a temp cludge to test the actions ...
+//import store from '../../App';
+//import { ADD_CATEGORY } from '../store/actions/actionTypes';
 //import CategoryList from '../components/CategoryList';
+//import superHeros from '../store/data/characters.json';
 
 class EditCategories extends Component {
 
@@ -44,8 +53,8 @@ class EditCategories extends Component {
     toggled: false,
     itemsLoaded: false,
     emailAddr: 'markus@profiphotos.com',
-    itemName: '',
-    itemIcon: 'Groovy',
+    itemName: 'Markus is here!',
+    itemIcon: 'Nice Heart',
     //removeAnim: new Animated.Value(1),
     //categoriesAnim: new Animated.Value(0),
     scrWidth: Dimensions.get('window').width,
@@ -69,6 +78,22 @@ class EditCategories extends Component {
     this.setState({ itemIcon: icon });
   }
 
+  itemSelectedHandler = key => {
+    Alert.alert(`A list item was selected with ${JSON.stringify(key)}`);
+    /*
+    const selPlace = this.props.places.find(place => {
+      return place.key === key;
+    });
+    this.props.navigator.push({
+      screen: 'tracksome.PlaceDetailScreen',
+      title: selPlace.name,
+      passProps: {
+        selectedPlace: selPlace
+      }
+    });
+    */
+  };
+
   addThisItem = () => {
     //if (this.props.navigator.header )
     //this.props.navigator.setTabBadge({
@@ -79,30 +104,49 @@ class EditCategories extends Component {
     //this.props.navigator.setSubTitle({
     //  subtitle: ''
     //});
-    const name = `The current description: ${this.state.itemName}`;
-    const icon = ` & the current icon is: ${this.state.itemIcon}`;
-    Alert.alert(name + icon);
+    //const name = `The current description: ${this.state.itemName}`;
+    //const icon = ` & the current icon is: ${this.state.itemIcon}`;
+    //Alert.alert(name + icon);
+    //console.log('---->>>', JSON.stringify(this.props.itemList));
+    //Alert.alert(JSON.stringify(this.props.itemList));
+    this.props.onAddCategory('04587', 'Great Red Meat', 'smiley-lady');
+    // this.props.navigator.switchToTab({tabIndex: 0});
   }
 
+renderItem({ item }) {
+  return (
+      <View style={styles.row}>
+          <Text style={styles.rowText}> Name {item}</Text>
+      </View>
+  );
+}
+
   render() {
+    console.log(this.props.itemList);
+    //console.log(superHeros);
     return (
-      <ScrollView>
+      <View style={{ flex: 1 }}>
         <View style={styles.outerContainer}>
           <View style={styles.container}>
             <Text style={styles.textHeading}>Enter a new Category</Text>
-            <Icon ios='ios-book' android="md-book" style={{ fontSize: 48, color: 'blue' }} />
             <MDInput
               label='Category Name'
-              placeholder='Something short to describe this category ... '
+              placeholder='A short category description ... '
               value={this.state.itemName}
               onChangeText={text => this.itemNameChanged(text)}
             />
             <MDInput
               label='Icon (optional)'
-              placeholder='How about a nice Icon for this category? '
+              placeholder='A nice Icon for this category? '
               value={this.state.itemIcon}
               onChangeText={icon => this.itemIconChanged(icon)}
             />
+            <FlatList
+              data={this.props.itemList}
+              renderItem={({ item }) => (
+                <Text>Hero: {item.name}  Strength: {item.strength}</Text>
+              )}
+            />            
             <Button
               style={styles.button}
               title="Add this Category"
@@ -110,13 +154,85 @@ class EditCategories extends Component {
             />
           </View>
         </View>
-      </ScrollView>
+      </View>
     );
   }
 
+/*
+            <CategoryList
+              data={this.props.itemList}
+              onItemSelected={this.itemSelectedHandler}
+            />
+            <CategoryList
+              data={this.props.itemList}
+              onItemSelected={this.itemSelectedHandler}
+            />
+
+            <FlatList
+              data={superHeros}
+              renderItem={({ item }) => (
+                <ListItem
+                  title={`${item.name}`}
+                />
+              )}
+            />            
+
+            <CategoryList
+              data={this.props.itemList}
+              onItemSelected={this.itemSelectedHandler}
+            />
+
+              onItemSelected={this.itemSelectedHandler}
+
+            <FlatList
+              data={this.props.itemList}
+              renderItem={({ item }) => this.renderItem(item)}
+            />
+
+ {item.catName}
+            <Text>{this.props.itemList.catName}</Text>
+          <CategoryList
+            categories={this.props.itemList}
+            onItemSelected={this.itemSelectedHandler}
+          />
+<FlatList
+      style={styles.listContainer}
+      data={props.categories}
+      renderItem={(info) => (
+        <CategoryItem
+          categoryName={info.categories.catName}
+          categoryIcon={info.categories.catIcon}
+          onItemPressed={() => props.onItemSelected(info.categories.catId)}
+        />
+      )}
+    />
+*/
+
 }
 
-export default EditCategories;
+const mapStateToProps = state => {
+  return {
+    itemList: state.categories.itemList
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    onAddCategory: (categoryId, categoryDesc, categoryIcon) =>
+      dispatch(addCategory(categoryId, categoryDesc, categoryIcon)),
+  };
+};
+
+/*
+const mapDispatchToProps = dispatch => {
+  return {
+    onLoadPlaces: () => dispatch(getPlaces())
+  };
+};
+*/
+
+//export default connect(mapStateToProps)(EditCategories);
+export default connect(mapStateToProps, mapDispatchToProps)(EditCategories);
 
 const styles = StyleSheet.create({
   button: {
@@ -130,6 +246,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   outerContainer: {
+    flex: 1,
     margin: 3,
     paddingBottom: 10,
     borderRadius: 2,
@@ -137,7 +254,7 @@ const styles = StyleSheet.create({
     shadowColor: '#121212',
     shadowOffset: { width: 1, height: 3 },
     shadowOpacity: 0.85,
-    elevation: 3
+    //elevation: 3
   },
   textHeading: {
     color: '#232323',
@@ -150,6 +267,7 @@ const styles = StyleSheet.create({
 
 /*
 
+            <Icon ios='ios-book' android="md-book" style={{ fontSize: 48, color: 'blue' }} />
             <EmojiPicker 
               onEmojiSelected={this.onEmojiSelected}
             />            
