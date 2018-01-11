@@ -15,10 +15,10 @@ export const newCategory = () => {
   };
 };
 
-export const addCategory = (catId, catDesc, catIcon) => {
+export const addCategory = (catId, catName, catDesc, catIcon) => {
   return {
     type: ADD_CATEGORY,
-    payload: { catId, catDesc, catIcon }
+    payload: { catId, catName, catDesc, catIcon }
   };
 };
 

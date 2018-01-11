@@ -27,16 +27,17 @@ class mdInput extends React.Component {
   }
 */
   render() {
+    //console.log(`Style: ${this.props.style}`);
     return (
       <View style={this.props.darkInput ? styles.darkContainerStyle : styles.lightContainerStyle}>
         <TextField 
-          style={[this.props.darkInput ? styles.darkInputStyle 
-                                       : styles.lightInputStyle, this.props.style]}
-          labelColor={this.props.darkInput ? AppColors.accentColor : '#4f7bf3'}
-          color={this.props.darkInput ? AppColors.hiliteColor : '#000000'}
+          //style={this.props.style}  ... doesn't appear to work ...
+          //containerStyle={this.props.style}
+          labelColor={this.props.darkInput ? AppColors.accentColor : AppColors.mainLiteColor}
+          color={this.props.darkInput ? AppColors.hiliteColor : 'black'}
           paddingTop={16}
           paddingBottom={2}
-          labelActiveColor={this.props.darkInput ? AppColors.accentColor : AppColors.accentColor}
+          labelActiveColor={this.props.darkInput ? AppColors.accentColor : AppColors.darkerColor}
           labelActiveScale={0.75}
           autoCorrect={false}
           disableFullscreenUI
@@ -50,13 +51,16 @@ class mdInput extends React.Component {
     );
   }
 }
-
+/*
+          style={[this.props.darkInput ? styles.darkInputStyle 
+                                       : styles.lightInputStyle, this.props.style]}
+*/
 const styles = StyleSheet.create({
   darkContainerStyle: {
-    width: '80%',
+    //width: '80%',
     paddingLeft: 4,
     paddingRight: 4,
-    borderRadius: 5,
+    borderRadius: 3,
     borderColor: '#929292',
     borderWidth: 0,
     shadowColor: '#121212',
@@ -65,13 +69,13 @@ const styles = StyleSheet.create({
     elevation: 3,
     opacity: 1.0,
     backgroundColor: 'rgba(40,40,40,0.65)',
-    marginBottom: 8
+    //marginBottom: 8
   },
   lightContainerStyle: {
-    width: '90%',
+    //width: '90%',
     paddingLeft: 4,
     paddingRight: 4,
-    borderRadius: 5,
+    borderRadius: 3,
     borderColor: '#929292',
     borderWidth: 0,
     shadowColor: '#121212',
@@ -80,7 +84,7 @@ const styles = StyleSheet.create({
     //elevation: 3,
     opacity: 1.0,
     backgroundColor: 'white',
-    marginBottom: 8
+    //marginBottom: 8
   },
   darkInputStyle: {
     color: '#f2f2f2',

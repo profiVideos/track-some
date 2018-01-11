@@ -3,12 +3,11 @@ import {
   Text, 
   View,
   Alert,
-  Button,
   FlatList,
-  //ListItem,
+  Platform,
   Dimensions, 
-  //Animated,
   //ScrollView,
+  //Animated,
   StyleSheet 
 } from 'react-native';
 import { connect } from 'react-redux';
@@ -17,15 +16,32 @@ import { connect } from 'react-redux';
 //import EmojiPicker from 'react-native-simple-emoji-picker';  ... 1) broken ...
 //import Emoticons from 'react-native-emoticons';  ... 2) also broken ...
 //import EmojiPicker from 'react-native-emoji-picker';   // ... 3) also broken ProcTypes ...
-//import { Icon } from 'native-base';   // ... Uses Ionicons from React Native Vector Icons ...
+//import { Icon, Button } from 'native-base';   // ... Uses Ionicons from RN Vector Icons ...
+//import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
+//import Emoji from 'react-native-emoji';
+import nodeEmoji from 'node-emoji';
 import AppColors from '../templates/appColors';
 import MDInput from '../components/common/mdInput';
+import MDButton from '../components/common/mdButton';
 import { addCategory } from '../store/actions';
-// ... following two lines are a temp cludge to test the actions ...
-//import store from '../../App';
-//import { ADD_CATEGORY } from '../store/actions/actionTypes';
-//import CategoryList from '../components/CategoryList';
-//import superHeros from '../store/data/characters.json';
+//import CategoryItem from '../components/CategoryItem';
+
+
+/*
+const AppColors = {
+  paperColor: '#e2e2e2',      // ... off white ...
+  hiliteColor: '#fff8b2',     // ... light yellow ...
+  accentColor: '#dea140',     // ... medium orange ...
+  mainLiteColor: '#a32b26',   // ... medium red ...
+  mainDarkColor: '#590d0b',   // ... dark red (burgundy) ...
+  darkerColor: '#325a66'      // ... dark cyan ....
+}
+
+    "babel-polyfill": "^6.26.0",
+    "emoji-datasource": "^2.4.4",
+    "prop-types": "^15.6.0"
+
+*/
 
 class EditCategories extends Component {
 
@@ -51,10 +67,11 @@ class EditCategories extends Component {
 
   state = {
     toggled: false,
-    itemsLoaded: false,
-    emailAddr: 'markus@profiphotos.com',
-    itemName: 'Markus is here!',
-    itemIcon: 'Nice Heart',
+    hasloaded: false,
+    itemsCount: 0,
+    itemName: '',
+    itemDesc: '',
+    itemIcon: '',
     //removeAnim: new Animated.Value(1),
     //categoriesAnim: new Animated.Value(0),
     scrWidth: Dimensions.get('window').width,
@@ -62,16 +79,28 @@ class EditCategories extends Component {
     viewMode: this.scrHeight > this.scrWidth ? 'portrait' : 'landscape'
   }
 
-  onBackspacePress() {
-    Alert.alert('Backspace was pressed!');
+  componentDidUpdate() {
+    this.props.navigator.setTabBadge({
+      badge: this.state.itemsCount,
+      badgeColor: '#121212'  // ... doesn't seem to be working ...
+    });
+    //console.log(`Toggled is: ${this.state.toggled}`);
   }
 
-  onEmojiSelected() {
-    Alert.alert('Emoticon was selected!');
+  onEmojiSelect() {
+    Alert.alert('Select an Emoticon!');
+  }
+
+  toggleDescription = () => {
+    this.setState({ toggled: !this.state.toggled });
   }
 
   itemNameChanged(text) {
     this.setState({ itemName: text });
+  }
+
+  itemDescChanged(text) {
+    this.setState({ itemDesc: text });
   }
 
   itemIconChanged(icon) {
@@ -84,81 +113,123 @@ class EditCategories extends Component {
     const selPlace = this.props.places.find(place => {
       return place.key === key;
     });
-    this.props.navigator.push({
-      screen: 'tracksome.PlaceDetailScreen',
-      title: selPlace.name,
-      passProps: {
-        selectedPlace: selPlace
-      }
-    });
     */
   };
 
   addThisItem = () => {
-    //if (this.props.navigator.header )
-    //this.props.navigator.setTabBadge({
-    //  tabIndex: 0, // (optional) if missing, the badge will be added to this screen's tab
-    //  badge: 17, // badge value, null to remove badge
-    //  badgeColor: '#006400', // (optional) if missing, the badge will use the default color
-    //});
-    //this.props.navigator.setSubTitle({
-    //  subtitle: ''
-    //});
-    //const name = `The current description: ${this.state.itemName}`;
-    //const icon = ` & the current icon is: ${this.state.itemIcon}`;
-    //Alert.alert(name + icon);
-    //console.log('---->>>', JSON.stringify(this.props.itemList));
-    //Alert.alert(JSON.stringify(this.props.itemList));
-    this.props.onAddCategory('04587', 'Great Red Meat', 'smiley-lady');
-    // this.props.navigator.switchToTab({tabIndex: 0});
+    this.props.onAddCategory('04587', 'Best Red Meat', 
+      'Probably the best prime meat this side of the Atlantic', 'smiley-lady');
+    this.setState({ itemsCount: this.state.itemsCount + 1 });
   }
 
-renderItem({ item }) {
-  return (
-      <View style={styles.row}>
-          <Text style={styles.rowText}> Name {item}</Text>
-      </View>
+  itemSeparator = () => {
+    return (<View style={{ height: 1, width: '100%', backgroundColor: '#d2d2d2' }} />);
+  };
+
+/*
+
+Used for other module - but here it is.
+
+react-native-image-resizer
+
+
+  renderCategoryItem = ({ item }) => (
+    <CategoryItem 
+      key={item.key}
+      Icon={item.icon}
+      Name={item.name}
+      Description={item.desc}
+      //onPressItem={this.onPressItem}
+      //selected={!!this.state.selected.get(item.id)}
+    />
   );
-}
+*/
+  renderMoreFields() {
+    if (this.state.toggled) {
+      return (
+        <View style={{ marginTop: 5 }}>
+          <MDInput 
+            label='Description (optional)'
+            placeholder='An optional category description ... '
+            value={this.state.itemDesc}
+            onChangeText={text => this.itemDescChanged(text)}
+          />
+        </View>
+      );
+    }
+  }
 
   render() {
-    console.log(this.props.itemList);
-    //console.log(superHeros);
+    //console.log(this.props.itemList);
+    //const backColor = this.props.selected ? '#fff8b2' : 'white';
+    //const buttonType = (Platform.OS === 'android' ? 0 : 64);
+    const emoji = nodeEmoji.get('sunrise_over_mountains');
+    const stars = nodeEmoji.get('night_with_stars');
+    const melon = nodeEmoji.get(':watermelon:');
+    const cake = nodeEmoji.get('birthday');
     return (
-      <View style={{ flex: 1 }}>
         <View style={styles.outerContainer}>
-          <View style={styles.container}>
-            <Text style={styles.textHeading}>Enter a new Category</Text>
-            <MDInput
-              label='Category Name'
-              placeholder='A short category description ... '
-              value={this.state.itemName}
-              onChangeText={text => this.itemNameChanged(text)}
+          <View style={styles.rowInputBar}>
+            <MDButton
+              iconSize={36} iconColor='white' iconName='mood' 
+              textLabel='Add Icon'
+              onPress={this.onEmojiSelect} 
             />
+            <View style={styles.textInput}>
+              <MDInput
+                label='Category Name'
+                placeholder='A short category name ... '
+                value={this.state.itemName}
+                onChangeText={text => this.itemNameChanged(text)}
+              />
+              {this.renderMoreFields()}
+            </View>
+            <MDButton
+              iconSize={36} iconColor='white' iconName='event-note' 
+              textLabel='Description'
+              onPress={this.toggleDescription} 
+            />
+            <MDButton
+              iconSize={46} iconColor='#333' iconName='add' 
+              onPress={this.addThisItem} 
+            />
+          </View>
+          <Text style={{ fontSize: 32 }}>{emoji}</Text>
+          <Text style={{ fontSize: 32 }}>{stars}</Text>
+          <Text style={{ fontSize: 32 }}>{melon}</Text>
+          <Text style={{ fontSize: 32 }}>{cake}</Text>
+          <FlatList
+            data={this.props.itemList}
+            renderItem={({ item }) => (
+              <Text>Category: {item.name}  Description: {item.desc}</Text>
+            )}
+            ItemSeparatorComponent={this.itemSeparator}
+          />            
+        </View>
+    );
+  }
+
+/*
+              <Button transparent onPress={this.addThisItem}>
+                <Icon ios='ios-add' android='md-add' style={{ fontSize: 56 }} />
+              </Button>            
+
             <MDInput
               label='Icon (optional)'
               placeholder='A nice Icon for this category? '
               value={this.state.itemIcon}
               onChangeText={icon => this.itemIconChanged(icon)}
             />
-            <FlatList
-              data={this.props.itemList}
-              renderItem={({ item }) => (
-                <Text>Hero: {item.name}  Strength: {item.strength}</Text>
-              )}
-            />            
-            <Button
-              style={styles.button}
-              title="Add this Category"
-              onPress={this.addThisItem}
-            />
-          </View>
-        </View>
-      </View>
-    );
-  }
+          <Button
+            style={styles.button}
+            title="Add this Category"
+            onPress={this.addThisItem}
+          />
 
-/*
+    // this.props.navigator.switchToTab({tabIndex: 0});
+    //this.props.navigator.setSubTitle({
+    //  subtitle: ''
+    //});
             <CategoryList
               data={this.props.itemList}
               onItemSelected={this.itemSelectedHandler}
@@ -218,8 +289,8 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    onAddCategory: (categoryId, categoryDesc, categoryIcon) =>
-      dispatch(addCategory(categoryId, categoryDesc, categoryIcon)),
+    onAddCategory: (categoryId, categoryName, categoryDesc, categoryIcon) =>
+      dispatch(addCategory(categoryId, categoryName, categoryDesc, categoryIcon)),
   };
 };
 
@@ -231,37 +302,31 @@ const mapDispatchToProps = dispatch => {
 };
 */
 
-//export default connect(mapStateToProps)(EditCategories);
 export default connect(mapStateToProps, mapDispatchToProps)(EditCategories);
 
 const styles = StyleSheet.create({
   button: {
     width: '80%'
   },
-  container: {
-    flex: 1,
-    margin: 7,
-    marginBottom: 25,
+  textInput: {
+    width: '50%',
+    borderWidth: 1,
+    borderColor: '#979797'
+  },
+  rowInputBar: {
+    width: '100%',
+    flexDirection: 'row',
+    padding: (Platform.OS === 'android' ? 5 : 5),
     alignItems: 'center',
-    justifyContent: 'center'
+    //margin: 3,
+    backgroundColor: AppColors.accentColor,  // ... medium orange ...
+    justifyContent: 'space-around'
   },
   outerContainer: {
     flex: 1,
-    margin: 3,
-    paddingBottom: 10,
-    borderRadius: 2,
-    backgroundColor: 'white',
-    shadowColor: '#121212',
-    shadowOffset: { width: 1, height: 3 },
-    shadowOpacity: 0.85,
-    //elevation: 3
-  },
-  textHeading: {
-    color: '#232323',
-    margin: 20,
-    fontSize: 20,
-    fontWeight: '700',
-    textAlign: 'center'
+    //padding: 5,
+    //borderRadius: 2,
+    backgroundColor: 'white'
   }
 });
 
@@ -312,15 +377,6 @@ const styles = StyleSheet.create({
               onChangeText={icon => this.itemIconChanged(icon)}
             />
 
-
-const AppColors = {
-  paperColor: '#e2e2e2',      // ... off white ...
-  hiliteColor: '#fff8b2',     // ... light yellow ...
-  accentColor: '#dea140',     // ... medium orange ...
-  mainLiteColor: '#a32b26',   // ... medium red ...
-  mainDarkColor: '#590d0b',   // ... dark red (burgundy) ...
-  darkerColor: '#325a66'      // ... dark cyan ....
-}
 
     let content = (<Text>Hello World!</Text>);
     if (this.state.itemsLoaded) {

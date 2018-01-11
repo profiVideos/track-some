@@ -12,12 +12,13 @@ import {
 
 const initialState = {
   itemList: [],
+  loading: false,
   detailView: false,
   catSelected: null,
   catId: '',
   catName: '',
-  catIcon: null,
-  loading: false
+  catDesc: '',
+  catIcon: null
 };
 
 const CategoryReducer = (state = initialState, action) => {
@@ -32,27 +33,20 @@ const CategoryReducer = (state = initialState, action) => {
         ...state,
         catId: '',
         catName: '',
+        catDesc: '',
         catIcon: null
       };
 
     case ADD_CATEGORY:
       return {
         ...state,
-        itemList: state.itemList.concat({
-          key: Math.random(),
-          name: action.payload.catDesc,
+        itemList: state.itemList.concat({   // ... need to add this to the list of categories ...
+          key: Math.random(),   // ... must be unique key - use timestamp ??? ...
+          name: action.payload.catName,
+          desc: action.payload.catDesc,
           icon: action.payload.catIcon
         })
       };
-
-/*
-        itemList: state.itemList.concat({  // ... need to add this to the list of categories ...
-          catId: action.payload.catId,
-          catName: action.payload.catDesc,
-          catIcon: action.payload.catIcon
-        })
-*/
-
 
     case UPDATE_CATEGORY:
       return {
