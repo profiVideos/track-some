@@ -1,54 +1,48 @@
-import React, { PureComponent } from 'react';
+import React, { Component } from 'react';
 import {
   Text,
   View,
   FlatList,
   StyleSheet
 } from 'react-native';
-import emojiData from 'emoji-datasource/emoji.json';
-import Emoji from 'react-native-emoji';
+import 'babel-polyfill';  // ... needed for String.fromCodePoint for Emojis ...
+import emojiData from 'emoji-datasource';
 import { orderBy } from 'lodash';
-//import nodeEmoji from 'node-emoji';
 import AppColors from '../templates/appColors';
-//import EmojiItem from '../components/EmojiItem';
 
 console.warn('Emojis are loading ... ');
+const charFromCode = utf16 => String.fromCodePoint(...utf16.split('-').map(u => `0x${u}`));
+
+// ... build our own stripped down version of the emoji database ...
+const emojiParsedData = emojiData.map(item => {
+    const newObject = { 
+      category: item.category, 
+      image: item.image, 
+      name: item.name,
+      unified: item.unified,
+      emoji_code: charFromCode(item.unified),
+      sort_order: item.sort_order,
+      short_names: item.short_names,
+      skin_variations: item.skin_variations };
+    return newObject;
+  });
+const sortedEmojis = orderBy(emojiParsedData, 'sort_order');
+//console.log(sortedEmojis);
 
 // ... build a list of unique emoji categories ...
+/*
 function unique(inputArray, prop) {
   return inputArray.map(item => { return item[prop]; }).filter((item, i, a) => {
     return i === a.indexOf(item);
   });
 }
-const emojiCats = unique(emojiData, 'category');
-console.log(emojiCats);
-
-//function isCategory(emojicon) {
-//  return emojicon.category === 'Skin Tones';
-//}
-//const emojiSmileys = emojiData.filter(isCategory);
-const eFlags = emojiData.filter((item) => item.category === 'Flags');
-//const eSmileys = emojiData.filter((item) => item.category === 'Smileys & People');
+*/
+//const emojiCats = unique(emojiData, 'category');
+//console.log(emojiCats);
+const eFlags = sortedEmojis.filter((item) => item.category === 'Flags');
+//const eSmileys = sortedEmojis.filter((item) => item.category === 'Smileys & People');
 console.log(eFlags);
-
 /*
-const eSmileys = emojiData.filter((transformer) => { 
-  return transformer.category === 'Autobot');
-autobots ==  [
-  {
-    name: 'Optimus Prime',
-    form: 'Freightliner Truck',
-    team: 'Autobot'
-  },
-  {
-    name: 'Bumblebee',
-    form: 'VW Beetle',
-    team: 'Autobot'
-  }
-]
-
-/*
-
  [
  "Symbols", 
  "Activities", 
@@ -60,47 +54,11 @@ autobots ==  [
  "Objects", 
  "Skin Tones"
  ]
-
-
-function groupOf(inputArray, prop, value) {
-  return inputArray.map(item => { return item[prop]; }).filter( (prop) => {
-      return prop === value;
-    });
-}
-
-function groupBy(array, property) {
-    var hash = {};
-    for (var i = 0; i < array.length; i++) {
-        if (!hash[array[i][property]]) hash[array[i][property]] = [];
-        hash[array[i][property]].push(array[i]);
-    }
-    return hash;
-}
-
-groupBy(arr,'type')  // Object {orange: Array[2], banana: Array[2]}
-groupBy(arr,'title') // Object {First: Array[1], Second: Array[1], 
-  Third: Array[1], Fourth: Array[1]}
-
 */
 
-const emojiParsedData = emojiData.map(item => {
-    const newObject = { 
-      category: item.category, 
-      image: item.image, 
-      name: item.name,
-      unified: item.unified,
-      //emoji_code: charFromUtf16(item.unified),
-      sort_order: item.sort_order,
-      short_names: item.short_names,
-      skin_variations: item.skin_variations };
-    return newObject;
-  });
-const sortedEmojis = orderBy(emojiParsedData, 'sort_order');
-console.log(sortedEmojis);
+const listItemHeight = 62;  // ... used to calculate faster scrolls ...
 
-const listItemHeight = 70;  // ... used to calculate faster scrolls ...
-
-export default class EmojiPicker extends PureComponent {
+export default class EmojiPicker extends Component {
 
   static navigatorStyle = {
     drawUnderNavBar: false,
@@ -150,7 +108,7 @@ export default class EmojiPicker extends PureComponent {
   
   renderEmojiItem = ({ item }) => (
     <View style={styles.container}>
-      <Text style={styles.iconValue}><Emoji name={item.short_names[0]} /></Text>
+      <Text style={styles.iconValue}>{item.emoji_code}</Text>
       <Text style={styles.textValue}>{item.short_names[0]}</Text>
     </View>
   );
@@ -159,10 +117,10 @@ export default class EmojiPicker extends PureComponent {
     return (
       <View style={styles.outerContainer}>
         <FlatList
-          numColumns={5}
+          numColumns={7}
           horizontal={false}
           data={eFlags}
-          initialNumToRender={45}
+          initialNumToRender={63}
           //extraData={this.state}
           //getItemLayout={this.getItemLayout}
           keyExtractor={item => item.unified}
@@ -175,6 +133,7 @@ export default class EmojiPicker extends PureComponent {
 }
 
 /*
+      <Text style={styles.iconValue}><Emoji name={item.short_names[0]} /></Text>
 
       <Text style={styles.textValue}>{item.short_names.slice(0, 1)} </Text>
       <Text style={styles.iconValue}><Emoji name="coffee" /></Text>
@@ -256,7 +215,7 @@ const styles = StyleSheet.create({
   container: {
     elevation: 1,
     borderRadius: 2,
-    width: '20%',
+    width: '14.28571428571429%',
     height: listItemHeight,  // ... used to calculate faster scrolls ...
     //flexDirection: 'row',
     margin: 0,
@@ -268,12 +227,12 @@ const styles = StyleSheet.create({
   },
   iconValue: {
     color: 'black',
-    fontSize: 40,
+    fontSize: 36,
     textAlign: 'center'
   },
   textValue: {
     color: 'black',
-    fontSize: 10,
+    fontSize: 9,
     textAlign: 'center'
   },
   textInput: {

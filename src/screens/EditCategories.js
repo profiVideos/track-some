@@ -19,7 +19,6 @@ import { connect } from 'react-redux';
 //import { Icon, Button } from 'native-base';   // ... Uses Ionicons from RN Vector Icons ...
 //import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 //import Emoji from 'react-native-emoji';
-import nodeEmoji from 'node-emoji';
 import AppColors from '../templates/appColors';
 import MDInput from '../components/common/mdInput';
 import MDButton from '../components/common/mdButton';
@@ -167,10 +166,6 @@ react-native-image-resizer
     //console.log(this.props.itemList);
     //const backColor = this.props.selected ? '#fff8b2' : 'white';
     //const buttonType = (Platform.OS === 'android' ? 0 : 64);
-    const emoji = nodeEmoji.get('sunrise_over_mountains');
-    const stars = nodeEmoji.get('night_with_stars');
-    const melon = nodeEmoji.get(':watermelon:');
-    const cake = nodeEmoji.get('birthday');
     return (
         <View style={styles.outerContainer}>
           <View style={styles.rowInputBar}>
@@ -198,10 +193,6 @@ react-native-image-resizer
               onPress={this.addThisItem} 
             />
           </View>
-          <Text style={{ fontSize: 32 }}>{emoji}</Text>
-          <Text style={{ fontSize: 32 }}>{stars}</Text>
-          <Text style={{ fontSize: 32 }}>{melon}</Text>
-          <Text style={{ fontSize: 32 }}>{cake}</Text>
           <FlatList
             data={this.props.itemList}
             renderItem={({ item }) => (

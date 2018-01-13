@@ -1,5 +1,6 @@
 import { Navigation } from 'react-native-navigation';
 import { Provider } from 'react-redux';
+import 'babel-polyfill';  // ... needed for String.fromCodePoint for Emojis ...
 
 import Login from './src/screens/Login';
 import BuildCard from './src/screens/BuildCard';
