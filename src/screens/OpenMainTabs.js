@@ -32,7 +32,16 @@ const OpenMainTabs = () => {
               screen: 'tracksome.EmojiPicker',
               label: 'Emojis',
               title: 'Select an Emoji',
-              icon: sources[0]
+              icon: sources[0],
+              rightButtons: [
+                {
+                  title: 'Close', // for a textual button, provide the button title (label)
+                  //icon: require('../../img/navicon_add.png'), // local image asset name
+                  id: 'close', // id for this button, given help understand which button was clicked
+                  buttonFontSize: 14, // Set font size for the button (
+                  buttonFontWeight: '600' // Set font weight for the button 
+                }
+              ]
             },
             {
               screen: 'tracksome.EditCategories',
