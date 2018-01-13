@@ -14,6 +14,7 @@ const AppColors = {
 
 const OpenMainTabs = () => {
     Promise.all([
+        getImageSource('md-thumbs-up', 30),    // ... emojis ...
         getImageSource('logo-buffer', 30),    // ... categories ...
         getImageSource('md-paper', 30),       // ... build card ...
         getImageSource('ios-desktop', 30)     // ... show card ...
@@ -28,22 +29,28 @@ const OpenMainTabs = () => {
           },
           tabs: [
             {
+              screen: 'tracksome.EmojiPicker',
+              label: 'Emojis',
+              title: 'Select an Emoji',
+              icon: sources[0]
+            },
+            {
               screen: 'tracksome.EditCategories',
               label: 'Categories',
               title: 'Maintain Categories',
-              icon: sources[0]
+              icon: sources[1]
             },
             {
               screen: 'tracksome.BuildCard',
               label: 'Build Card',
               title: 'New Card',
-              icon: sources[1]
+              icon: sources[2]
             },
             {
               screen: 'tracksome.ShowCard',
               label: 'Show Card',
               title: 'Show Card',
-              icon: sources[2]
+              icon: sources[3]
             }
           ],
           tabsStyle: {

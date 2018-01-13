@@ -8,6 +8,8 @@
   },
   "dependencies": {
     "babel-polyfill": "^6.26.0",
+    "emoji-datasource": "^4.0.3",
+    "lodash": "^4.17.4",
     "native-base": "^2.3.5",
     "node-emoji": "^1.8.1",
     "prop-types": "^15.6.0",

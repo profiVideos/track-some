@@ -128,6 +128,10 @@ class EditCategories extends Component {
 
 /*
 
+icons on the image server;
+
+https://res.cloudinary.com/profivideos/icons/apple-64/1f4a3.png
+
 Used for other module - but here it is.
 
 react-native-image-resizer
