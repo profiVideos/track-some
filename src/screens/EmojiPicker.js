@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import {
   Text,
   View,
@@ -11,13 +11,12 @@ import {
 } from 'react-native';
 import 'babel-polyfill';  // ... needed for String.fromCodePoint for Emojis ...
 import ScrollableTabView from 'react-native-scrollable-tab-view';
-
-//import Icon from 'react-native-vector-icons/Ionicons';
-
+import Icon from 'react-native-vector-icons/Ionicons';
 import emojiData from 'emoji-datasource';
 import { orderBy } from 'lodash';
 import AppColors from '../templates/appColors';
 import EmojiTabBar from './EmojiTabBar';
+import EmojiItem from '../components/EmojiItem';
 
 console.warn('Emojis are loading ... ');
 const charFromCode = utf16 => String.fromCodePoint(...utf16.split('-').map(u => `0x${u}`));
@@ -29,13 +28,13 @@ const emojiParsedData = emojiData.map(item => {
       image: item.image, 
       name: item.name,
       unified: item.unified,
-      emoji_code: charFromCode(item.unified),
-      sort_order: item.sort_order,
-      short_names: item.short_names,
-      skin_variations: item.skin_variations };
+      emojiCode: charFromCode(item.unified),
+      sortOrder: item.sort_order,
+      shortName: item.short_name,
+      skinVariations: item.skin_variations };
     return newObject;
   });
-const sortedEmojis = orderBy(emojiParsedData, 'sort_order');
+const sortedEmojis = orderBy(emojiParsedData, 'sortOrder');
 //console.log(sortedEmojis);
 //const eFlags = sortedEmojis.filter((item) => item.category === 'Flags');
 //const eSmileys = sortedEmojis.filter((item) => item.category === 'Smileys & People');
@@ -53,7 +52,7 @@ function unique(inputArray, prop) {
 */
 //const emojiCats = unique(sortedEmojis, 'category');
 const emojiCats = [
-  'Recently Selected',
+  'My Favorite Emojis',
   'Smileys & People',
   'Animals & Nature', 
   'Food & Drink', 
@@ -63,7 +62,7 @@ const emojiCats = [
   'Symbols', 
   'Flags'
 ];
-console.log(emojiCats);
+//console.log(emojiCats);
 
 /*
 [ ... sort order as per whapsapp ...
@@ -82,7 +81,7 @@ console.log(emojiCats);
 
 const listItemHeight = 62;  // ... used to calculate faster scrolls ...
 
-export default class EmojiPicker extends Component {
+export default class EmojiPicker extends PureComponent {
 
   static navigatorStyle = {
     tabBarHidden: true,   // ... we need space for the emojis ...
@@ -100,14 +99,21 @@ export default class EmojiPicker extends Component {
     this.state = {
       checked: false,
       loading: false,
-      //emojiGroups: EMOJI_GROUPS.slice(0, 1),  // ... extract first array element ...
-      selected: (new Map(): Map<string, boolean>)
+      canEdit: false,
+      emojiCode: '',
+      emojiName: '',
+      emojisClicked: '',
+      myEmojis: []
     };
   }
 
   componentDidMount() {
     //console.log(`Switch is: ${this.state.checked}`);
-    console.log(this.state);
+    //console.log(this.state);
+  }
+
+  componentWillUpdate() {
+    console.log('About to update');
   }
 
   componentDidUpdate() {
@@ -115,7 +121,7 @@ export default class EmojiPicker extends Component {
     //console.log(this.state);
   }
 
-  onNavigatorEvent(event) { // this is the onPress handler for the two buttons together
+  onNavigatorEvent(event) {
     if (event.type === 'NavBarButtonPress') { // this is the event type for button presses
       if (event.id === 'close') { // this is the same id field from the static navigatorButtons
         this.toggleTabs();
@@ -126,21 +132,39 @@ export default class EmojiPicker extends Component {
     }
   }
 
-  onPressItem = (id: string) => {
-    // ... updater functions are preferred for transactional updates ...
-    //console.log(`onPressItem id: ${id}`);
+  onPressItem = (unified, shortName, emojiCode) => {
+    this.setState({ emojisClicked: `${emojiCode} ${this.state.emojisClicked}` });
+    this.setState({ emojiCode, emojiName: shortName });
+    // ... see if we should update theusage count or add a new emoji ...
+
+    // ... add this item to the user's emoji list (redux it later) ...
+    this.setState(prevState => ({
+      myEmojis: [...prevState.myEmojis, { unified, shortName, emojiCode, numUsed: 0 }]
+    }));
+  };
+
+/*
     this.setState((state) => {
       // ... copy the map rather than modifying state ...
       const selected = new Map(state.selected);
       selected.set(id, !selected.get(id)); // ... toggle item ...
       return { selected };
     });
-  };
+*/
 
   getItemLayout = (data, index) => (  // ... so flatlist can scroll faster ...
     { length: listItemHeight, offset: listItemHeight * index, index }
   );
 
+  setEditFlag = (allowEdits) => {
+    //console.log(`setEditFlag value: ${allowEdits}`);
+    this.setState({ canEdit: allowEdits });
+  };
+
+  toggleSwitch = () => {
+    this.setState({ checked: !this.state.checked });
+  }
+  
   toggleTabs = () => {
     const to = this.tabBarState === 'shown' ? 'hidden' : 'shown';
     this.props.navigator.toggleTabs({
@@ -150,16 +174,6 @@ export default class EmojiPicker extends Component {
     this.tabBarState = to;
   };
 
-/*  
-  toggleTabs = () => {
-    this.setState({ tabsShown: !this.state.tabsShown });
-  };
-*/
-
-  toggleSwitch = () => {
-    this.setState({ checked: !this.state.checked });
-  }
-  
   showEmojis = (emojiGroup) => (
     <FlatList
         numColumns={7}
@@ -174,41 +188,57 @@ export default class EmojiPicker extends Component {
     />
   );
 
-  renderEmojiItem = ({ item }) => (
-    <View style={styles.container}>
-      <Text style={styles.iconValue}>{item.emoji_code}</Text>
-      <Text style={styles.textValue}>{item.short_names[0]}</Text>
-    </View>
-  );
+  renderEmojiItem = ({ item }) => {
+    return (
+      <EmojiItem 
+        emojiId={item.unified}
+        emojiString={item.emojiCode}
+        emojiName={item.shortName}
+        itemHeight={listItemHeight}
+        onPressItem={this.onPressItem}
+        //selected={!!this.state.selected.get(item.id)}
+      />
+    );
+  }
 
   renderHeader = () => {
       if (!this.state.loading) return null;
       return (
-        <View
-          style={{
-            paddingVertical: 20,
-            borderTopWidth: 1,
-            borderColor: '#CED0CE'
-          }}
-        >
+        <View style={{ paddingVertical: 20, borderTopWidth: 1, borderColor: '#CED0CE' }}>
           <ActivityIndicator animating size="large" />
         </View>
       );
   }
 
   render() {
+    const backColor = this.state.emojiCode === '' ? 'transparent' : 'white';
     return (
       <View style={styles.outerContainer}>
+
+        <View style={styles.statusBar}>
+          <View style={styles.historyBar} >
+            <Text ellipsizeMode='tail' numberOfLines={1} style={styles.textHistory}>
+              {this.state.emojisClicked}
+            </Text>
+          </View>
+          <View style={[styles.iconPaper, { backgroundColor: backColor }]}>
+            <Text style={styles.iconPreview} >
+              {this.state.emojiCode}
+            </Text>
+          </View>
+          <View>
+            <Icon name='md-checkmark-circle-outline' size={38} color={AppColors.paperColor} />
+          </View>
+        </View>
+
         <ScrollableTabView
           style={{ backgroundColor: '#f2f2f2' }}
           initialPage={0}
           //tabBarPosition='overlayTop'
-          renderTabBar={() => <EmojiTabBar tabGroupTitle={emojiCats} />}
+          renderTabBar={() => <EmojiTabBar tabGroupTitle={emojiCats} canEdit={this.setEditFlag} />}
         >
           <ScrollView tabLabel="stopwatch" style={styles.tabView}>
-            <View style={styles.card}>
-              <Text>Your Favourite Collection of Emojis</Text>
-            </View>
+            {this.showEmojis(this.state.myEmojis)}
           </ScrollView>
           <ScrollView tabLabel="happy" style={styles.tabView}>
             {this.showEmojis(sortedEmojis.filter((item) => item.category === 'Smileys & People'))}
@@ -235,11 +265,6 @@ export default class EmojiPicker extends Component {
             {this.showEmojis(sortedEmojis.filter((item) => item.category === 'Flags'))}
           </ScrollView>
         </ScrollableTabView>
-        <View style={styles.statusBar}>
-          <View style={styles.historyBar} >
-            <Text>Markus was here!</Text>
-          </View>            
-        </View>      
       </View>
     );
   }
@@ -247,6 +272,7 @@ export default class EmojiPicker extends Component {
 
 /*
 
+              {(this.state.emojiCode === '' ? null : this.state.emojiCode)}
             {this.showEmojiList(sortedEmojis.filter((item) => item.category === 'flag'))}
 sortedEmojis.filter((item) => item.category === thisGroup)
 
@@ -292,21 +318,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: AppColors.paperColor
   },
-  container: {
-    elevation: 1,
-    borderRadius: 2,
-    width: '14.28571428571429%',
-    height: listItemHeight,  // ... used to calculate faster scrolls ...
-    margin: 0,
-    padding: 2,
-    backgroundColor: 'white',
-    shadowColor: '#121212',
-    shadowOffset: { width: 1, height: 3 },
-    shadowOpacity: 0.5,
-    shadowRadius: 3
-  },
   statusBar: {
-    height: 40,
+    height: 42,
     flexDirection: 'row',
     padding: (Platform.OS === 'android' ? 3 : 3),
     alignItems: 'center',
@@ -315,26 +328,35 @@ const styles = StyleSheet.create({
   },
   historyBar: {
     height: 26,
-    padding: 3,
+    paddingBottom: 2,
     borderRadius: 15,
-    width: '70%',
-    backgroundColor: AppColors.paperColor
+    width: '65%',
+    backgroundColor: '#d5d5d5'
   },
-  iconValue: {
+  textHistory: {
     color: 'black',
-    fontSize: 36,
-    textAlign: 'center'
-  },
-  textValue: {
-    color: 'black',
-    fontSize: 9,
-    textAlign: 'center'
+    fontSize: 18,
+    paddingLeft: 8,
+    paddingRight: 8
   },
   tabView: {
     flex: 1,
     padding: 0,
     backgroundColor: AppColors.paperColor
   },
+  iconPaper: {
+    paddingBottom: 1,
+    paddingLeft: 6,
+    paddingRight: 6,
+    borderRadius: 3,
+    backgroundColor: 'transparent'
+  },
+  iconPreview: {
+    color: 'black',
+    fontSize: 31,
+    textAlign: 'center',
+    paddingBottom: 1
+  },  
   card: {
     borderWidth: 1,
     backgroundColor: '#fff',

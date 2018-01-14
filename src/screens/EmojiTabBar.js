@@ -10,12 +10,18 @@ import Icon from 'react-native-vector-icons/Ionicons';
 class EmojiTabBar extends React.Component {
   constructor(props) {
     super(props);
+    //console.log(props);
     this.icons = [];
   }
 
   componentDidMount() {
     //this._listener = this.props.scrollValue.addListener(this.setAnimationValue.bind(this));
+  }
+
+  componentDidUpdate() {
+    //console.log(`Switch is: ${this.state.checked}`);
     //console.log(this.props);
+    this.props.canEdit(this.props.activeTab === 0 ? true : false);
   }
 
   setAnimationValue({ value, }) {
@@ -40,6 +46,7 @@ class EmojiTabBar extends React.Component {
   }
 
   gotoNewPage(tabNum) {
+    //console.log('tab number pressed: ', tabNum);
     this.props.goToPage(tabNum);
   }
 
@@ -72,10 +79,6 @@ class EmojiTabBar extends React.Component {
   }
 
 }
-
-/*
-                onPress={() => this.props.goToPage(i)}
-*/
 
 const styles = StyleSheet.create({
   titleContainer: {
