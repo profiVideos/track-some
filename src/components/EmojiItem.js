@@ -9,7 +9,7 @@ import {
 
 //const uri = 'http://profigraphics.com/images/Christina-100px.jpg';
 
-const itemHeight = 62;  // ... used to calculate faster scrolls ...
+const itemHeight = 65;  // ... used to calculate faster scrolls ...
 
 class EmojiItem extends PureComponent {
 
@@ -27,7 +27,7 @@ class EmojiItem extends PureComponent {
 
   onTouchablePress = () => { 
     //console.log('Pressed an item! Hurrah!', this.props.emojiId);
-    this.props.onPressItem(this.props.emojiId, this.props.emojiName, this.props.emojiString);
+    this.props.onPressItem(this.props.emojiName, this.props.emojiString);
     //this.setState({ selected: !this.state.selected });
   } 
 
@@ -45,7 +45,13 @@ class EmojiItem extends PureComponent {
       <TouchableNativeFeedback onPress={this.onTouchablePress}>
         <View style={styles.container}>
           <Text style={styles.iconValue}>{this.props.emojiString}</Text>
-          <Text style={styles.textValue}>{this.props.emojiName}</Text>
+          <Text 
+            ellipsizeMode='tail' 
+            numberOfLines={1} 
+            style={styles.textValue}
+          >
+            {this.props.emojiName}
+          </Text>
         </View>
       </TouchableNativeFeedback>
     );
@@ -76,7 +82,8 @@ const styles = StyleSheet.create({
     container: {
     elevation: 1,
     borderRadius: 2,
-    width: '14.28571428571429%',  // ... 100 / 7 items across ...
+    width: '16.66666666666667%',  // ... 100 / 6 items across ...
+    //width: '14.28571428571429%',  // ... 100 / 7 items across ...
     height: itemHeight,           // ... used to calculate faster scrolls ...
     margin: 0,
     padding: 2,
@@ -88,7 +95,7 @@ const styles = StyleSheet.create({
   },
   iconValue: {
     color: 'black',
-    fontSize: 36,
+    fontSize: 32,
     textAlign: 'center'
   },
   textValue: {

@@ -5,6 +5,7 @@ import Login from './src/screens/Login';
 import BuildCard from './src/screens/BuildCard';
 import ShowCard from './src/screens/ShowCard';
 import EditCategories from './src/screens/EditCategories';
+//import EmojiPicker from './src/screens/CreateJSONSortedEmojisFile';
 import EmojiPicker from './src/screens/EmojiPicker';
 import OpenMainTabs from './src/screens/OpenMainTabs';
 import loadStoreConfig from './src/store/loadStoreConfig';
