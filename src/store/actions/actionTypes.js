@@ -3,8 +3,15 @@
 //export const LOGIN_USER_SUCCESS = 'login_user_success';
 //export const LOGIN_USER_FAIL = 'login_user_fail';
 //export const LOGIN_USER = 'login_user';
+export const SET_SAVE_MODE = 'SET_SAVE_MODE';
 
-//export const NONE_SELECTED = 'none_selected';
+export const ADD_EMOJI = 'ADD_EMOJI'; 
+export const UPDATE_EMOJI = 'UPDATE_EMOJI';
+export const REMOVE_EMOJI = 'REMOVE_EMOJI';
+export const CURRENT_EMOJI = 'CURRENT_EMOJI';
+export const CLEAR_EMOJI = 'CLEAR_EMOJI';
+export const SORT_EMOJIS = 'SORT_EMOJIS';
+export const LOAD_EMOJIS = 'LOAD_EMOJIS';
 
 export const NEW_CATEGORY = 'new_category';
 export const ADD_CATEGORY = 'add_category';

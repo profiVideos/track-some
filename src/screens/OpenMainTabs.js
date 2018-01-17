@@ -13,6 +13,7 @@ const AppColors = {
 */
 
 const OpenMainTabs = () => {
+  //console.log('OpenMainTabs: ', props);
     Promise.all([
         getImageSource('md-thumbs-up', 30),      // ... emojis ...
         getImageSource('logo-buffer', 30),      // ... categories ...
@@ -28,6 +29,13 @@ const OpenMainTabs = () => {
             tabBarSelectedButtonColor: AppColors.hiliteColor,
             tabBarTranslucent: false,
           },
+          drawer: {
+            left: {
+              screen: 'tracksome.ConfigMenu', // unique ID you registered
+              fixedWidth: 1000, // a fixed width you want your left drawer to have (optional)
+            },
+            disableOpenGesture: false // optional, can the drawer be opened with a swipe 
+          },          
           tabs: [
             {
               screen: 'tracksome.EmojiPicker',
@@ -69,12 +77,12 @@ const OpenMainTabs = () => {
               label: 'Show Card',
               title: 'Show Card',
               icon: sources[3]
-            }
+            },
           ],
           tabsStyle: {
               tabBarButtonColor: 'orange'
             },
-          passProps: {},            
+          //passProps: { props },            
           animationType: 'fade'
         });
     });

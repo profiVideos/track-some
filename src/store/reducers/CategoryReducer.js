@@ -22,10 +22,6 @@ const initialState = {
 };
 
 const CategoryReducer = (state = initialState, action) => {
-  //console.log('---------------------------------------');
-  //console.log('inside CategoryReducer - State & Action = ');
-  //console.log(state, action);
-  //console.log('---------------------------------------');
   switch (action.type) {
 
     case NEW_CATEGORY:

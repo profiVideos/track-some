@@ -7,18 +7,20 @@ import {
   Platform,
   //TextInput,
   StyleSheet,
-  AsyncStorage,
+  //AsyncStorage,
   ActivityIndicator
 } from 'react-native';
 import ScrollableTabView from 'react-native-scrollable-tab-view';
 import Icon from 'react-native-vector-icons/Ionicons';
 //import { orderBy } from 'lodash';
+import { connect } from 'react-redux';
 import AppColors from '../templates/appColors';
 import emojiData from '../store/data/sorted-emojis.json';
 import EmojiTabBar from './EmojiTabBar';
 import EmojiItem from '../components/EmojiItem';
+import { addEmoji, currentEmoji } from '../store/actions';
 
-console.warn('Emojis are loading ... ');
+//console.warn('Emojis are loading ... ');
 //console.log(emojiData);
 // ... our new stripped down version of the emoji database ...
 /*
@@ -57,17 +59,27 @@ const emojiCats = [
 */
 
 const listItemHeight = 65;          // ... used to calculate faster scrolls (pass to EmojiItem) ...
-const GUID = function (append) {   // ... nice function to create a unique id ...
-    let d = new Date().getTime();
-    const uuid = 'xxxx-xxxx-xxxx'.replace(/[xy]/g, (c) => {
-        const r = (d + (Math.random() * 16)) % 16 | 0;
-        d = Math.floor(d / 16);
-        return (c === 'x' ? r : ((r & 0x3) | 0x8)).toString(16);
-    });
-    return append ? `${uuid}-${append}` : uuid;
+
+const whatDoYouNeed = state => {
+  return {
+    saveMode: state.login.saveMode,
+    emojiCode: state.emojis.emojiCode,
+    emojiName: state.emojis.emojiName,
+    myEmojis: state.emojis.myEmojis
+  };
 };
 
-export default class EmojiPicker extends PureComponent {
+const whatShouldIDo = dispatch => {
+  return {
+    addThisEmoji: (emoji, name) => dispatch(addEmoji(emoji, name)),
+    setCurrentEmoji: (emoji, name) => dispatch(currentEmoji(emoji, name))
+  };
+};
+
+// ... tell Redux what we need for this module ...
+//export default connect(whatDoYouNeed)(EmojiPicker);
+
+class EmojiPicker extends PureComponent {
 
   static navigatorStyle = {
     tabBarHidden: true,   // ... we need space for the emojis ...
@@ -80,27 +92,26 @@ export default class EmojiPicker extends PureComponent {
 
   constructor(props) {
     super(props);
+    //console.log('Inside Emoji Picker: ', this.props);
     this.tabBarState = 'hidden';
     this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     this.state = {
       checked: false,
       loading: false,
       canEdit: false,
-      emojiCode: '',
-      emojiName: '',
       emojisClicked: '',
-      myEmojis: []
+      //emojiCode: '',
+      //emojiName: '',
+      //myEmojis: []
     };
   }
 
   componentWillMount() {
-    return <Text>Ready to mount the bitch!</Text>;
     //console.log(`Switch is: ${this.state.checked}`);
     //console.log(this.state);
   }
 
   componentDidMount() {
-    return <Text>It was good!!!</Text>;
     //console.log(`Switch is: ${this.state.checked}`);
     //console.log(this.state);
   }
@@ -115,7 +126,7 @@ export default class EmojiPicker extends PureComponent {
 
   componentDidUpdate() {
     //console.log(`Switch is: ${this.state.checked}`);
-    console.log(this.state);
+    //console.log(this.state);
   }
 
   onNavigatorEvent(event) {
@@ -130,14 +141,16 @@ export default class EmojiPicker extends PureComponent {
   }
 
   onPressItem = (name, emoji) => {
+    // ... update the local emoji history buffer ...
     this.setState({ emojisClicked: `${emoji} ${this.state.emojisClicked}` });
-    this.setState({ emojiCode: emoji, emojiName: name });  // ... for the current emoji display ...
-    // ... see if we should update theusage count or add a new emoji ...
 
-    // ... add this item to the top of the user's emoji list (redux it later) ...
-    this.setState(prevState => ({
-      myEmojis: [{ emoji, name, numUsed: 0, id: GUID() }, ...prevState.myEmojis]
-    }));
+    // ... tell the store that the selected emoji is the current one ...
+    const dataStore = this.props;
+    dataStore.setCurrentEmoji(emoji, name);
+    //const key = dataStore.findThisEmoji(emoji, name);  // ... check if this emoji exists ...
+    // ... see if we should update theusage count or add a new emoji ...
+    // ... add this item to the top of the user's emoji list ...
+    dataStore.addThisEmoji(emoji, name);
   };
 
 /*
@@ -177,7 +190,7 @@ export default class EmojiPicker extends PureComponent {
         horizontal={false}
         data={emojiGroup}
         initialNumToRender={3}
-        extraData={this.state}
+        extraData={this.props.myEmojis}
         removeClippedSubviews
         getItemLayout={this.getItemLayout}
         keyExtractor={(item, index) => index}
@@ -208,7 +221,7 @@ export default class EmojiPicker extends PureComponent {
   }
 
   render() {
-    const backColor = this.state.emojiCode === '' ? 'transparent' : 'white';
+    const backColor = this.props.emojiCode === '' ? 'transparent' : 'white';
     return (
       <View style={styles.outerContainer}>
 
@@ -220,7 +233,7 @@ export default class EmojiPicker extends PureComponent {
           </View>
           <View style={[styles.iconPaper, { backgroundColor: backColor }]}>
             <Text style={styles.iconPreview} >
-              {this.state.emojiCode}
+              {this.props.emojiCode}
             </Text>
           </View>
           <View>
@@ -235,7 +248,7 @@ export default class EmojiPicker extends PureComponent {
           renderTabBar={() => <EmojiTabBar tabGroupTitle={emojiCats} canEdit={this.setEditFlag} />}
         >
           <View tabLabel="stopwatch" style={styles.tabView}>
-            {this.showEmojis(this.state.myEmojis)}
+            {this.showEmojis(this.props.myEmojis)}
           </View>
           <View tabLabel="happy" style={styles.tabView}>
             {this.showEmojis(emojiData.filter((item) => item.cat === 'SMI'))}
@@ -266,6 +279,8 @@ export default class EmojiPicker extends PureComponent {
     );
   }
 }
+
+export default connect(whatDoYouNeed, whatShouldIDo)(EmojiPicker);
 
 /*
 
@@ -471,11 +486,11 @@ https://github.com/zmxv/react-native-sound
   onFindTodo = (text) => {
     const {todos} = this.state
     // ... try to find this one in the list ...
-    // ... if found - return the item & true ...
+    // ... if found - return the key & true ...
     // ... otherwise return null & false ...
   }
   
-  onUpdateTodo = (index, text) => {
+  onUpdateTodo = (key, text) => {
     const {todos} = this.state
     // ... first find the one to update ...
     // ... if found then update - else we add it ...
@@ -488,10 +503,10 @@ https://github.com/zmxv/react-native-sound
     })
   }
 
-  onRemoveTodo = (index) => {
+  onRemoveTodo = (key) => {
     const {todos} = this.state
     this.setState({
-      todos: todos.filter((todo, i) => i !== index),
+      todos: todos.filter((todo, i) => i !== key),
     })
   }
 

@@ -3,9 +3,10 @@
 import { 
   EMAIL_CHANGED, 
   PASSWORD_CHANGED,
-  LOGIN_USER_SUCCESS,
-  LOGIN_USER_FAIL,
-  LOGIN_USER
+  //LOGIN_USER_SUCCESS,
+  //LOGIN_USER_FAIL,
+  //LOGIN_USER,
+  SET_SAVE_MODE
 } from './actionTypes';
 
 export const emailChanged = (text) => {
@@ -19,6 +20,13 @@ export const passwordChanged = (text) => {
   return {
     type: PASSWORD_CHANGED,
     payload: text
+  };
+};
+
+export const setSaveMode = (mode) => {
+  return {
+    type: SET_SAVE_MODE,
+    payload: mode
   };
 };
 
