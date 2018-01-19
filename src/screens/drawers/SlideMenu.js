@@ -3,34 +3,56 @@ import { connect } from 'react-redux';
 import { 
   View, 
   Text,
-  Image,
-  Alert,
+  //Image,
+  //Alert,
   Switch,
+  Button,
   ScrollView,
   StyleSheet,
-  Dimensions, 
-  ImageBackground } from 'react-native';
+  Dimensions,
+  AsyncStorage 
+  //ImageBackground 
+} from 'react-native';
 
 //import Icon from 'react-native-vector-icons/FontAwesome';
 //import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
-import profiGraphicsLogo from '../../images/profiGraphics-logo-257w.png';
-import menuBackgroundImage from '../../images/menu-Background-850w.jpg';
-import AppColors from '../../templates/appColors';
-import MDButton from '../../components/common/mdButton';
-import { setSaveMode } from '../../store/actions';
+//import profiGraphicsLogo from '../../images/profiGraphics-logo-257w.png';
+//import menuBackgroundImage from '../../images/menu-Background-850w.jpg';
+//import AppColors from '../../templates/appColors';
+/*
+import { 
+  setSaveMode, 
+  saveMyEmojis, 
+  loadMyEmojis, 
+  emojiLoadSuccess
+} from '../../store/actions';
+*/
 
-class Configurator extends Component {
-  static navigatorStyle = {
-    tabBarHidden: true,   // ... we need space for the emojis ...
-    navBarHidden: true,
-    //drawUnderNavBar: true,
-    screenBackgroundColor: AppColors.paperColor,
-    //navBarTextColor: AppColors.mainLiteColor,
-    //navBarBackgroundColor: AppColors.hiliteColor,
-    //navBarTranslucent: true
-  }
+import * as actionCreators from '../../store/actions';
 
+const whatDoYouNeed = state => {
+  return {
+    login: state.login,
+    myEmojis: state.emojis.myEmojis
+  };
+};
+
+const EMOJIS_STORAGE_KEY = '@track!some:my_emojis';
+
+//    dispatch(actionCreators.fetchPosts())
+//    loadSuccess: (jsonData) => dispatch(emojiLoadSuccess(jsonData)),
+/*
+const whatShouldIDo = dispatch => {
+  return {
+    setNewSaveMode: (newSaveMode) => dispatch(setSaveMode(newSaveMode)),
+    saveAllEmojis: (myEmojis) => saveMyEmojis(myEmojis),
+    loadAllEmojis: (msg) => loadMyEmojis(msg),
+  };
+};
+*/
+
+class TrackSomeConfig extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -42,57 +64,55 @@ class Configurator extends Component {
     };
   }
   
-  componentWillMount() {
-    //OpenMainTabs();
-  }
-  
   componentDidMount() {
-    Dimensions.addEventListener('change', () => {
-      this.setState({
-        scrWidth: Dimensions.get('window').width,
-        scrHeight: Dimensions.get('window').height,
-        viewMode: Dimensions.get('window').height > Dimensions.get('window').width 
-          ? 'portrait' : 'landscape'
-      });
+    console.log('Slide Menu Props: ', this.props);
+    //Dimensions.addEventListener('change', () => {
+    //  this.setState({
+    //    scrWidth: Dimensions.get('window').width,
+    //    scrHeight: Dimensions.get('window').height,
+    //    viewMode: Dimensions.get('window').height > Dimensions.get('window').width 
+    //      ? 'portrait' : 'landscape'
+    //  });
+    //});
+  }
+
+  onClearEmojisHandler = () => {
+    this.props.dispatch(actionCreators.emojiLoadSuccess('ABC'));
+    //Alert.alert('Will be removing your favourite Emojis from Disk!');
+    //Alert.alert('Screen Height:' + this.state.scrHeight + '  Orientation: ' + 
+    //  this.state.viewMode);
+  }
+
+  onSaveEmojisHandler = () => {
+    const myEmojis = this.props.myEmojis;
+    AsyncStorage.setItem(EMOJIS_STORAGE_KEY, JSON.stringify(myEmojis), (errorMsg, result) => {
+      console.log('Save result: ', result, '*** Error: ', errorMsg);
+      // ... here result is normally undefinded and error is null (very strange) ...
     });
   }
 
-  componentDidUpdate() {
-    //console.log('New Props: ', this.props);
-  }
-
-  loginHandler = () => {
-    //Alert.alert('Pressed the Login button');
-    //Alert.alert('Screen Height:' + this.state.scrHeight + '  Orientation: ' + 
-    //  this.state.viewMode);
-  }
-
-  signupHandler = () => {
-    Alert.alert('Pressed the Signup button');
-    //Alert.alert('Screen Height:' + this.state.scrHeight + '  Orientation: ' + 
-    //  this.state.viewMode);
-    //OpenMainTabs();
-  }
-
-  handleTextChange(text) {
-    this.setState({ emailAddr: text });
-    console.log(this.state.emailAddr);
+  onLoadEmojisHandler = () => {
+    console.log('About to try loading Emojis ... ');
+    AsyncStorage.getItem(EMOJIS_STORAGE_KEY, (errorMsg, jsonData) => {
+      //console.log('Raw Data is: ', jsonData);
+      this.props.dispatch(actionCreators.emojiLoadSuccess(JSON.parse(jsonData)));
+    });
   }
 
   handleSaveMode(newMode) {
-    this.props.setNewSaveMode((newMode ? 'local' : 'none'));
+    console.log(newMode);
+    //this.props.setNewSaveMode((newMode ? 'local' : 'none'));
   }
 
   render() {
     return (
-      <ImageBackground source={menuBackgroundImage} style={styles.backgroundImage}>
-        <ScrollView style={{ flex: 1 }}>
+        <ScrollView style={{ flex: 1, backgroundColor: 'white' }}>
           <View style={styles.container}>
             <Text style={styles.title}>Configuration Settings</Text>
             <View style={styles.optionRow}>
               <Text style={styles.optionText}>User successfully logged in</Text>
               <Switch 
-                onValueChange={(value) => this.setState({ loggedIn: value })} 
+                onValueChange={(value) => this.setState({ loggedIn: value })}
                 value={this.state.loggedIn} 
               /> 
             </View>
@@ -100,7 +120,6 @@ class Configurator extends Component {
               <Text style={styles.optionText}>Save information locally</Text>
               <Switch 
                 onValueChange={(value) => this.handleSaveMode(value)} 
-                //value={this.state.toggled} 
                 value={(this.props.login.saveMode === 'local' || 
                         this.props.login.saveMode === 'cloud')} 
               /> 
@@ -120,28 +139,45 @@ class Configurator extends Component {
               /> 
             </View>
             <View style={styles.optionRow}>
-              <MDButton
-                iconSize={32} iconColor='white' iconName='mood' 
-                textLabel='Save Emojis'
-                //onPress={this.onEmojiSelect} 
+              <Button
+                title='Save Emojis'
+                onPress={this.onSaveEmojisHandler}
+              />
+              <Button
+                title='Clear'
+                onPress={this.onClearEmojisHandler}
+              />
+              <Button
+                title='Load Emojis'
+                onPress={this.onLoadEmojisHandler}
               />
             </View>
           </View>
-          <View style={styles.logoContainer}>
-            <Image 
-              source={profiGraphicsLogo} 
-              style={this.state.viewMode === 'portrait' ? 
-                styles.logoPortrait : styles.logoLandscape} 
-            />
-          </View>
         </ScrollView>
-      </ImageBackground>
     );
   }
 
 }
 
+export default connect(whatDoYouNeed)(TrackSomeConfig);
+
+//export default connect(whatDoYouNeed, whatShouldIDo)(TrackSomeConfig);
 /*
+      <ImageBackground 
+        source={menuBackgroundImage} 
+        style={styles.backgroundImage}
+        imageStyle={{ resizeMode: 'cover' }}
+      >
+      </ImageBackground>
+
+          <View style={styles.logoContainer}>
+            <Image 
+              source={profiGraphicsLogo} 
+              imageStyle={this.state.viewMode === 'portrait' ? styles.portrait : styles.landscape} 
+            />
+          </View>
+
+export default connect(whatDoYouNeed, whatShouldIDo)(Configurator);
 
 const mapStateToProps = state => {
   return {
@@ -157,31 +193,21 @@ export const getSaveMode = () => {
   };
 };
 
+<imagebackground source="{require" ('..="" images="" images.jpg')}="" 
+  style="{styles.backgroundImage}">
+<keyboardavoidingview behavior="padding" 
+  style="{styles.container}" contentcontainerstyle="{styles.content}">
+......
+</keyboardavoidingview>
+</imagebackground>
+
+<CustomCachedImage
+    component={ImageBackground}
+    source={{ uri: 'http://loremflickr.com/640/480/dog' }} 
+/>
+
 */
 
-const whatDoYouNeed = state => {
-  return {
-    login: state.login
-  };
-};
-
-const mapDispatchToProps = dispatch => {
-  return {
-    setNewSaveMode: (newSaveMode) => dispatch(setSaveMode(newSaveMode)),
-  };
-};
-
-export default connect(whatDoYouNeed, mapDispatchToProps)(Configurator);
-
-/*
-            style={styles.input}
-            label='Email'
-            placeholder='Your Email Address'
-            value={this.state.emailAddr}
-            maxLength={20}
-            error='You must enter a valid eMail-Address!'
-            onChangeText={emailAddr => this.setState({ emailAddr })}
-*/
 
 /*
 const AppColors = {
@@ -191,11 +217,30 @@ const AppColors = {
   mainLiteColor: '#a32b26',   // ... medium red ...
   mainDarkColor: '#590d0b',   // ... dark red (burgundy) ...
   darkerColor: '#325a66'      // ... dark cyan ....
+
+const { width: viewportWidth, height: viewportHeight } = Dimensions.get('window');
+
+const styles = StyleSheet.create({
+
+  backgroundImage: {
+   flex: 1,
+   position: 'absolute',
+   resizeMode: 'cover',
+   width: viewportWidth,
+   height: viewportHeight,
+   backgroundColor: 'transparent',
+   justifyContent: 'center',
+   alignItems: 'center'
+  },
+
 */
 
 const styles = StyleSheet.create({
   backgroundImage: {
-    flex: 1
+    flex: 1,
+    position: 'absolute',
+    width: null,
+    height: null
   },
   container: {
     flex: 1,
@@ -205,7 +250,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: '#f2f2f2',
-    marginBottom: 12,
+    marginBottom: 5,
     fontSize: 20,
     fontWeight: '700',
     shadowColor: '#121212',
@@ -215,6 +260,7 @@ const styles = StyleSheet.create({
   },
   optionRow: {
     flex: 1,
+    marginTop: 7,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center'   // ... top to bottom ...
@@ -232,23 +278,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  logoPortrait: {
-    marginTop: 20,
+  portrait: {
     width: 180,
     height: 38
   },
-  logoLandscape: {
-    marginTop: 5,
-    width: 100,
-    height: 45
+  landscape: {
+    width: 180,
+    height: 38
   },
   logoContainer: {
     alignItems: 'center'
   }
 });
-
-/*
-          <Icon.Button name="facebook" backgroundColor="#3b5998" onPress={this.loginWithFacebook}>
-            Login with Facebook
-          </Icon.Button>
-*/

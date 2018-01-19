@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react';
 import {
   Text,
   View,
-  Alert,
+  //Alert,
   FlatList,
   Platform,
   //TextInput,
@@ -76,13 +76,10 @@ const whatShouldIDo = dispatch => {
   };
 };
 
-// ... tell Redux what we need for this module ...
-//export default connect(whatDoYouNeed)(EmojiPicker);
-
 class EmojiPicker extends PureComponent {
 
   static navigatorStyle = {
-    tabBarHidden: true,   // ... we need space for the emojis ...
+    //tabBarHidden: true,   // ... we need space for the emojis ...
     drawUnderNavBar: false,
     screenBackgroundColor: AppColors.paperColor,
     navBarTextColor: AppColors.mainLiteColor,
@@ -135,7 +132,8 @@ class EmojiPicker extends PureComponent {
         this.toggleTabs();
       }
       if (event.id === 'menu') {
-        Alert.alert('NavBar', 'Show me the money!');
+        this.props.navigator.toggleDrawer({ side: 'left', animated: true });
+        //Alert.alert('NavBar', 'Show me the money!');
       }
     }
   }
@@ -283,6 +281,7 @@ class EmojiPicker extends PureComponent {
 export default connect(whatDoYouNeed, whatShouldIDo)(EmojiPicker);
 
 /*
+
 
               {(this.state.emojiCode === '' ? null : this.state.emojiCode)}
             {this.showEmojiList(sortedEmojis.filter((item) => item.category === 'flag'))}
@@ -544,91 +543,17 @@ There is also "redux-persist-transform-compress"
 and "redux-persist-transform-filter" - need to investigate for more info
 
 -----------------------------------------------------------------------------------
-
-https://facebook.github.io/react-native/docs/asyncstorage.html
-
-Example:
-
-let UID123_object = {
-  name: 'Chris',
-  age: 30,
-  traits: {hair: 'brown', eyes: 'brown'},
-};
-// You only need to define what will be added or updated
-let UID123_delta = {
-  age: 31,
-  traits: {eyes: 'blue', shoe_size: 10},
-};
-
-AsyncStorage.setItem('UID123', JSON.stringify(UID123_object), () => {
-  AsyncStorage.mergeItem('UID123', JSON.stringify(UID123_delta), () => {
-    AsyncStorage.getItem('UID123', (err, result) => {
-      console.log(result);
-    });
-  });
-});
-
-// Console log result:
-// => {'name':'Chris','age':31,'traits':
-//    {'shoe_size':10,'hair':'brown','eyes':'blue'}}
-
------------------------------------------------------------------------------------
-
-import React, { Component } from 'react'
-import { AppRegistry, View, Text, AsyncStorage, StyleSheet } from 'react-native'
-
-import Input from './Input'
-const STORAGE_KEY = 'ASYNC_STORAGE_NAME_EXAMPLE'
-
-class App extends Component {
-  state = {name: 'World'}
-
-  componentWillMount() {
-    this.load()
-  }
-
-  load = async () => {
-    try {
-      const name = await AsyncStorage.getItem(STORAGE_KEY)
-      if (name !== null) {
-        this.setState({name})
-      }
-    } catch (e) {
-      console.error('Failed to load name.')
-    }
-  }
-
-  save = async (name) => {
-    try {
-      await AsyncStorage.setItem(STORAGE_KEY, name)
-      this.setState({name})
-    } catch (e) {
-      console.error('Failed to save name.')
-    }
-  }
-
-  render() {
-    const {name} = this.state
-
-    return (
-      <View>
-        <Input
-          placeholder={'Type your name, hit enter, and refresh!'}
-          onSubmitEditing={this.save}
-        />
-        <Text style={styles.text}>
-          Hello {name}!
-        </Text>
-      </View>
-    )
-  }
-}
-
------------------------------------------------------------------------------------
  REDUX PERSIST (Local Storage) EXAMPLE
 -----------------------------------------------------------------------------------
 
 http://www.reactnativeexpress.com/redux_persist
+
+With redux-persist this can be done with a blacklist option:
+
+persistStore(store, {
+  blacklist: ['nav'],
+  storage: AsyncStorage
+});
 
 -----------------------------------------------------------------------------------
  REDUX FULL (Cloud Storage) EXAMPLE

@@ -22,20 +22,6 @@ const OpenMainTabs = () => {
         getImageSource('md-menu', 30)        // ... the menu button ...
     ]).then(sources => {
         Navigation.startTabBasedApp({
-          appStyle: {
-            keepStyleAcrossPush: false,
-            tabBarBackgroundColor: AppColors.darkerColor,
-            tabBarButtonColor: AppColors.accentColor,
-            tabBarSelectedButtonColor: AppColors.hiliteColor,
-            tabBarTranslucent: false,
-          },
-          drawer: {
-            left: {
-              screen: 'tracksome.ConfigMenu', // unique ID you registered
-              fixedWidth: 1000, // a fixed width you want your left drawer to have (optional)
-            },
-            disableOpenGesture: false // optional, can the drawer be opened with a swipe 
-          },          
           tabs: [
             {
               screen: 'tracksome.EmojiPicker',
@@ -78,11 +64,26 @@ const OpenMainTabs = () => {
               title: 'Show Card',
               icon: sources[3]
             },
+            
           ],
+          
+          drawer: {
+            left: {
+              screen: 'tracksome.ConfigMenu'   // unique ID you registered
+            },
+            disableOpenGesture: false // optional, can the drawer be opened with a swipe 
+          },
+          
           tabsStyle: {
               tabBarButtonColor: 'orange'
             },
-          //passProps: { props },            
+          appStyle: {
+            keepStyleAcrossPush: false,
+            tabBarBackgroundColor: AppColors.darkerColor,
+            tabBarButtonColor: AppColors.accentColor,
+            tabBarSelectedButtonColor: AppColors.hiliteColor,
+            tabBarTranslucent: false,
+          },
           animationType: 'fade'
         });
     });

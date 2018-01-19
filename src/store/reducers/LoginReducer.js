@@ -37,3 +37,27 @@ export default (state = INITIAL_STATE, action) => {
       return state;
   }
 };
+
+/*
+
+const isFetching = (state = false, action) => {
+  switch (action.type) {
+    case types.FETCH_PROFILE_REQUEST:
+      return true;
+    case types.FETCH_PROFILE_SUCCESS:
+    case types.FETCH_PROFILE_FAIL:
+      return false;
+    default:
+      return state;
+  }
+};
+
+const data = (state = {}, action) => {
+  switch (action.type) {
+    case types.FETCH_PROFILE_SUCCESS:
+      return action.data;
+  }
+  return state;
+};
+
+*/

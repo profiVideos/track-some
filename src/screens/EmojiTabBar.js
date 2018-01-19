@@ -6,22 +6,47 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import AppColors from '../templates/appColors';
 
 class EmojiTabBar extends React.Component {
   constructor(props) {
     super(props);
     //console.log(props);
     this.icons = [];
+    this.state = {
+      toggled: false,
+      hasloaded: false,
+    };
   }
 
   componentDidMount() {
-    //this._listener = this.props.scrollValue.addListener(this.setAnimationValue.bind(this));
+    this.listener = this.props.scrollValue.addListener(this.setAnimationValue.bind(this));
   }
 
   componentDidUpdate() {
     //console.log(`Switch is: ${this.state.checked}`);
     //console.log(this.props);
-    this.props.canEdit(this.props.activeTab === 0 ? true : false);
+    //this.props.canEdit(this.props.activeTab === 0 ? true : false);
+  }
+
+/*
+    this.setColorValues();
+*/
+
+  setColorValues() {
+    if (this.props.activeTab === 0) {
+      this.setState({ 
+        backColor: AppColors.mainDarkColor,
+        textColor: AppColors.paperColor,
+        height: 30
+      });
+    } else {
+      this.setState({ 
+        backColor: 'white',
+        textColor: '#333',
+        height: 20
+      });
+    }
   }
 
   setAnimationValue({ value, }) {
@@ -49,8 +74,12 @@ class EmojiTabBar extends React.Component {
     //console.log('tab number pressed: ', tabNum);
     this.props.goToPage(tabNum);
   }
+/*
+      const backColor = this.props.activeTab === 0 ? AppColors.mainDarkColor : 'white';
+*/
 
   render() {
+    const backColor = this.props.activeTab === 0 ? AppColors.hiliteColor : 'white';
     return (
       <View>
         <View style={[styles.tabs, this.props.style]}>
@@ -71,7 +100,7 @@ class EmojiTabBar extends React.Component {
             );
           })}
         </View>
-        <View style={styles.titleContainer}>
+        <View style={[styles.titleContainer, { backgroundColor: backColor }]}>
           <Text style={styles.emojiTitle} >{this.props.tabGroupTitle[this.props.activeTab]}</Text>
         </View>
       </View>
@@ -83,9 +112,11 @@ class EmojiTabBar extends React.Component {
 const styles = StyleSheet.create({
   titleContainer: {
     padding: 2,
+    height: 30,
+    borderBottomColor: '#ccc',
+    borderBottomWidth: 1,
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'white' 
+    justifyContent: 'center'
   },
   tab: {
     flex: 1,

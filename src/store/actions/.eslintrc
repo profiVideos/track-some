@@ -1,8 +1,0 @@
-{
-	"extends": "rallycoding",
-  "rules": {
-    "arrow-body-style": 0,
-    "global-require": 0,
-    "react/require-extension": 0
-  }
-}

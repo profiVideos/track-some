@@ -1,8 +1,16 @@
+export const INITIALIZED = 'TRACKSOME_INITIALIZED';
+export const ROOT_CHANGED = 'TRACKSOME_ROOT_CHANGED';
+
 //export const EMAIL_CHANGED = 'email_changed';
 //export const PASSWORD_CHANGED = 'password_changed';
 //export const LOGIN_USER_SUCCESS = 'login_user_success';
 //export const LOGIN_USER_FAIL = 'login_user_fail';
 //export const LOGIN_USER = 'login_user';
+
+//export const FETCH_PROFILE_REQUEST = 'FETCH_PROFILE_REQUEST';
+//export const FETCH_PROFILE_SUCCESS = 'FETCH_PROFILE_SUCCESS';
+//export const FETCH_PROFILE_FAIL = 'FETCH_PROFILE_FAIL';
+
 export const SET_SAVE_MODE = 'SET_SAVE_MODE';
 
 export const ADD_EMOJI = 'ADD_EMOJI'; 
@@ -11,7 +19,10 @@ export const REMOVE_EMOJI = 'REMOVE_EMOJI';
 export const CURRENT_EMOJI = 'CURRENT_EMOJI';
 export const CLEAR_EMOJI = 'CLEAR_EMOJI';
 export const SORT_EMOJIS = 'SORT_EMOJIS';
-export const LOAD_EMOJIS = 'LOAD_EMOJIS';
+export const SAVE_EMOJIS_FAILURE = 'SAVE_EMOJIS_FAILURE';
+export const LOAD_EMOJIS_SUCCESS = 'LOAD_EMOJIS_SUCCESS';
+export const LOAD_EMOJIS_FAILURE = 'LOAD_EMOJIS_FAILURE';
+export const PURGE_EMOJIS = 'PURGE_EMOJIS';
 
 export const NEW_CATEGORY = 'new_category';
 export const ADD_CATEGORY = 'add_category';

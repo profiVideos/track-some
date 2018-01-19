@@ -1,13 +1,15 @@
-//import people from './people.json';
-
+import { Alert } from 'react-native';
 import {
-  ADD_EMOJI, 
-  //LOAD_EMOJIS,
-  //SORT_EMOJIS,        // ... gets the current emojis database (from JSON File / Async / Firebase)
+  ADD_EMOJI,
+  CLEAR_EMOJI,
+  SAVE_EMOJIS_FAILURE, 
+  LOAD_EMOJIS_SUCCESS,    // ... the current emojis ( AsyncStorage / Cloud Storage )
+  LOAD_EMOJIS_FAILURE,   // ... the current emojis ( AsyncStorage / Cloud Storage )
+  //SORT_EMOJIS,
+  //PURGE_EMOJIS,
   //UPDATE_EMOJI, 
   REMOVE_EMOJI,
-  CURRENT_EMOJI,
-  CLEAR_EMOJI,
+  CURRENT_EMOJI
 } from '../actions/actionTypes';
 
 const GUID = function (append) {   // ... nice function to create a unique id ...
@@ -69,6 +71,28 @@ const EmojiReducer = (state = initialState, action) => {
         emojiName: '',
         detailView: false
       };
+
+    case LOAD_EMOJIS_SUCCESS:
+      // ... restore the user's emoji list ...
+      console.log('Yippie - Got these Emojis: ', action.payload.emojis);
+      return { 
+        ...state,
+        myEmojis: action.payload.emojis
+      };
+
+    case SAVE_EMOJIS_FAILURE:
+      // ... show user a proper notification about the save error and show developer ...
+      console.error('Error - Failed to save Emojis with error: ', action.payload.error);
+      Alert.alert('Your favourite Emojis will be saved to your device only with login!');
+      return state;  // ... nothing to change in store ...
+
+    default: return state;
+  
+  }  // ... switch ...
+};
+
+export default EmojiReducer;
+
 /*
     case 'INITIAL_FETCH':
       return {
@@ -78,6 +102,11 @@ const EmojiReducer = (state = initialState, action) => {
     case UPDATE_EMOJI:
       return {
         ...state,
+        var index = getIndex(quotes, quote.id); //find the index of the quote with the id passed
+        if (index !== -1) {
+            quotes[index]['author'] = quote.author;
+            quotes[index]['quote'] = quote.quote;
+        }
         [action.payload.prop]: action.payload.value
       };
     case FIND_EMOJI:
@@ -89,10 +118,3 @@ const EmojiReducer = (state = initialState, action) => {
         })
       };
 */
-
-    default: return state;
-  
-  }
-};
-
-export default EmojiReducer;
