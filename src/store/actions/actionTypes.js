@@ -13,6 +13,8 @@ export const ROOT_CHANGED = 'TRACKSOME_ROOT_CHANGED';
 
 export const SET_SAVE_MODE = 'SET_SAVE_MODE';
 
+export const EMOJIS_STORAGE_KEY = '@track!some:my_emojis';
+
 export const ADD_EMOJI = 'ADD_EMOJI'; 
 export const UPDATE_EMOJI = 'UPDATE_EMOJI';
 export const REMOVE_EMOJI = 'REMOVE_EMOJI';

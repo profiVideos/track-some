@@ -30,6 +30,7 @@ import {
 */
 
 import * as actionCreators from '../../store/actions';
+import { EMOJIS_STORAGE_KEY } from '../../store/actions/actionTypes';
 
 const whatDoYouNeed = state => {
   return {
@@ -38,7 +39,7 @@ const whatDoYouNeed = state => {
   };
 };
 
-const EMOJIS_STORAGE_KEY = '@track!some:my_emojis';
+//const EMOJIS_STORAGE_KEY = '@track!some:my_emojis';
 
 //    dispatch(actionCreators.fetchPosts())
 //    loadSuccess: (jsonData) => dispatch(emojiLoadSuccess(jsonData)),
@@ -86,9 +87,10 @@ class TrackSomeConfig extends Component {
   onSaveEmojisHandler = () => {
     const myEmojis = this.props.myEmojis;
     AsyncStorage.setItem(EMOJIS_STORAGE_KEY, JSON.stringify(myEmojis), (errorMsg, result) => {
-      console.log('Save result: ', result, '*** Error: ', errorMsg);
+      console.log('Actually SAVED! but save result: ', result, '*** Error: ', errorMsg);
       // ... here result is normally undefinded and error is null (very strange) ...
     });
+    this.props.navigator.toggleDrawer({ side: 'left', animated: true });
   }
 
   onLoadEmojisHandler = () => {
@@ -101,7 +103,7 @@ class TrackSomeConfig extends Component {
 
   handleSaveMode(newMode) {
     console.log(newMode);
-    //this.props.setNewSaveMode((newMode ? 'local' : 'none'));
+    this.props.setNewSaveMode((newMode ? 'local' : 'none'));
   }
 
   render() {

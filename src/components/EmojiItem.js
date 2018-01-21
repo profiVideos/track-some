@@ -39,12 +39,15 @@ class EmojiItem extends PureComponent {
 
   render() {
     //console.log(this.props);
-    //const backColor = this.props.selected ? '#fff8b2' : 'white';
+    const badgeColor = this.props.canEdit ? 'blue' : 'transparent';
     //const backColor = this.state.selected ? '#fff8b2' : 'white';
     return (
       <TouchableNativeFeedback onPress={this.onTouchablePress}>
         <View style={styles.container}>
           <Text style={styles.iconValue}>{this.props.emojiString}</Text>
+          <View style={[styles.extraInfo, { backgroundColor: badgeColor }]}>
+            <Text style={styles.badgeStyle}>{this.props.usageNum}</Text>
+          </View>
           <Text 
             ellipsizeMode='tail' 
             numberOfLines={1} 
@@ -92,6 +95,20 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 1, height: 3 },
     shadowOpacity: 0.5,
     shadowRadius: 3
+  },
+  badgeStyle: {
+    color: 'white',
+    textAlign: 'center',
+    fontSize: 12,
+    fontWeight: '700'
+  },
+  extraInfo: {
+    justifyContent: 'center',
+    marginLeft: 3,
+    marginTop: -17,
+    width: 17,
+    height: 17,
+    borderRadius: 17
   },
   iconValue: {
     color: 'black',

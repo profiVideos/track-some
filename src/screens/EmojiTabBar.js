@@ -26,13 +26,14 @@ class EmojiTabBar extends React.Component {
   componentDidUpdate() {
     //console.log(`Switch is: ${this.state.checked}`);
     //console.log(this.props);
-    //this.props.canEdit(this.props.activeTab === 0 ? true : false);
+    this.props.canEdit(this.props.activeTab === 0 ? true : false);
   }
 
 /*
     this.setColorValues();
 */
 
+/*
   setColorValues() {
     if (this.props.activeTab === 0) {
       this.setState({ 
@@ -48,8 +49,9 @@ class EmojiTabBar extends React.Component {
       });
     }
   }
+*/
 
-  setAnimationValue({ value, }) {
+  setAnimationValue({ value }) {
     this.icons.forEach((icon, i) => {
       const progress = (value - i >= 0 && value - i <= 1) ? value - i : 1;
       icon.setNativeProps({
@@ -80,6 +82,7 @@ class EmojiTabBar extends React.Component {
 
   render() {
     const backColor = this.props.activeTab === 0 ? AppColors.hiliteColor : 'white';
+    const hasOptionsMenu = this.props.activeTab === 0 ? this.props.optionMenu() : null;
     return (
       <View>
         <View style={[styles.tabs, this.props.style]}>
@@ -101,7 +104,12 @@ class EmojiTabBar extends React.Component {
           })}
         </View>
         <View style={[styles.titleContainer, { backgroundColor: backColor }]}>
-          <Text style={styles.emojiTitle} >{this.props.tabGroupTitle[this.props.activeTab]}</Text>
+          <View style={styles.titleSection}>
+            <Text style={styles.emojiTitle}>{this.props.tabGroupTitle[this.props.activeTab]}</Text>
+          </View>
+          <View style={styles.menuTriggers}>
+            {hasOptionsMenu}
+          </View>
         </View>
       </View>
     );
@@ -111,12 +119,19 @@ class EmojiTabBar extends React.Component {
 
 const styles = StyleSheet.create({
   titleContainer: {
+    flexDirection: 'row',
     padding: 2,
     height: 30,
     borderBottomColor: '#ccc',
     borderBottomWidth: 1,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'space-between'
+  },
+  titleSection: {
+    flex: 1,
+  },
+  menuTriggers: {
+    padding: 3
   },
   tab: {
     flex: 1,
@@ -125,7 +140,8 @@ const styles = StyleSheet.create({
     paddingBottom: 5,
   },
   emojiTitle: {
-    color: '#333' 
+    color: '#333', 
+    textAlign: 'center'
   },
   tabs: {
     height: 45,

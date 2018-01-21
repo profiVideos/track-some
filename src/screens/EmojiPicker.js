@@ -7,18 +7,32 @@ import {
   Platform,
   //TextInput,
   StyleSheet,
-  //AsyncStorage,
-  ActivityIndicator
+  AsyncStorage,
+  //ActivityIndicator
 } from 'react-native';
 import ScrollableTabView from 'react-native-scrollable-tab-view';
 import Icon from 'react-native-vector-icons/Ionicons';
-//import { orderBy } from 'lodash';
 import { connect } from 'react-redux';
+import {
+  Menu,
+  MenuOptions,
+  MenuOption,
+  MenuTrigger,
+  MenuProvider
+} from 'react-native-popup-menu';
+
 import AppColors from '../templates/appColors';
 import emojiData from '../store/data/sorted-emojis.json';
 import EmojiTabBar from './EmojiTabBar';
 import EmojiItem from '../components/EmojiItem';
-import { addEmoji, currentEmoji } from '../store/actions';
+import { EMOJIS_STORAGE_KEY } from '../store/actions/actionTypes';
+import { 
+  addEmoji, 
+  updateEmoji, 
+  currentEmoji, 
+  sortMyEmojis, 
+  emojiLoadSuccess
+} from '../store/actions';
 
 //console.warn('Emojis are loading ... ');
 //console.log(emojiData);
@@ -72,6 +86,9 @@ const whatDoYouNeed = state => {
 const whatShouldIDo = dispatch => {
   return {
     addThisEmoji: (emoji, name) => dispatch(addEmoji(emoji, name)),
+    sortEmojiList: () => dispatch(sortMyEmojis()), 
+    updateThisEmoji: (key, numUsed) => dispatch(updateEmoji(key, numUsed)),
+    loadedMyEmojis: (jsonData) => dispatch(emojiLoadSuccess(jsonData)),
     setCurrentEmoji: (emoji, name) => dispatch(currentEmoji(emoji, name))
   };
 };
@@ -79,7 +96,7 @@ const whatShouldIDo = dispatch => {
 class EmojiPicker extends PureComponent {
 
   static navigatorStyle = {
-    //tabBarHidden: true,   // ... we need space for the emojis ...
+    tabBarHidden: true,   // ... we need space for the emojis ...
     drawUnderNavBar: false,
     screenBackgroundColor: AppColors.paperColor,
     navBarTextColor: AppColors.mainLiteColor,
@@ -89,40 +106,24 @@ class EmojiPicker extends PureComponent {
 
   constructor(props) {
     super(props);
-    //console.log('Inside Emoji Picker: ', this.props);
     this.tabBarState = 'hidden';
     this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     this.state = {
       checked: false,
       loading: false,
       canEdit: false,
-      emojisClicked: '',
-      //emojiCode: '',
-      //emojiName: '',
-      //myEmojis: []
+      language: '',
+      emojisClicked: ''
     };
   }
 
   componentWillMount() {
-    //console.log(`Switch is: ${this.state.checked}`);
-    //console.log(this.state);
-  }
-
-  componentDidMount() {
-    //console.log(`Switch is: ${this.state.checked}`);
-    //console.log(this.state);
-  }
-
-  //shouldComponentUpdate() {   // ... need to research this one more ...
-  //  return false;             // ... can we turn updates off for the flatlist ...
-  //}                           // ... without turning all other components in class off? ...
-
-  componentWillUpdate() {
-    //console.log('About to update');
+    AsyncStorage.getItem(EMOJIS_STORAGE_KEY, (errorMsg, jsonData) => {
+      if (jsonData !== null) this.props.loadedMyEmojis(JSON.parse(jsonData));
+    });
   }
 
   componentDidUpdate() {
-    //console.log(`Switch is: ${this.state.checked}`);
     //console.log(this.state);
   }
 
@@ -133,22 +134,21 @@ class EmojiPicker extends PureComponent {
       }
       if (event.id === 'menu') {
         this.props.navigator.toggleDrawer({ side: 'left', animated: true });
-        //Alert.alert('NavBar', 'Show me the money!');
       }
     }
   }
 
   onPressItem = (name, emoji) => {
-    // ... update the local emoji history buffer ...
     this.setState({ emojisClicked: `${emoji} ${this.state.emojisClicked}` });
-
-    // ... tell the store that the selected emoji is the current one ...
     const dataStore = this.props;
     dataStore.setCurrentEmoji(emoji, name);
-    //const key = dataStore.findThisEmoji(emoji, name);  // ... check if this emoji exists ...
-    // ... see if we should update theusage count or add a new emoji ...
-    // ... add this item to the top of the user's emoji list ...
-    dataStore.addThisEmoji(emoji, name);
+    const locatePos = this.findEmoji(name);
+    if (locatePos >= 0) {
+      const emojiKey = this.props.myEmojis[locatePos].key;
+      dataStore.updateThisEmoji(emojiKey, this.props.myEmojis[locatePos].numUsed + 1);
+    } else {
+      dataStore.addThisEmoji(emoji, name);
+    }
   };
 
 /*
@@ -160,6 +160,19 @@ class EmojiPicker extends PureComponent {
     });
 */
 
+  onMenuOptionSelect = (value) => {
+    console.log('Doing the sort even though we got this ', value);
+    const dataStore = this.props;
+    dataStore.sortEmojiList();
+    // ... the values after the sort are not current - however the flatlist has current values??? ...
+    console.log('Sorted Values?: ', JSON.stringify(this.props.myEmojis));
+    AsyncStorage.setItem(EMOJIS_STORAGE_KEY, 
+      JSON.stringify(this.props.myEmojis), (errorMsg, result) => {
+      console.log('Actually SAVED! but save result: ', result, '*** Error: ', errorMsg);
+      // ... here result is normally undefinded and error is null (very strange) ...
+    });
+  }
+
   getItemLayout = (data, index) => (  // ... so flatlist can scroll faster ...
     { length: listItemHeight, offset: listItemHeight * index, index }
   );
@@ -168,6 +181,10 @@ class EmojiPicker extends PureComponent {
     //console.log(`setEditFlag value: ${allowEdits}`);
     this.setState({ canEdit: allowEdits });
   };
+
+  findEmoji(name) {
+    return this.props.myEmojis.findIndex((element) => { return element.name === name; });
+  }
 
   toggleSwitch = () => {
     this.setState({ checked: !this.state.checked });
@@ -188,12 +205,12 @@ class EmojiPicker extends PureComponent {
         horizontal={false}
         data={emojiGroup}
         initialNumToRender={3}
-        extraData={this.props.myEmojis}
+        extraData={this.state}
         removeClippedSubviews
         getItemLayout={this.getItemLayout}
         keyExtractor={(item, index) => index}
         renderItem={this.renderEmojiItem}
-        ListHeaderComponent={this.renderHeader}
+        //ListHeaderComponent={this.renderOptionMenu}
     />
   );
 
@@ -202,6 +219,8 @@ class EmojiPicker extends PureComponent {
       <EmojiItem 
         emojiString={item.emoji}
         emojiName={item.name}
+        usageNum={item.numUsed}
+        canEdit={this.state.canEdit}
         itemHeight={listItemHeight}
         onPressItem={this.onPressItem}
         //selected={!!this.state.selected.get(item.id)}
@@ -209,76 +228,131 @@ class EmojiPicker extends PureComponent {
     );
   }
 
+  renderOptionMenu = () => (
+    //if (!this.state.canEdit) return null;
+    //return (
+      <Menu onSelect={value => this.onMenuOptionSelect(value)}>
+        <MenuTrigger>
+          <View style={{ width: 20, alignItems: 'center' }}>
+            <Icon name='md-more' size={24} color={AppColors.darkerColor} />
+          </View>
+        </MenuTrigger>      
+        <MenuOptions customStyles={menuOptionsStyles}>
+          <MenuOption value={0} disabled>
+            <Text style={styles.menuTitle}>Emoji Options</Text>
+          </MenuOption>
+          <MenuOption value={'sortEmojis'} text='Sort by Most Used' />
+          <MenuOption value={'deleteEmojis'} text='Delete Selected' />
+        </MenuOptions>
+      </Menu>
+    //);
+  )
+
   renderHeader = () => {
-      if (!this.state.loading) return null;
-      return (
-        <View style={{ paddingVertical: 20, borderTopWidth: 1, borderColor: '#CED0CE' }}>
-          <ActivityIndicator animating size="large" />
-        </View>
-      );
+    /*
+    if (!this.state.loading) return null;
+    return (
+      <View style={{ paddingVertical: 20, borderTopWidth: 1, borderColor: '#CED0CE' }}>
+        <ActivityIndicator animating size="large" />
+      </View>
+    );
+    */
   }
 
   render() {
     const backColor = this.props.emojiCode === '' ? 'transparent' : 'white';
+    //console.log(this);
     return (
-      <View style={styles.outerContainer}>
+      <MenuProvider>
+        <View style={styles.outerContainer}>
+          <View style={styles.statusBar}>
+            <View style={styles.historyBar} >
+              <Text ellipsizeMode='tail' numberOfLines={1} style={styles.textHistory}>
+                {this.state.emojisClicked}
+              </Text>
+            </View>
+            <View style={[styles.iconPaper, { backgroundColor: backColor }]}>
+              <Text style={styles.iconPreview} >
+                {this.props.emojiCode}
+              </Text>
+            </View>
+            <View>
+              <Icon name='md-checkmark-circle-outline' size={38} color={AppColors.paperColor} />
+            </View>
+          </View>
 
-        <View style={styles.statusBar}>
-          <View style={styles.historyBar} >
-            <Text ellipsizeMode='tail' numberOfLines={1} style={styles.textHistory}>
-              {this.state.emojisClicked}
-            </Text>
-          </View>
-          <View style={[styles.iconPaper, { backgroundColor: backColor }]}>
-            <Text style={styles.iconPreview} >
-              {this.props.emojiCode}
-            </Text>
-          </View>
-          <View>
-            <Icon name='md-checkmark-circle-outline' size={38} color={AppColors.paperColor} />
-          </View>
+          <ScrollableTabView
+            style={{ backgroundColor: '#f2f2f2' }}
+            initialPage={0}
+            //tabBarPosition='overlayTop'
+            renderTabBar={() =>
+              <EmojiTabBar 
+                tabGroupTitle={emojiCats}
+                optionMenu={this.renderOptionMenu}
+                canEdit={this.setEditFlag} 
+              />
+            }
+          >
+            <View tabLabel="stopwatch" style={styles.tabView}>
+              {this.showEmojis(this.props.myEmojis)}
+            </View>
+            <View tabLabel="happy" style={styles.tabView}>
+              {this.showEmojis(emojiData.filter((item) => item.cat === 'SMI'))}
+            </View>
+            <View tabLabel="paw" style={styles.tabView}>
+              {this.showEmojis(emojiData.filter((item) => item.cat === 'ANI'))}
+            </View>
+            <View tabLabel="pizza" style={styles.tabView}>
+              {this.showEmojis(emojiData.filter((item) => item.cat === 'FOO'))}
+            </View>
+            <View tabLabel="tennisball" style={styles.tabView}>
+              {this.showEmojis(emojiData.filter((item) => item.cat === 'ACT'))}
+            </View>
+            <View tabLabel="plane" style={styles.tabView}>
+              {this.showEmojis(emojiData.filter((item) => item.cat === 'TRV'))}
+            </View>
+            <View tabLabel="bulb" style={styles.tabView}>
+              {this.showEmojis(emojiData.filter((item) => item.cat === 'OBJ'))}
+            </View>
+            <View tabLabel="star" style={styles.tabView}>
+              {this.showEmojis(emojiData.filter((item) => item.cat === 'SYM'))}
+            </View>
+            <View tabLabel="flag" style={styles.tabView}>
+              {this.showEmojis(emojiData.filter((item) => item.cat === 'FLG'))}
+            </View>
+          </ScrollableTabView>
+
         </View>
-
-        <ScrollableTabView
-          style={{ backgroundColor: '#f2f2f2' }}
-          initialPage={0}
-          //tabBarPosition='overlayTop'
-          renderTabBar={() => <EmojiTabBar tabGroupTitle={emojiCats} canEdit={this.setEditFlag} />}
-        >
-          <View tabLabel="stopwatch" style={styles.tabView}>
-            {this.showEmojis(this.props.myEmojis)}
-          </View>
-          <View tabLabel="happy" style={styles.tabView}>
-            {this.showEmojis(emojiData.filter((item) => item.cat === 'SMI'))}
-          </View>
-          <View tabLabel="paw" style={styles.tabView}>
-            {this.showEmojis(emojiData.filter((item) => item.cat === 'ANI'))}
-          </View>
-          <View tabLabel="pizza" style={styles.tabView}>
-            {this.showEmojis(emojiData.filter((item) => item.cat === 'FOO'))}
-          </View>
-          <View tabLabel="tennisball" style={styles.tabView}>
-            {this.showEmojis(emojiData.filter((item) => item.cat === 'ACT'))}
-          </View>
-          <View tabLabel="plane" style={styles.tabView}>
-            {this.showEmojis(emojiData.filter((item) => item.cat === 'TRV'))}
-          </View>
-          <View tabLabel="bulb" style={styles.tabView}>
-            {this.showEmojis(emojiData.filter((item) => item.cat === 'OBJ'))}
-          </View>
-          <View tabLabel="star" style={styles.tabView}>
-            {this.showEmojis(emojiData.filter((item) => item.cat === 'SYM'))}
-          </View>
-          <View tabLabel="flag" style={styles.tabView}>
-            {this.showEmojis(emojiData.filter((item) => item.cat === 'FLG'))}
-          </View>
-        </ScrollableTabView>
-      </View>
+      </MenuProvider>
     );
   }
 }
 
 export default connect(whatDoYouNeed, whatShouldIDo)(EmojiPicker);
+
+const menuOptionsStyles = {
+  optionsContainer: {
+    //backgroundColor: 'green',
+    //padding: 5,
+    width: 150
+  },
+  /*
+  optionsWrapper: {
+    backgroundColor: 'red',
+  },
+  optionWrapper: {
+    backgroundColor: 'yellow',
+    margin: 5,
+  },
+  optionTouchable: {
+    underlayColor: 'gold',
+    activeOpacity: 70,
+  },
+  */
+  optionText: {
+    color: 'blue',
+  },
+};
 
 /*
 
@@ -373,7 +447,7 @@ onPress={() => this.setState({checked: !this.state.checked})
                             onMomentumScrollBegin={() => {
                                 this.onEndReachedCalledDuringMomentum = false;
                             }}
-                            removeClippedSubviews={true}
+                            OK, got it - removeClippedSubviews={true}
                             ListFooterComponent={this.renderFooter}
                         />
                     </View>
@@ -385,6 +459,13 @@ const styles = StyleSheet.create({
   outerContainer: {
     flex: 1,
     backgroundColor: AppColors.paperColor
+  },
+  menuTitle: {
+    fontWeight: '500', 
+    color: AppColors.darkerColor,
+    paddingBottom: 3,
+    borderBottomColor: '#ccc',
+    borderBottomWidth: 1
   },
   statusBar: {
     height: 44,

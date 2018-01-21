@@ -1,5 +1,4 @@
-//import { connect } from 'react-redux';
-// ... later (uses Async & thunk - import firebase from 'firebase';
+// ... later (uses thunk - import firebase from 'firebase';
 
 import {
   ADD_EMOJI,
@@ -9,12 +8,10 @@ import {
   UPDATE_EMOJI, 
   REMOVE_EMOJI,
   CURRENT_EMOJI,
-  SAVE_EMOJIS_FAILURE,   // ... no need to dispatch an operation that does not affect the store ...
+  //SAVE_EMOJIS_FAILURE,   // ... no need to dispatch operation that does not affect the store ...
   LOAD_EMOJIS_SUCCESS,    // ... gets the current emojis database ( AsyncStorage / Cloud Storage )
-  LOAD_EMOJIS_FAILURE    // ... reports an error condition to the store / user )
+  //LOAD_EMOJIS_FAILURE    // ... reports an error condition to the store / user )
 } from './actionTypes';
-
-const STORAGE_KEY = '@track!some:my_emojis';
 
 export const addEmoji = (emoji, name) => {
   return {
@@ -50,14 +47,13 @@ export const removeEmoji = (key) => {
   };
 };
 
-
 /*
 return dispatch => {
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(myEmojis))
       .then(console.log('Saved these Emojis', myEmojis))
       .catch((error) => {
         console.log('Error - Failed to save name.', error);
-        //dispatch({
+        //dispatch({ ... NEVER DID GET THIS TO WORK RELIABLY ...
         //  type: SAVE_EMOJIS_FAILURE,
         //  payload: error
         //});
@@ -65,7 +61,6 @@ return dispatch => {
 */
 
 export const emojiLoadSuccess = (jsonData) => {
-  //console.log('jsonData is ', jsonData);
   return {
     type: LOAD_EMOJIS_SUCCESS,
     payload: { emojis: jsonData }
@@ -78,113 +73,6 @@ export const emojiLoadSuccess = (jsonData) => {
 //    }
 //  }
 //  return (dispatch) => {
-
-//export const saveMyEmojis = async (myEmojis) => {
-/*
-
-    payload: { emojis: JSON.parse(jsonData) }
-
-  return () => {
-    const response = await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(myEmojis));  
-    await console.log('response: ', response);
-  }
-};
-
-    AsyncStorage.getItem('data', (err, quotes) => {
-      if (quotes !== null){
-        quotes = JSON.parse(quotes);
-        quotes.unshift(quote); //add the new quote to the top
-        AsyncStorage.setItem('data', JSON.stringify(quotes), () => {
-            dispatch({type: ADD_QUOTE, quote:quote});
-        });
-      }
-    });
-
-*/
-/*
-export const saveMyEmojis = (myEmojis) => { 
-  console.log('about to save emojis', myEmojis);
-  return (dispatch) => {
-    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(myEmojis), () => {
-      console.log('saved something', 'Really!');
-      //dispatch({ type: ADD_QUOTE, quote:quote });
-    });
-  };
-};
-*/
-/*
-  console.log('about to save emojis', myEmojis);
-  try {
-    //this.setState({name})
-    console.error('Supposedly saved data??');
-  } catch (errorMsg) {
-    console.error('Failed to save Emojis: ', errorMsg);
-  }
-};
-*/
-
-
-/*
-export const loadMyEmojis = (msg) => {
-  AsyncStorage.getItem(STORAGE_KEY)
-    .then(jsonData => console.log('Got this data: ', jsonData, msg))
-    .catch(error => console.log('Error - Failed to save name.', error));
-      //dispatch({
-      //  type: SAVE_EMOJIS_FAILURE,
-      //  payload: error
-      //});
-};
-*/
-//processPromise(response)
-//const processPromise = (response) => {
-//  console.log('The result of the promise is: ', response);
-//};
-
-export const saveMyEmojis = (myEmojis) => {
-  // ... here result is normally undefinded and error is null (very strange) ...
-  /*
-  AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(myEmojis))
-    .then(console.log('Saved these Emojis', myEmojis))
-    .catch(error => {
-      console.log('Error - Failed to save name.', error);
-      //dispatch({
-      //  type: SAVE_EMOJIS_FAILURE,
-      //  payload: error
-      //});
-  });
-  */
-};
-
-/*
-export const loadMyEmojis = () => {
-  //console.log('Making the call to AsyncStorage ...', STORAGE_KEY);
-  //console.log('Message is ', props);
-  AsyncStorage.getItem(STORAGE_KEY, (errorMsg, jsonData) => {
-    console.log(JSON.parse(jsonData));
-    return (dispatch) => {
-      dispatch(emojiLoadSuccess(JSON.parse(jsonData)));
-    };
-    //props.dispatch({ type: LOAD_EMOJIS_SUCCESS, payload: JSON.parse(jsonData) });
-  });
-};
-*/
-
-  //const promise = AsyncStorage.getItem(STORAGE_KEY, result => processPromise(result));
-  //console.log('promise is: ', promise, '***', msg);
-/*
-    .then(jsonData => {
-      console.log('Got something here!', jsonData);
-      //return { type: LOAD_EMOJIS_SUCCESS, payload: jsonData };  
-      //dispatch(emojiLoadSuccess(jsonData));
-    })
-    .catch(error => {
-      console.log('Error - Failed to load emojis: ', error);
-      //dispatch({
-      //  type: LOAD_EMOJIS_FAILURE,
-      //  payload: error
-      //});
-    });
-*/
 
 export const sortMyEmojis = () => {
   return {
