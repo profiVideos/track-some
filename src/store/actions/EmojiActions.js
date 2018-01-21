@@ -1,5 +1,7 @@
 // ... later (uses thunk - import firebase from 'firebase';
 
+//import { connect } from 'react-redux';
+import { AsyncStorage } from 'react-native';
 import {
   ADD_EMOJI,
   CLEAR_EMOJI,
@@ -8,15 +10,17 @@ import {
   UPDATE_EMOJI, 
   REMOVE_EMOJI,
   CURRENT_EMOJI,
-  //SAVE_EMOJIS_FAILURE,   // ... no need to dispatch operation that does not affect the store ...
+  EMOJIS_STORAGE_KEY, 
+  SAVE_EMOJIS_SUCCESS,   // ... not really needed - just being thorough ...
+  //SAVE_EMOJIS_FAILURE,   // ... not used right now as AsyncStorage does not return error ...
   LOAD_EMOJIS_SUCCESS,    // ... gets the current emojis database ( AsyncStorage / Cloud Storage )
   //LOAD_EMOJIS_FAILURE    // ... reports an error condition to the store / user )
 } from './actionTypes';
 
-export const addEmoji = (emoji, name) => {
+export const addEmoji = (key, emoji, name) => {
   return {
     type: ADD_EMOJI,
-    payload: { emoji, name }
+    payload: { key, emoji, name }
   };
 };
 
@@ -33,10 +37,10 @@ export const clearEmoji = () => {
   };
 };
 
-export const updateEmoji = (key, numUsed) => {
+export const updateEmoji = (key, selected, numUsed) => {
   return {
     type: UPDATE_EMOJI,
-    payload: { key, numUsed }
+    payload: { key, selected, numUsed }
   };
 };
 
@@ -67,12 +71,36 @@ export const emojiLoadSuccess = (jsonData) => {
   };
 };
 
+export const emojiSaveSuccess = () => {
+  return {
+    type: SAVE_EMOJIS_SUCCESS
+  };
+};
+
 //  clearPosts: () => async (dispatch, getState) => {
 //    if (getState().posts.length > 0) {
 //      dispatch({type: types.CLEAR_POSTS})
 //    }
 //  }
 //  return (dispatch) => {
+
+export const loadMyEmojis = () => {
+  return dispatch => {
+    AsyncStorage.getItem(EMOJIS_STORAGE_KEY, (errorMsg, jsonData) => {
+      if (jsonData !== null) dispatch(emojiLoadSuccess(JSON.parse(jsonData)));
+    });
+  };
+};
+
+export const saveMyEmojis = (myEmojis) => {
+  return dispatch => {
+    AsyncStorage.setItem(EMOJIS_STORAGE_KEY, JSON.stringify(myEmojis), (errorMsg, result) => {
+      //console.log('SAVED! but result is bogus: ', result, '*** Error: ', errorMsg);
+      // ... here result is normally undefinded and error is null (very strange) ...
+      dispatch(emojiSaveSuccess());
+    });
+  };
+};
 
 export const sortMyEmojis = () => {
   return {
@@ -85,7 +113,6 @@ export const deleteMyEmojis = () => {
     type: PURGE_EMOJIS
   };
 };
-
 
 /*
 

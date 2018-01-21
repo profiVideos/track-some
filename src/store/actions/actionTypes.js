@@ -11,20 +11,22 @@ export const ROOT_CHANGED = 'TRACKSOME_ROOT_CHANGED';
 //export const FETCH_PROFILE_SUCCESS = 'FETCH_PROFILE_SUCCESS';
 //export const FETCH_PROFILE_FAIL = 'FETCH_PROFILE_FAIL';
 
-export const SET_SAVE_MODE = 'SET_SAVE_MODE';
+// ... a global flag used to see if user has logged in and is paid member (members='cloud') ...
+export const SET_SAVE_MODE = 'SET_SAVE_MODE';  // ... 'none', 'local', 'cloud' ...
 
+// ... everything dealing with emojis ...
 export const EMOJIS_STORAGE_KEY = '@track!some:my_emojis';
-
 export const ADD_EMOJI = 'ADD_EMOJI'; 
 export const UPDATE_EMOJI = 'UPDATE_EMOJI';
 export const REMOVE_EMOJI = 'REMOVE_EMOJI';
 export const CURRENT_EMOJI = 'CURRENT_EMOJI';
 export const CLEAR_EMOJI = 'CLEAR_EMOJI';
 export const SORT_EMOJIS = 'SORT_EMOJIS';
+export const PURGE_EMOJIS = 'PURGE_EMOJIS';
+export const SAVE_EMOJIS_SUCCESS = 'SAVE_EMOJIS_SUCCESS';
 export const SAVE_EMOJIS_FAILURE = 'SAVE_EMOJIS_FAILURE';
 export const LOAD_EMOJIS_SUCCESS = 'LOAD_EMOJIS_SUCCESS';
 export const LOAD_EMOJIS_FAILURE = 'LOAD_EMOJIS_FAILURE';
-export const PURGE_EMOJIS = 'PURGE_EMOJIS';
 
 export const NEW_CATEGORY = 'new_category';
 export const ADD_CATEGORY = 'add_category';

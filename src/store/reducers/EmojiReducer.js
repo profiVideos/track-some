@@ -2,30 +2,22 @@ import { Alert } from 'react-native';
 import {
   ADD_EMOJI,
   CLEAR_EMOJI,
-  SAVE_EMOJIS_FAILURE, 
-  LOAD_EMOJIS_SUCCESS,    // ... the current emojis ( AsyncStorage / Cloud Storage )
-  //LOAD_EMOJIS_FAILURE,   // ... the current emojis ( AsyncStorage / Cloud Storage )
   SORT_EMOJIS,
   //PURGE_EMOJIS,
   UPDATE_EMOJI, 
   REMOVE_EMOJI,
-  CURRENT_EMOJI
+  CURRENT_EMOJI,
+  SAVE_EMOJIS_SUCCESS, 
+  SAVE_EMOJIS_FAILURE, 
+  LOAD_EMOJIS_SUCCESS       // ... the current emojis ( AsyncStorage / Cloud Storage )
+  //LOAD_EMOJIS_FAILURE    // ... the current emojis ( AsyncStorage / Cloud Storage )
 } from '../actions/actionTypes';
-
-const GUID = function (append) {   // ... nice function to create a unique id ...
-    let d = new Date().getTime();
-    const uuid = 'xxxx-xxxx-xxxx'.replace(/[xy]/g, (c) => {
-        const r = (d + (Math.random() * 16)) % 16 | 0;
-        d = Math.floor(d / 16);
-        return (c === 'x' ? r : ((r & 0x3) | 0x8)).toString(16);
-    });
-    return append ? `${uuid}-${append}` : uuid;
-};
 
 const initialState = {
   emojiCode: '',
   emojiName: '',
   myEmojis: [],
+  emojisDirty: false,
   detailView: false
 };
 
@@ -37,6 +29,34 @@ const compareString = (a, b) => {
   if (itemA > itemB) return 1;
   return 0;  // ... items are equal ...
 };
+
+function compareValues(key, order='asc') {
+  return function(a, b) {
+    if(!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
+      // property doesn't exist on either object
+        return 0; 
+    }
+
+    const varA = (typeof a[key] === 'string') ? 
+      a[key].toUpperCase() : a[key];
+    const varB = (typeof b[key] === 'string') ? 
+      b[key].toUpperCase() : b[key];
+
+    let comparison = 0;
+    if (varA > varB) {
+      comparison = 1;
+    } else if (varA < varB) {
+      comparison = -1;
+    }
+    return (
+      (order == 'desc') ? (comparison * -1) : comparison
+    );
+  };
+}
+
+Usage;
+bands.sort(compareValues('band', 'desc')); 
+
 */
 
 const compareNum = (a, b) => {
@@ -51,22 +71,29 @@ const EmojiReducer = (state = initialState, action) => {
       return { 
         ...state,
         myEmojis: [{
-          key: GUID(),
+          key: action.payload.key,
           emoji: action.payload.emoji,
           name: action.payload.name,
+          selected: false,
           numUsed: 1 },
           ...state.myEmojis
-        ]
+        ],
+        emojisDirty: true
       };
 
     case UPDATE_EMOJI:
       //console.log('Yippie - Will now update this Emoji: ', action.payload.key);
       // ... update this emoji in our emoji object list ...
+      // ... this approach is not exactly correct - it mutates our state ...
+      // ... when time permits find a better immutable solution ...
       return {
         ...state,
         myEmojis: state.myEmojis.map(emoji => 
           (emoji.key === action.payload.key ? 
-            { ...emoji, numUsed: action.payload.numUsed } : emoji)) 
+            { ...emoji, 
+              numUsed: action.payload.numUsed,
+              selected: action.payload.selected } : emoji)),
+        emojisDirty: true 
       };
 
     case REMOVE_EMOJI:
@@ -77,7 +104,8 @@ const EmojiReducer = (state = initialState, action) => {
         }),
         emojiCode: '',
         emojiName: '',
-        detailview: false
+        detailview: false,
+        emojisDirty: true
       };
 
 /*
@@ -91,7 +119,8 @@ const EmojiReducer = (state = initialState, action) => {
     case SORT_EMOJIS:
       return {
         ...state,
-        myEmojis: state.myEmojis.slice().sort((a, b) => compareNum(a.numUsed, b.numUsed))
+        myEmojis: state.myEmojis.slice().sort((a, b) => compareNum(a.numUsed, b.numUsed)),
+        emojisDirty: true
       };
 
     case CURRENT_EMOJI:
@@ -115,6 +144,12 @@ const EmojiReducer = (state = initialState, action) => {
       return { 
         ...state,
         myEmojis: action.payload.emojis
+      };
+
+    case SAVE_EMOJIS_SUCCESS:
+      return {
+        ...state,
+        emojisDirty: false   // ... list has been saved ...
       };
 
     case SAVE_EMOJIS_FAILURE:

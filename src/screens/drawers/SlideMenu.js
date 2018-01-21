@@ -9,8 +9,8 @@ import {
   Button,
   ScrollView,
   StyleSheet,
-  Dimensions,
-  AsyncStorage 
+  Dimensions
+  //AsyncStorage 
   //ImageBackground 
 } from 'react-native';
 
@@ -29,8 +29,12 @@ import {
 } from '../../store/actions';
 */
 
-import * as actionCreators from '../../store/actions';
-import { EMOJIS_STORAGE_KEY } from '../../store/actions/actionTypes';
+import {
+  loadMyEmojis,
+  saveMyEmojis
+} from '../../store/actions';
+
+//import { EMOJIS_STORAGE_KEY } from '../../store/actions/actionTypes';
 
 const whatDoYouNeed = state => {
   return {
@@ -78,7 +82,7 @@ class TrackSomeConfig extends Component {
   }
 
   onClearEmojisHandler = () => {
-    this.props.dispatch(actionCreators.emojiLoadSuccess('ABC'));
+    //this.props.dispatch(actionCreators.emojiLoadSuccess('ABC'));
     //Alert.alert('Will be removing your favourite Emojis from Disk!');
     //Alert.alert('Screen Height:' + this.state.scrHeight + '  Orientation: ' + 
     //  this.state.viewMode);
@@ -86,24 +90,19 @@ class TrackSomeConfig extends Component {
 
   onSaveEmojisHandler = () => {
     const myEmojis = this.props.myEmojis;
-    AsyncStorage.setItem(EMOJIS_STORAGE_KEY, JSON.stringify(myEmojis), (errorMsg, result) => {
-      console.log('Actually SAVED! but save result: ', result, '*** Error: ', errorMsg);
-      // ... here result is normally undefinded and error is null (very strange) ...
-    });
+    this.props.dispatch(saveMyEmojis(myEmojis));
     this.props.navigator.toggleDrawer({ side: 'left', animated: true });
   }
 
   onLoadEmojisHandler = () => {
-    console.log('About to try loading Emojis ... ');
-    AsyncStorage.getItem(EMOJIS_STORAGE_KEY, (errorMsg, jsonData) => {
-      //console.log('Raw Data is: ', jsonData);
-      this.props.dispatch(actionCreators.emojiLoadSuccess(JSON.parse(jsonData)));
-    });
+    //console.log('About to try loading Emojis ... ');
+    this.props.dispatch(loadMyEmojis());
+    this.props.navigator.toggleDrawer({ side: 'left', animated: true });
   }
 
   handleSaveMode(newMode) {
     console.log(newMode);
-    this.props.setNewSaveMode((newMode ? 'local' : 'none'));
+    //this.props.setNewSaveMode((newMode ? 'local' : 'none'));
   }
 
   render() {

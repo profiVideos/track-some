@@ -2,12 +2,11 @@ import React, { PureComponent } from 'react';
 import {
   Text,
   View,
-  //Alert,
+  Alert,
   FlatList,
   Platform,
   //TextInput,
   StyleSheet,
-  AsyncStorage,
   //ActivityIndicator
 } from 'react-native';
 import ScrollableTabView from 'react-native-scrollable-tab-view';
@@ -25,13 +24,13 @@ import AppColors from '../templates/appColors';
 import emojiData from '../store/data/sorted-emojis.json';
 import EmojiTabBar from './EmojiTabBar';
 import EmojiItem from '../components/EmojiItem';
-import { EMOJIS_STORAGE_KEY } from '../store/actions/actionTypes';
 import { 
   addEmoji, 
   updateEmoji, 
-  currentEmoji, 
-  sortMyEmojis, 
-  emojiLoadSuccess
+  currentEmoji,
+  loadMyEmojis,
+  saveMyEmojis, 
+  sortMyEmojis 
 } from '../store/actions';
 
 //console.warn('Emojis are loading ... ');
@@ -45,6 +44,7 @@ import {
       name: item.short_name };
     return newObject;
 */
+
 const emojiCats = [
   'My Favorite Emojis',
   'Smileys & People',
@@ -57,6 +57,7 @@ const emojiCats = [
   'Flags'
 ];
 //console.log(emojiCats);
+
 /*
 [ ... sort order as per whapsapp ...
 9) 'REC', "Recently Used"
@@ -79,18 +80,19 @@ const whatDoYouNeed = state => {
     saveMode: state.login.saveMode,
     emojiCode: state.emojis.emojiCode,
     emojiName: state.emojis.emojiName,
+    listUpdated: state.emojis.emojisDirty,
     myEmojis: state.emojis.myEmojis
   };
 };
 
-const whatShouldIDo = dispatch => {
-  return {
-    addThisEmoji: (emoji, name) => dispatch(addEmoji(emoji, name)),
-    sortEmojiList: () => dispatch(sortMyEmojis()), 
-    updateThisEmoji: (key, numUsed) => dispatch(updateEmoji(key, numUsed)),
-    loadedMyEmojis: (jsonData) => dispatch(emojiLoadSuccess(jsonData)),
-    setCurrentEmoji: (emoji, name) => dispatch(currentEmoji(emoji, name))
-  };
+const GUID = (append) => {   // ... nice function to create a unique id ...
+    let d = new Date().getTime();
+    const uuid = 'xxxx-xxxx-xxxx'.replace(/[xy]/g, (c) => {
+        const r = (d + (Math.random() * 16)) % 16 | 0;
+        d = Math.floor(d / 16);
+        return (c === 'x' ? r : ((r & 0x3) | 0x8)).toString(16);
+    });
+    return append ? `${uuid}-${append}` : uuid;
 };
 
 class EmojiPicker extends PureComponent {
@@ -112,19 +114,33 @@ class EmojiPicker extends PureComponent {
       checked: false,
       loading: false,
       canEdit: false,
+      refresh: false,
       language: '',
       emojisClicked: ''
     };
   }
 
+/*
+... to force flatlist to update ... not exactly the issue I'm having with the sort...
+<FlatList> 
+  ... data={this.props.searchBookResults} 
+  extraData={this.state.refresh} 
+  onPress={()={this.setState({ refresh: !refresh})}
+*/
+
   componentWillMount() {
-    AsyncStorage.getItem(EMOJIS_STORAGE_KEY, (errorMsg, jsonData) => {
-      if (jsonData !== null) this.props.loadedMyEmojis(JSON.parse(jsonData));
-    });
+    this.props.dispatch(loadMyEmojis());
   }
 
-  componentDidUpdate() {
-    //console.log(this.state);
+  componentWillReceiveProps(nextProps) {
+    //console.log('ATTENTION: A component will receive new props: ', nextProps);
+    // ... values after sort are not current - however the flatlist has current values??? ...
+    //console.log('Sorted Values?: ', JSON.stringify(this.props.myEmojis));
+    // ... if the emojis list is dirty (used) then we should save it ...
+    if (nextProps.listUpdated) {
+      const myEmojis = nextProps.myEmojis;
+      this.props.dispatch(saveMyEmojis(myEmojis));
+    }
   }
 
   onNavigatorEvent(event) {
@@ -141,13 +157,22 @@ class EmojiPicker extends PureComponent {
   onPressItem = (name, emoji) => {
     this.setState({ emojisClicked: `${emoji} ${this.state.emojisClicked}` });
     const dataStore = this.props;
-    dataStore.setCurrentEmoji(emoji, name);
+    dataStore.dispatch(currentEmoji(emoji, name));
     const locatePos = this.findEmoji(name);
     if (locatePos >= 0) {
       const emojiKey = this.props.myEmojis[locatePos].key;
-      dataStore.updateThisEmoji(emojiKey, this.props.myEmojis[locatePos].numUsed + 1);
+      // ... if on the my Fav Emojis screen - toggle item on/off ...
+      if (this.state.canEdit) {
+        const isSelected = !this.props.myEmojis[locatePos].selected;
+        dataStore.dispatch(updateEmoji(emojiKey, 
+          isSelected, this.props.myEmojis[locatePos].numUsed + 1));
+      } else {
+        dataStore.dispatch(updateEmoji(emojiKey, 
+          false, this.props.myEmojis[locatePos].numUsed + 1));
+      }
     } else {
-      dataStore.addThisEmoji(emoji, name);
+      // ... call the GUID function to generate a new unique id or key ...
+      dataStore.dispatch(addEmoji(GUID(), emoji, name));
     }
   };
 
@@ -160,17 +185,38 @@ class EmojiPicker extends PureComponent {
     });
 */
 
+  onEmojiListRefresh() {
+    console.log('The flatlist component has done a refresh ... ');
+    console.log('Refreshing flag is ', this.state.refreshing);
+  }
+
   onMenuOptionSelect = (value) => {
-    console.log('Doing the sort even though we got this ', value);
-    const dataStore = this.props;
-    dataStore.sortEmojiList();
-    // ... the values after the sort are not current - however the flatlist has current values??? ...
-    console.log('Sorted Values?: ', JSON.stringify(this.props.myEmojis));
-    AsyncStorage.setItem(EMOJIS_STORAGE_KEY, 
-      JSON.stringify(this.props.myEmojis), (errorMsg, result) => {
-      console.log('Actually SAVED! but save result: ', result, '*** Error: ', errorMsg);
-      // ... here result is normally undefinded and error is null (very strange) ...
-    });
+    switch (value) {
+      case 'sortEmojis': {
+        // ... sort the emojis by frequency of use ...
+        const dataStore = this.props;
+        dataStore.dispatch(sortMyEmojis());
+        // ... since the sort routines marks the list as "dirty", the ...
+        // ... componentWillReceiveProps(nextProps) will force a save ...
+        break;
+      }
+      case 'clearEmojis': {
+        // ... delete all selected emojis without asking ...
+        Alert.alert('We need to remove all selected Emojis!');
+        break;
+      }
+      case 'deleteEmojis': {
+        // ... delete all selected emojis without asking ...
+        Alert.alert('We need to delete all selected Emojis!');
+        break;
+      }
+      case 'deleteALLEmojis': {
+        // ... delete all selected emojis without asking ...
+        Alert.alert('We are going to delete ALL Emojis!');
+        break;
+      }
+      default: break;
+    }  // ... switch ...
   }
 
   getItemLayout = (data, index) => (  // ... so flatlist can scroll faster ...
@@ -178,7 +224,6 @@ class EmojiPicker extends PureComponent {
   );
 
   setEditFlag = (allowEdits) => {
-    //console.log(`setEditFlag value: ${allowEdits}`);
     this.setState({ canEdit: allowEdits });
   };
 
@@ -206,11 +251,13 @@ class EmojiPicker extends PureComponent {
         data={emojiGroup}
         initialNumToRender={3}
         extraData={this.state}
+        // ... not sure how these work??? refreshing={this.state.refreshing}
+        //onRefresh={this.onEmojiListRefresh}
         removeClippedSubviews
         getItemLayout={this.getItemLayout}
         keyExtractor={(item, index) => index}
         renderItem={this.renderEmojiItem}
-        //ListHeaderComponent={this.renderOptionMenu}
+        // ... useful for an activity spinner - ListHeaderComponent={this.renderOptionMenu}
     />
   );
 
@@ -220,6 +267,7 @@ class EmojiPicker extends PureComponent {
         emojiString={item.emoji}
         emojiName={item.name}
         usageNum={item.numUsed}
+        isChecked={item.selected}
         canEdit={this.state.canEdit}
         itemHeight={listItemHeight}
         onPressItem={this.onPressItem}
@@ -242,7 +290,9 @@ class EmojiPicker extends PureComponent {
             <Text style={styles.menuTitle}>Emoji Options</Text>
           </MenuOption>
           <MenuOption value={'sortEmojis'} text='Sort by Most Used' />
-          <MenuOption value={'deleteEmojis'} text='Delete Selected' />
+          <MenuOption value={'clearEmojis'} text='Clear All Selected' />
+          <MenuOption value={'deleteEmojis'} text='Delete All Selected' />
+          <MenuOption value={'deleteALLEmojis'} text='Purge Entire List' />
         </MenuOptions>
       </Menu>
     //);
@@ -328,7 +378,8 @@ class EmojiPicker extends PureComponent {
   }
 }
 
-export default connect(whatDoYouNeed, whatShouldIDo)(EmojiPicker);
+export default connect(whatDoYouNeed)(EmojiPicker);
+//export default connect(whatDoYouNeed, whatShouldIDo)(EmojiPicker);
 
 const menuOptionsStyles = {
   optionsContainer: {

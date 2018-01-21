@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
+import { connect } from 'react-redux';
 import AppColors from '../templates/appColors';
 
 /*
@@ -12,6 +13,16 @@ const AppColors = {
   darkerColor: '#325a66'      // ... dark cyan ....
 */
 
+const whatDoYouNeed = state => {
+  return {
+    saveMode: state.login.saveMode,
+    emojiCode: state.emojis.emojiCode,
+    emojiName: state.emojis.emojiName,
+    listUpdated: state.emojis.emojisUpdated,
+    myEmojis: state.emojis.myEmojis
+  };
+};
+
 class ShowCard extends Component {
   static navigatorStyle = {
     drawUnderNavBar: false,
@@ -19,6 +30,17 @@ class ShowCard extends Component {
     navBarTranslucent: false
   };
 
+  componentDidMount() {
+    console.log('Show Card Props: ', this.props);
+    //Dimensions.addEventListener('change', () => {
+    //  this.setState({
+    //    scrWidth: Dimensions.get('window').width,
+    //    scrHeight: Dimensions.get('window').height,
+    //    viewMode: Dimensions.get('window').height > Dimensions.get('window').width 
+    //      ? 'portrait' : 'landscape'
+    //  });
+    //});
+  }
 
   render() {
     return (
@@ -30,7 +52,7 @@ class ShowCard extends Component {
 
 }
 
-export default ShowCard;
+export default connect(whatDoYouNeed)(ShowCard);
 
 const styles = StyleSheet.create({
   container: {

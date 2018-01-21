@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import {
   View,
   Text,
@@ -32,22 +33,38 @@ class EmojiItem extends PureComponent {
   } 
 
 /*
+
+          // ... for sort debugging ...
+          <View style={styles.usageStyle}>
+            <Text style={styles.usageText}>{this.props.usageNum}</Text>
+          </View>
+
   TouchableNativeFeedback (On Android for almost all touchable elements.)
   TouchableHighlight (On iOS for touchable elements or buttons that have a 
                       solid shape or background, and on ListView items.)
+          <View style={[styles.extraInfo, { backgroundColor: badgeColor }]}>
+            <Text style={styles.badgeStyle}>{this.props.usageNum}</Text>
+          </View>
+        <Text style={styles.badgeStyle}>{this.props.usageNum}</Text>
+         <Icon name='md-checkmark' style={styles.badgeStyle} size={16} color='white' />
+
+          md-checkmark
+
 */
 
   render() {
     //console.log(this.props);
-    const badgeColor = this.props.canEdit ? 'blue' : 'transparent';
+    //const badgeColor = this.props.canEdit ? 'blue' : 'transparent';
+    const renderBadge = this.props.canEdit && this.props.isChecked ?
+      (<View style={[styles.extraInfo, { backgroundColor: 'blue' }]}>
+         <Icon name='check' style={styles.badgeStyle} />
+       </View>) : null;
     //const backColor = this.state.selected ? '#fff8b2' : 'white';
     return (
       <TouchableNativeFeedback onPress={this.onTouchablePress}>
         <View style={styles.container}>
           <Text style={styles.iconValue}>{this.props.emojiString}</Text>
-          <View style={[styles.extraInfo, { backgroundColor: badgeColor }]}>
-            <Text style={styles.badgeStyle}>{this.props.usageNum}</Text>
-          </View>
+          { renderBadge }
           <Text 
             ellipsizeMode='tail' 
             numberOfLines={1} 
@@ -82,7 +99,7 @@ export default EmojiItem;
 */
 
 const styles = StyleSheet.create({
-    container: {
+  container: {
     elevation: 1,
     borderRadius: 2,
     width: '16.66666666666667%',  // ... 100 / 6 items across ...
@@ -96,19 +113,29 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 3
   },
+  usageStyle: {
+    position: 'absolute',
+    marginTop: 0,
+    marginLeft: 55
+  },
+  usageText: {
+    fontSize: 11,
+    fontWeight: '700'
+  },
   badgeStyle: {
     color: 'white',
     textAlign: 'center',
-    fontSize: 12,
-    fontWeight: '700'
+    fontSize: 16,
+    //fontWeight: 'bold'
   },
   extraInfo: {
     justifyContent: 'center',
+    alignItems: 'center',
     marginLeft: 3,
-    marginTop: -17,
-    width: 17,
-    height: 17,
-    borderRadius: 17
+    marginTop: -20,
+    width: 22,
+    height: 22,
+    borderRadius: 22
   },
   iconValue: {
     color: 'black',
