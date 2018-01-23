@@ -1,78 +1,88 @@
 // ... later (uses Async & thunk - import firebase from 'firebase';
+import { AsyncStorage } from 'react-native';
 import {
-  NEW_CATEGORY,
-  ADD_CATEGORY, 
-  UPDATE_CATEGORY, 
+  ADD_CATEGORY,
+  CLEAR_CATEGORY,
+  UPDATE_CATEGORY,
   REMOVE_CATEGORY,
-  SELECT_CATEGORY,
-  UNSELECT_CATEGORY,
-//  INITIAL_CATEGORIES  ... gets initial state of the categories (from Async / Firebase)
+  //SORT_CATEGORIES, 
+  CURRENT_CATEGORY,
+  //PURGE_CATEGORIES,
+  CATEGORIES_STORAGE_KEY,
+  SAVE_CATEGORIES_SUCCESS,
+  //SAVE_CATEGORIES_FAILURE,
+  LOAD_CATEGORIES_SUCCESS,
+  //LOAD_CATEGORIES_FAILURE
 } from './actionTypes';
 
-export const newCategory = () => {
-  return {
-    type: NEW_CATEGORY
-  };
-};
-
-export const addCategory = (catId, catName, catDesc, catIcon) => {
+export const addCategory = (catKey, catName, catDesc, catIcon) => {
   return {
     type: ADD_CATEGORY,
-    payload: { catId, catName, catDesc, catIcon }
+    payload: { catKey, catName, catDesc, catIcon }
   };
 };
 
-export const updateCategory = ({ prop, value }) => {
+export const updateCategory = ({ catKey, catName, catDesc, catIcon }) => {
   return {
     type: UPDATE_CATEGORY,
-    payload: { prop, value }
+    payload: { catKey, catName, catDesc, catIcon }
   };
 };
 
-export const removeCategory = (catId) => {
+export const removeCategory = (catKey) => {
   return {
     type: REMOVE_CATEGORY,
-    payload: { catId }
+    payload: { catKey }
   };
 };
 
-export const selectCategory = (catId) => {
+export const clearCategory = () => {
   return {
-    type: SELECT_CATEGORY,
-    payload: catId
+    type: CLEAR_CATEGORY
   };
 };
 
-export const unselectCategory = () => {
+export const currentCategory = (catKey) => {
   return {
-    type: UNSELECT_CATEGORY
+    type: CURRENT_CATEGORY,
+    payload: { catKey }
   };
 };
 
-/*
-
-  //console.log('inside selectCategory');
-  //console.log(categoryDetails);
-
-export const formUpdate = ({ prop, value }) => {
+export const categoriesSaveSuccess = () => {
+  //console.log('Did the bloomen SAVE! : ');
   return {
-    type: 'FORM_UPDATE',
-    payload: { prop, value }
+    type: SAVE_CATEGORIES_SUCCESS
   };
 };
 
-export const createNewContact = ({ 
-  first_name, last_name, phone, email, company, project, notes }) => {
-  const { currentUser } = firebase.auth();
-  return (dispatch) => {
-    firebase.database().ref(`/users/${currentUser.uid}/people`)
-      .push({ first_name, last_name, phone, email, company, project, notes })
-      .then(() => {
-        dispatch({ type: 'NEW_CONTACT' });
+export const saveCategories = (categoryList) => {
+  //console.log('Will SAVE! : ', categoryList);
+  return dispatch => {
+    AsyncStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(categoryList), (err, result) => {
+      console.log('SAVED! But result is bogus: ', result, '*** Error: ', err);
+      // ... here result is normally undefinded and error is null (very strange) ...
+      dispatch(categoriesSaveSuccess());
     });
   };
 };
 
+export const categoriesLoadSuccess = (jsonData) => {
+  return {
+    type: LOAD_CATEGORIES_SUCCESS,
+    payload: { itemList: jsonData }
+  };
+};
+
+export const loadCategories = () => {
+  return dispatch => {
+    AsyncStorage.getItem(CATEGORIES_STORAGE_KEY, (errorMsg, jsonData) => {
+      if (jsonData !== null) dispatch(categoriesLoadSuccess(JSON.parse(jsonData)));
+    });
+  };
+};
+
+/*
 export const loadInitialContacts = () => { 
   const { currentUser } = firebase.auth();
   console.log('inside loadInitialContacts - user is:');
@@ -84,5 +94,4 @@ export const loadInitialContacts = () => {
     });
   };
 };
-
 */

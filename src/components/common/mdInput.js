@@ -25,25 +25,51 @@ class mdInput extends React.Component {
         animate: true,
     });
   }
+
+alt-text
+Normal spacing
+Padding above label: 16dp
+Padding below label: 8dp
+Padding above text input line: 8dp
+Padding below text input line: 8dp
+
+alt-text
+Dense spacing
+Padding above label: 8dp
+Padding below label: 4dp
+Padding above text input line: 8dp
+Padding below text input line: 4dp
+
+          underlineColor={this.props.darkInput ? 'gray' : '#c3c3c3'}
+          underlineActiveColor={this.props.darkInput ? AppColors.accentColor 
+                                                     : AppColors.accentColor} 
+
 */
   render() {
     //console.log(`Style: ${this.props.style}`);
+    const ulineColor = this.props.darkInput ? 'gray' : '#c3c3c3';
+    const ulineActiveColor = this.props.darkInput ? AppColors.accentColor : AppColors.accentColor;
     return (
       <View style={this.props.darkInput ? styles.darkContainerStyle : styles.lightContainerStyle}>
         <TextField 
           //style={this.props.style}  ... doesn't appear to work ...
-          //containerStyle={this.props.style}
+          //containerStyle={{ justifyContent: 'center', alignItems: 'center' }}
+          //inputContainerStyle={{ justifyContent: 'center', alignItems: 'center' }}
           labelColor={this.props.darkInput ? AppColors.accentColor : AppColors.mainLiteColor}
           color={this.props.darkInput ? AppColors.hiliteColor : 'black'}
-          paddingTop={16}
-          paddingBottom={2}
+          fontSize={16}
+          marginLeft={2}
+          marginRight={2}
+          paddingBottom={this.props.dense ? 0 : 0}
+          paddingTop={this.props.dense ? 18 : 0}
+          labelPadding={this.props.dense ? 0 : 0}
+          inputContainerPadding={this.props.dense ? 0 : 0}
           labelActiveColor={this.props.darkInput ? AppColors.accentColor : AppColors.darkerColor}
-          labelActiveScale={0.75}
+          labelActiveScale={0.70}
           autoCorrect={false}
           disableFullscreenUI
-          underlineColor={this.props.darkInput ? 'gray' : '#c3c3c3'}
-          underlineActiveColor={this.props.darkInput ? AppColors.accentColor 
-                                                     : AppColors.accentColor} 
+          underlineColor={this.props.dense ? 'transparent' : ulineColor}
+          underlineActiveColor={this.props.dense ? 'transparent' : ulineActiveColor} 
           underlineColorAndroid='transparent'
           {...this.props}
         />
@@ -73,25 +99,25 @@ const styles = StyleSheet.create({
   },
   lightContainerStyle: {
     //width: '90%',
-    paddingLeft: 4,
-    paddingRight: 4,
-    borderRadius: 3,
-    borderColor: '#929292',
+    //paddingLeft: 4,
+    //paddingRight: 4,
+    //borderColor: '#929292',
+    borderRadius: 15,
     borderWidth: 0,
     shadowColor: '#121212',
     shadowOffset: { width: 1, height: 3 },
     shadowOpacity: 0.85,
     //elevation: 3,
     opacity: 1.0,
-    backgroundColor: 'white',
+    backgroundColor: 'transparent',
     //marginBottom: 8
   },
   darkInputStyle: {
     color: '#f2f2f2',
-    fontSize: 28,
+    fontSize: 16,
     fontWeight: '400',
     width: '100%',
-    height: 40,
+    //height: 40,
     shadowColor: '#121212',
     shadowOffset: { width: 1, height: 3 },
     shadowOpacity: 0.85,
@@ -99,10 +125,10 @@ const styles = StyleSheet.create({
   },
   lightInputStyle: {
     color: '#121212',
-    fontSize: 28,
+    fontSize: 16,
     fontWeight: '400',
     width: '100%',
-    height: 40,
+    //height: 40,
     shadowColor: '#121212',
     shadowOffset: { width: 1, height: 3 },
     shadowOpacity: 0.85,

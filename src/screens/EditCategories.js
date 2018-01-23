@@ -3,28 +3,32 @@ import {
   Text, 
   View,
   Alert,
+  Image,
   FlatList,
   Platform,
   Dimensions, 
   //ScrollView,
   //Animated,
-  StyleSheet 
+  StyleSheet,
+  TouchableNativeFeedback 
 } from 'react-native';
 import { connect } from 'react-redux';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import HappyGuy from '../images/1f603.png';
 
-//import { Button } from 'react-native-elements';
 //import EmojiPicker from 'react-native-simple-emoji-picker';  ... 1) broken ...
 //import Emoticons from 'react-native-emoticons';  ... 2) also broken ...
 //import EmojiPicker from 'react-native-emoji-picker';   // ... 3) also broken ProcTypes ...
-//import { Icon, Button } from 'native-base';   // ... Uses Ionicons from RN Vector Icons ...
-//import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
-//import Emoji from 'react-native-emoji';
 import AppColors from '../templates/appColors';
 import MDInput from '../components/common/mdInput';
 import MDButton from '../components/common/mdButton';
-import { addCategory } from '../store/actions';
-//import CategoryItem from '../components/CategoryItem';
-
+import { UniqueId } from '../components/common/UniqueId';
+import CategoryItem from '../components/CategoryItem';
+import { 
+  addCategory,
+  saveCategories,
+  loadCategories
+} from '../store/actions';
 
 /*
 const AppColors = {
@@ -35,15 +39,18 @@ const AppColors = {
   mainDarkColor: '#590d0b',   // ... dark red (burgundy) ...
   darkerColor: '#325a66'      // ... dark cyan ....
 }
-
-    "babel-polyfill": "^6.26.0",
-    "emoji-datasource": "^2.4.4",
-    "prop-types": "^15.6.0"
-
 */
 
-class EditCategories extends Component {
+const mapStateToProps = state => {
+  return {
+    itemList: state.categories.itemList,
+    emojiCode: state.emojis.emojiCode,     // ... current emoji selected in PickEmojis ...
+    currentCat: state.categories.catCurrent,
+    listUpdated: state.categories.catsDirty
+  };
+};
 
+class EditCategories extends Component {
   static navigatorStyle = {
     drawUnderNavBar: false,
     screenBackgroundColor: AppColors.paperColor,
@@ -54,6 +61,10 @@ class EditCategories extends Component {
 
   constructor(props) {
     super(props);
+    this.onEmojiSelect = this.onEmojiSelect.bind(this);    
+    //console.log('Edit Categories Props: ', this.props);
+    //this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
+    /*
     Dimensions.addEventListener('change', () => {
       this.setState({
         scrWidth: Dimensions.get('window').width,
@@ -62,6 +73,7 @@ class EditCategories extends Component {
           ? 'portrait' : 'landscape'
       });
     });
+    */
   }
 
   state = {
@@ -70,7 +82,7 @@ class EditCategories extends Component {
     itemsCount: 0,
     itemName: '',
     itemDesc: '',
-    itemIcon: '',
+    //itemIcon: '',
     //removeAnim: new Animated.Value(1),
     //categoriesAnim: new Animated.Value(0),
     scrWidth: Dimensions.get('window').width,
@@ -78,31 +90,60 @@ class EditCategories extends Component {
     viewMode: this.scrHeight > this.scrWidth ? 'portrait' : 'landscape'
   }
 
-  componentDidUpdate() {
+  componentWillMount() {
+    this.props.dispatch(loadCategories());
+  }
+
+  componentWillReceiveProps(nextProps) {
+    // ... if the categories list is dirty (used) then we should save it ...
+    if (nextProps.listUpdated) {
+      const myCategories = nextProps.itemList;
+      this.props.dispatch(saveCategories(myCategories));
+    }
+  }
+
+/*
+  componentSomethingorOther() {
     this.props.navigator.setTabBadge({
       badge: this.state.itemsCount,
       badgeColor: '#121212'  // ... doesn't seem to be working ...
     });
     //console.log(`Toggled is: ${this.state.toggled}`);
   }
+*/
 
   onEmojiSelect() {
-    Alert.alert('Select an Emoticon!');
+    this.props.navigator.showModal({
+       title: 'Select an Emoji', 
+      screen: 'tracksome.EmojiPicker' 
+    });
   }
 
+  onCatItemPress() {
+    console.log('A category item was pressed.');
+  }
+
+/*
   toggleDescription = () => {
     this.setState({ toggled: !this.state.toggled });
   }
+*/
 
   itemNameChanged(text) {
+    // ... update the redux store with the current value ...
+    // ... don't save anything or set the dirty flag ...
     this.setState({ itemName: text });
   }
 
   itemDescChanged(text) {
+    // ... update the redux store with the current value ...
+    // ... don't save anything or set the dirty flag ...
     this.setState({ itemDesc: text });
   }
 
   itemIconChanged(icon) {
+    // ... update the redux store with the current value ...
+    // ... don't save anything or set the dirty flag ...
     this.setState({ itemIcon: icon });
   }
 
@@ -116,8 +157,11 @@ class EditCategories extends Component {
   };
 
   addThisItem = () => {
-    this.props.onAddCategory('04587', 'Best Red Meat', 
-      'Probably the best prime meat this side of the Atlantic', 'smiley-lady');
+    this.props.dispatch(addCategory(
+      UniqueId(), 
+      this.state.itemName, 
+      '', 
+      this.props.emojiCode));
     this.setState({ itemsCount: this.state.itemsCount + 1 });
   }
 
@@ -126,27 +170,24 @@ class EditCategories extends Component {
   };
 
 /*
-
 icons on the image server;
-
 https://res.cloudinary.com/profivideos/icons/apple-64/1f4a3.png
 
 Used for other module - but here it is.
-
 react-native-image-resizer
-
+*/
 
   renderCategoryItem = ({ item }) => (
     <CategoryItem 
-      key={item.key}
-      Icon={item.icon}
-      Name={item.name}
-      Description={item.desc}
-      //onPressItem={this.onPressItem}
-      //selected={!!this.state.selected.get(item.id)}
+      id={item.key}
+      icon={item.icon}
+      name={item.name}
+      description={item.desc}
+      onPressItem={this.onCatItemPress}
     />
   );
-*/
+
+/*
   renderMoreFields() {
     if (this.state.toggled) {
       return (
@@ -161,43 +202,62 @@ react-native-image-resizer
       );
     }
   }
-
-  render() {
-    //console.log(this.props.itemList);
-    //const backColor = this.props.selected ? '#fff8b2' : 'white';
-    //const buttonType = (Platform.OS === 'android' ? 0 : 64);
-    return (
-        <View style={styles.outerContainer}>
-          <View style={styles.rowInputBar}>
-            <MDButton
-              iconSize={36} iconColor='white' iconName='mood' 
-              textLabel='Add Icon'
-              onPress={this.onEmojiSelect} 
-            />
-            <View style={styles.textInput}>
-              <MDInput
-                label='Category Name'
-                placeholder='A short category name ... '
-                value={this.state.itemName}
-                onChangeText={text => this.itemNameChanged(text)}
-              />
-              {this.renderMoreFields()}
-            </View>
             <MDButton
               iconSize={36} iconColor='white' iconName='event-note' 
               textLabel='Description'
               onPress={this.toggleDescription} 
             />
+            {this.renderMoreFields()}fa-plus-circle
+
+<Icon name='insert-emoticon' size={40} color={AppColors.hiliteColor} />            
+      <Text style={styles.iconPreview}>{this.props.emojiCode}</Text>
+*/
+
+  render() {
+    const showIconOrEmoji = (this.props.emojiCode === '' ?
+      <Image style={styles.imageStyle} source={HappyGuy} /> :
+      <Text style={styles.iconPreview}>{this.props.emojiCode}</Text>
+    );
+    //console.log(this.props.itemList);
+    //const backColor = this.props.selected ? '#fff8b2' : 'white';
+    //const buttonType = (Platform.OS === 'android' ? 0 : 64);
+    return (
+        <View style={styles.outerContainer}>
+          <View style={styles.statusBar}>
+            <TouchableNativeFeedback onPress={this.onEmojiSelect}>
+              <View 
+                style={{ 
+                flexDirection: 'column', 
+                alignItems: 'flex-end', 
+                justifyContent: 'center' }}
+              >
+                { showIconOrEmoji }
+                <Icon 
+                  size={30}
+                  name='plus' 
+                  style={styles.overlayPlus} 
+                  color={'white'} 
+                />            
+              </View>
+            </TouchableNativeFeedback>
+            <View style={styles.inputContainer}>
+              <MDInput
+                label='Category Name'
+                dense
+                placeholder='A short category name ... '
+                // ... these values should be under redux control ...
+                value={this.state.itemName}
+                onChangeText={text => this.itemNameChanged(text)}
+              />
+            </View>
             <MDButton
-              iconSize={46} iconColor='#333' iconName='add' 
+              iconSize={50} iconColor='#333' iconName='add' 
               onPress={this.addThisItem} 
             />
           </View>
           <FlatList
             data={this.props.itemList}
-            renderItem={({ item }) => (
-              <Text>Category: {item.name}  Description: {item.desc}</Text>
-            )}
+            renderItem={this.renderCategoryItem}
             ItemSeparatorComponent={this.itemSeparator}
           />            
         </View>
@@ -276,12 +336,7 @@ react-native-image-resizer
 
 }
 
-const mapStateToProps = state => {
-  return {
-    itemList: state.categories.itemList
-  };
-};
-
+/*
 const mapDispatchToProps = dispatch => {
   return {
     onAddCategory: (categoryId, categoryName, categoryDesc, categoryIcon) =>
@@ -289,25 +344,71 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-/*
 const mapDispatchToProps = dispatch => {
   return {
     onLoadPlaces: () => dispatch(getPlaces())
   };
 };
+
+  historyBar: {
+    height: 32,
+    //paddingBottom: 2,
+    flexDirection: 'row',
+    borderRadius: 15,
+    alignItems: 'center',
+    width: '65%',
+    backgroundColor: '#d5d5d5'
+  },
+
 */
 
-export default connect(mapStateToProps, mapDispatchToProps)(EditCategories);
+export default connect(mapStateToProps)(EditCategories);
 
 const styles = StyleSheet.create({
-  button: {
-    width: '80%'
-  },
-  textInput: {
-    width: '50%',
+  inputContainer: {
+    width: '65%',
     borderWidth: 1,
-    borderColor: '#979797'
+    borderColor: '#979797',
+    borderRadius: 20,
+    paddingTop: 4,
+    paddingLeft: 12,
+    paddingRight: 12,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    height: 44
   },
+  overlayPlus: {
+    elevation: 2,
+    marginTop: -36,
+    //paddingRight: 5,
+    marginBottom: 3
+  },
+  iconPreview: {
+    color: 'black',
+    fontSize: 34,
+    textAlign: 'center',
+    padding: 5
+  },
+  imageStyle: {
+    height: 46,
+    width: 46,
+    margin: 5,
+    paddingBottom: 3,
+    //borderRadius: 5,
+    shadowColor: '#121212',
+    shadowOffset: { width: 1, height: 3 },
+    shadowOpacity: 0.85,
+    resizeMode: 'contain'
+  },
+  statusBar: {
+    height: 54, //48,
+    flexDirection: 'row',
+    padding: (Platform.OS === 'android' ? 2 : 2),
+    alignItems: 'center',
+    backgroundColor: AppColors.accentColor,  // ... medium orange ...
+    justifyContent: 'space-around'
+  },
+/*  
   rowInputBar: {
     width: '100%',
     flexDirection: 'row',
@@ -317,54 +418,17 @@ const styles = StyleSheet.create({
     backgroundColor: AppColors.accentColor,  // ... medium orange ...
     justifyContent: 'space-around'
   },
+*/
+
   outerContainer: {
     flex: 1,
     //padding: 5,
     //borderRadius: 2,
-    backgroundColor: 'white'
+    backgroundColor: AppColors.paperColor
   }
 });
 
 /*
-
-            <Icon ios='ios-book' android="md-book" style={{ fontSize: 48, color: 'blue' }} />
-            <EmojiPicker 
-              onEmojiSelected={this.onEmojiSelected}
-            />            
-
-              onChangeText={icon => this.itemIconChanged(icon)}
-              onChangeText={icon => this.setState({ itemIcon: icon })}
-              onChangeText={text => this.setState({ itemName: text })}
-
-  itemNameChanged(text) {
-    this.setState(prevState => {
-      return {
-        controls: {
-          ...prevState.controls,
-          itemName: {
-            ...prevState.controls.itemName,
-            value: text
-            //valid: validate(val, prevState.controls.placeName.validationRules)
-          }
-        }
-      };
-    });
-  }
-
-  itemIconChanged(icon) {
-    this.setState(prevState => {
-      return {
-        controls: {
-          ...prevState.controls,
-          itemIcon: {
-            ...prevState.controls.itemIcon,
-            value: icon
-          }
-        }
-      };
-    });
-  }
-
             <MDInput
               label='Icon (optional)'
               placeholder='How about a nice Icon for this category? '
@@ -372,38 +436,11 @@ const styles = StyleSheet.create({
               onChangeText={icon => this.itemIconChanged(icon)}
             />
 
-
-    let content = (<Text>Hello World!</Text>);
-    if (this.state.itemsLoaded) {
-      content = (
-          <CategoryList
-            categories={this.props.categories}
-            onItemSelected={this.itemSelectedHandler}
-          />
-      );
-    }
-
-
-              disabled={
-                !this.state.controls.itemName.valid ||
-                !this.state.controls.itemicon.valid
-              }
-
           <PickImage onImagePicked={this.imagePickedHandler} />
           <PickLocation onLocationPick={this.locationPickedHandler} />
 
       <View style={this.state.itemsLoaded ? null : styles.buttonContainer}>
         {content}
       </View>
-
-            ... also had problems with React.PropTypes.func
-            <Emoticons
-               onEmoticonPress={this.onEmoticonPress.bind(this)}
-               onBackspacePress={this.onBackspacePress.bind(this)}
-               show
-               concise
-               showHistoryBar
-               showPlusBar
-            />            
 
 */

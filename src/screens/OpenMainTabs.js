@@ -24,6 +24,13 @@ const OpenMainTabs = () => {
         Navigation.startTabBasedApp({
           tabs: [
             {
+              screen: 'tracksome.EditCategories',
+              label: 'Categories',
+              title: 'Maintain Categories',
+              icon: sources[1]
+            },
+/*            
+            {
               screen: 'tracksome.EmojiPicker',
               label: 'Emojis',
               title: 'Select an Emoji',
@@ -46,12 +53,7 @@ const OpenMainTabs = () => {
                 }
               ]
             },
-            {
-              screen: 'tracksome.EditCategories',
-              label: 'Categories',
-              title: 'Maintain Categories',
-              icon: sources[1]
-            },
+*/            
             {
               screen: 'tracksome.BuildCard',
               label: 'Build Card',
@@ -71,7 +73,7 @@ const OpenMainTabs = () => {
             left: {
               screen: 'tracksome.ConfigMenu'   // unique ID you registered
             },
-            disableOpenGesture: false // optional, can the drawer be opened with a swipe 
+            disableOpenGesture: false // optional, the drawer can be opened with a swipe 
           },
           
           tabsStyle: {

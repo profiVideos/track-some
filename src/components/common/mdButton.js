@@ -28,13 +28,15 @@ const MDButton = (props) => {
           backgroundColor='transparent'
           name={props.iconName} 
         />
-        <Text style={styles.buttonText}>{props.textLabel}</Text>
       </View>
     </TouchableNativeFeedback> 
   );
 };
 
 /*
+
+        <Text style={styles.buttonText}>{props.textLabel}</Text>
+
     (Platform.OS === 'android' ? 
     <TouchableNativeFeedback onPress={whenPressed} style={containerStyle}>
 

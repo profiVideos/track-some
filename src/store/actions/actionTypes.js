@@ -16,11 +16,12 @@ export const SET_SAVE_MODE = 'SET_SAVE_MODE';  // ... 'none', 'local', 'cloud' .
 
 // ... everything dealing with emojis ...
 export const EMOJIS_STORAGE_KEY = '@track!some:my_emojis';
+export const CLEAR_EMOJI = 'CLEAR_EMOJI';
 export const ADD_EMOJI = 'ADD_EMOJI'; 
 export const UPDATE_EMOJI = 'UPDATE_EMOJI';
 export const REMOVE_EMOJI = 'REMOVE_EMOJI';
 export const CURRENT_EMOJI = 'CURRENT_EMOJI';
-export const CLEAR_EMOJI = 'CLEAR_EMOJI';
+
 export const SORT_EMOJIS = 'SORT_EMOJIS';
 export const PURGE_EMOJIS = 'PURGE_EMOJIS';
 export const SAVE_EMOJIS_SUCCESS = 'SAVE_EMOJIS_SUCCESS';
@@ -28,13 +29,19 @@ export const SAVE_EMOJIS_FAILURE = 'SAVE_EMOJIS_FAILURE';
 export const LOAD_EMOJIS_SUCCESS = 'LOAD_EMOJIS_SUCCESS';
 export const LOAD_EMOJIS_FAILURE = 'LOAD_EMOJIS_FAILURE';
 
-export const NEW_CATEGORY = 'new_category';
-export const ADD_CATEGORY = 'add_category';
-export const UPDATE_CATEGORY = 'update_category';
-export const REMOVE_CATEGORY = 'remove_category';
-export const SELECT_CATEGORY = 'select_category';
-export const UNSELECT_CATEGORY = 'unselect_category';
-export const INITIAL_CATEGORIES = 'initial_categories';
+export const CATEGORIES_STORAGE_KEY = '@track!some:my_categories';
+export const CLEAR_CATEGORY = 'CLEAR_CATEGORY';
+export const ADD_CATEGORY = 'ADD_CATEGORY';
+export const UPDATE_CATEGORY = 'UPDATE_CATEGORY';
+export const REMOVE_CATEGORY = 'REMOVE_CATEGORY';
+export const CURRENT_CATEGORY = 'CURRENT_CATEGORY';
+
+export const SORT_CATEGORIES = 'SORT_CATEGORIES';
+export const PURGE_CATEGORIES = 'PURGE_CATEGORIES';
+export const SAVE_CATEGORIES_SUCCESS = 'SAVE_CATEGORIES_SUCCESS';
+export const SAVE_CATEGORIES_FAILURE = 'SAVE_CATEGORIES_FAILURE';
+export const LOAD_CATEGORIES_SUCCESS = 'LOAD_CATEGORIES_SUCCESS';
+export const LOAD_CATEGORIES_FAILURE = 'LOAD_CATEGORIES_FAILURE';
 
 //export const ADD_CARD = 'add_card';
 //export const UPDATE_CARD = 'update_card';

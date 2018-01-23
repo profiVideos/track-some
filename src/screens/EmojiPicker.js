@@ -7,7 +7,8 @@ import {
   Platform,
   //TextInput,
   StyleSheet,
-  //ActivityIndicator
+  //ActivityIndicator,
+  TouchableNativeFeedback
 } from 'react-native';
 import ScrollableTabView from 'react-native-scrollable-tab-view';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -23,6 +24,7 @@ import {
 import AppColors from '../templates/appColors';
 import emojiData from '../store/data/sorted-emojis.json';
 import EmojiTabBar from './EmojiTabBar';
+import { UniqueId } from '../components/common/UniqueId';
 import EmojiItem from '../components/EmojiItem';
 import { 
   addEmoji, 
@@ -85,20 +87,9 @@ const whatDoYouNeed = state => {
   };
 };
 
-const GUID = (append) => {   // ... nice function to create a unique id ...
-    let d = new Date().getTime();
-    const uuid = 'xxxx-xxxx-xxxx'.replace(/[xy]/g, (c) => {
-        const r = (d + (Math.random() * 16)) % 16 | 0;
-        d = Math.floor(d / 16);
-        return (c === 'x' ? r : ((r & 0x3) | 0x8)).toString(16);
-    });
-    return append ? `${uuid}-${append}` : uuid;
-};
-
 class EmojiPicker extends PureComponent {
-
   static navigatorStyle = {
-    tabBarHidden: true,   // ... we need space for the emojis ...
+    //tabBarHidden: true,   // ... we need space for the emojis ...
     drawUnderNavBar: false,
     screenBackgroundColor: AppColors.paperColor,
     navBarTextColor: AppColors.mainLiteColor,
@@ -109,6 +100,7 @@ class EmojiPicker extends PureComponent {
   constructor(props) {
     super(props);
     this.tabBarState = 'hidden';
+    this.onEmojiCloseSelf = this.onEmojiCloseSelf.bind(this);    
     this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     this.state = {
       checked: false,
@@ -133,9 +125,6 @@ class EmojiPicker extends PureComponent {
   }
 
   componentWillReceiveProps(nextProps) {
-    //console.log('ATTENTION: A component will receive new props: ', nextProps);
-    // ... values after sort are not current - however the flatlist has current values??? ...
-    //console.log('Sorted Values?: ', JSON.stringify(this.props.myEmojis));
     // ... if the emojis list is dirty (used) then we should save it ...
     if (nextProps.listUpdated) {
       const myEmojis = nextProps.myEmojis;
@@ -150,11 +139,59 @@ class EmojiPicker extends PureComponent {
       }
       if (event.id === 'menu') {
         this.props.navigator.toggleDrawer({ side: 'left', animated: true });
+        //this.props.navigator.showModal({ screen: 'tracksome.EmojiPicker' });
       }
     }
   }
 
-  onPressItem = (name, emoji) => {
+/*
+  onTouchPress = () => { 
+    this.props.onSelectItem(this.props.emojiName, this.props.emojiString);
+  } 
+
+  onTouchLongPress = () => { 
+    this.props.onToggleItem(this.props.emojiName, this.props.emojiString);
+  } 
+*/
+
+  onSelectItem = (name, emoji) => {  // ... a normal selected item (press and go) ...
+    this.setState({ emojisClicked: `${emoji} ${this.state.emojisClicked}` });
+    const dataStore = this.props;
+    dataStore.dispatch(currentEmoji(emoji, name));
+    const locatePos = this.findEmojiByName(name);
+    if (locatePos >= 0) {
+      const emojiKey = this.props.myEmojis[locatePos].key;
+      dataStore.dispatch(updateEmoji(
+        emojiKey, 
+        this.props.myEmojis[locatePos].selected,
+        this.props.myEmojis[locatePos].numUsed + 1));
+    } else {
+      // ... call the GUID function to generate a new unique id or key ...
+      dataStore.dispatch(addEmoji(UniqueId(), emoji, name));
+    }
+  }
+
+  onToggleItem = (emojiKey) => {   // ... editing favorite emojis list ...
+    if (this.state.canEdit) {
+      const locatePos = this.findEmojiByKey(emojiKey);
+      if (locatePos >= 0) {
+        const dataStore = this.props;
+        dataStore.dispatch(updateEmoji(
+          emojiKey, 
+          !this.props.myEmojis[locatePos].selected, 
+          this.props.myEmojis[locatePos].numUsed));
+      }
+    }
+  }
+
+  onEmojiCloseSelf() {
+    //console.log('Should close this window!');
+    this.props.navigator.dismissModal({
+      animationType: 'slide-down'
+    });
+  }   
+/*
+  onToggleItem = (name, emoji) => {
     this.setState({ emojisClicked: `${emoji} ${this.state.emojisClicked}` });
     const dataStore = this.props;
     dataStore.dispatch(currentEmoji(emoji, name));
@@ -172,9 +209,10 @@ class EmojiPicker extends PureComponent {
       }
     } else {
       // ... call the GUID function to generate a new unique id or key ...
-      dataStore.dispatch(addEmoji(GUID(), emoji, name));
+      dataStore.dispatch(addEmoji(UniqueId(), emoji, name));
     }
   };
+*/
 
 /*
     this.setState((state) => {
@@ -227,7 +265,11 @@ class EmojiPicker extends PureComponent {
     this.setState({ canEdit: allowEdits });
   };
 
-  findEmoji(name) {
+  findEmojiByKey(key) {
+    return this.props.myEmojis.findIndex((element) => { return element.key === key; });
+  }
+
+  findEmojiByName(name) {
     return this.props.myEmojis.findIndex((element) => { return element.name === name; });
   }
 
@@ -266,11 +308,13 @@ class EmojiPicker extends PureComponent {
       <EmojiItem 
         emojiString={item.emoji}
         emojiName={item.name}
+        emojiKey={item.key}
         usageNum={item.numUsed}
         isChecked={item.selected}
         canEdit={this.state.canEdit}
         itemHeight={listItemHeight}
-        onPressItem={this.onPressItem}
+        onTapItem={this.onSelectItem}
+        onLongPress={this.onToggleItem}
         //selected={!!this.state.selected.get(item.id)}
       />
     );
@@ -322,13 +366,13 @@ class EmojiPicker extends PureComponent {
               </Text>
             </View>
             <View style={[styles.iconPaper, { backgroundColor: backColor }]}>
-              <Text style={styles.iconPreview} >
+              <Text style={styles.iconPreview}>
                 {this.props.emojiCode}
               </Text>
             </View>
-            <View>
+            <TouchableNativeFeedback onPress={this.onEmojiCloseSelf}>
               <Icon name='md-checkmark-circle-outline' size={38} color={AppColors.paperColor} />
-            </View>
+            </TouchableNativeFeedback>
           </View>
 
           <ScrollableTabView

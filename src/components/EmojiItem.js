@@ -21,19 +21,16 @@ class EmojiItem extends PureComponent {
     };
   }
 
-  componentDidMount() {
-    //console.log('Inside EmojiItem ...');
-    //console.log(this.props.selected);
-  }
 
-  onTouchablePress = () => { 
-    //console.log('Pressed an item! Hurrah!', this.props.emojiId);
-    this.props.onPressItem(this.props.emojiName, this.props.emojiString);
-    //this.setState({ selected: !this.state.selected });
+  onPressItem = () => { 
+    this.props.onTapItem(this.props.emojiName, this.props.emojiString);
+  } 
+
+  onLongPressItem = () => { 
+    this.props.onLongPress(this.props.emojiKey);
   } 
 
 /*
-
           // ... for sort debugging ...
           <View style={styles.usageStyle}>
             <Text style={styles.usageText}>{this.props.usageNum}</Text>
@@ -42,14 +39,6 @@ class EmojiItem extends PureComponent {
   TouchableNativeFeedback (On Android for almost all touchable elements.)
   TouchableHighlight (On iOS for touchable elements or buttons that have a 
                       solid shape or background, and on ListView items.)
-          <View style={[styles.extraInfo, { backgroundColor: badgeColor }]}>
-            <Text style={styles.badgeStyle}>{this.props.usageNum}</Text>
-          </View>
-        <Text style={styles.badgeStyle}>{this.props.usageNum}</Text>
-         <Icon name='md-checkmark' style={styles.badgeStyle} size={16} color='white' />
-
-          md-checkmark
-
 */
 
   render() {
@@ -61,7 +50,7 @@ class EmojiItem extends PureComponent {
        </View>) : null;
     //const backColor = this.state.selected ? '#fff8b2' : 'white';
     return (
-      <TouchableNativeFeedback onPress={this.onTouchablePress}>
+      <TouchableNativeFeedback onPress={this.onPressItem} onLongPress={this.onLongPressItem}>
         <View style={styles.container}>
           <Text style={styles.iconValue}>{this.props.emojiString}</Text>
           { renderBadge }

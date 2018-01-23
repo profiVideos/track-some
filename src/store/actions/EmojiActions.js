@@ -95,7 +95,7 @@ export const loadMyEmojis = () => {
 export const saveMyEmojis = (myEmojis) => {
   return dispatch => {
     AsyncStorage.setItem(EMOJIS_STORAGE_KEY, JSON.stringify(myEmojis), (errorMsg, result) => {
-      //console.log('SAVED! but result is bogus: ', result, '*** Error: ', errorMsg);
+      console.log('SAVED! but result is bogus: ', result, '*** Error: ', errorMsg);
       // ... here result is normally undefinded and error is null (very strange) ...
       dispatch(emojiSaveSuccess());
     });
