@@ -39,21 +39,22 @@ class EmojiItem extends PureComponent {
   TouchableNativeFeedback (On Android for almost all touchable elements.)
   TouchableHighlight (On iOS for touchable elements or buttons that have a 
                       solid shape or background, and on ListView items.)
+
+
+          { renderBadge }
+
 */
 
   render() {
-    //console.log(this.props);
-    //const badgeColor = this.props.canEdit ? 'blue' : 'transparent';
-    const renderBadge = this.props.canEdit && this.props.isChecked ?
-      (<View style={[styles.extraInfo, { backgroundColor: 'blue' }]}>
-         <Icon name='check' style={styles.badgeStyle} />
-       </View>) : null;
+    //const renderBadge = this.props.canEdit && this.props.isChecked ?
+    //  (<View style={[styles.extraInfo, { backgroundColor: 'blue' }]}>
+    //     <Icon name='check' style={styles.badgeStyle} />
+    //   </View>) : null;
     //const backColor = this.state.selected ? '#fff8b2' : 'white';
     return (
       <TouchableNativeFeedback onPress={this.onPressItem} onLongPress={this.onLongPressItem}>
         <View style={styles.container}>
           <Text style={styles.iconValue}>{this.props.emojiString}</Text>
-          { renderBadge }
           <Text 
             ellipsizeMode='tail' 
             numberOfLines={1} 

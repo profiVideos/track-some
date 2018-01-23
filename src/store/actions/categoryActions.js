@@ -8,12 +8,20 @@ import {
   //SORT_CATEGORIES, 
   CURRENT_CATEGORY,
   //PURGE_CATEGORIES,
+  CATEGORY_EDIT_CHANGE,
   CATEGORIES_STORAGE_KEY,
   SAVE_CATEGORIES_SUCCESS,
   //SAVE_CATEGORIES_FAILURE,
   LOAD_CATEGORIES_SUCCESS,
   //LOAD_CATEGORIES_FAILURE
 } from './actionTypes';
+
+export const itemTextChanged = (prop, value) => {
+  return {
+    type: CATEGORY_EDIT_CHANGE,
+    payload: { prop, value }
+  };
+};
 
 export const addCategory = (catKey, catName, catDesc, catIcon) => {
   return {

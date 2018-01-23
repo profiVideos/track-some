@@ -3,9 +3,12 @@ import {
   View, 
   Text, 
   StyleSheet, 
+  TouchableOpacity,
+  TouchableWithoutFeedback,
   TouchableNativeFeedback 
   //Image 
 } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 class CategoryItem extends React.PureComponent {
   constructor(props) {
@@ -34,15 +37,38 @@ class CategoryItem extends React.PureComponent {
       name={item.name}
       description={item.desc}
       onPressItem={this.onCatItemPress}
+
+FontAwesome
+square-o
+check-square-o
+
 */
 
     return (
-      <TouchableNativeFeedback onPress={this.onTouchablePress}>
-        <View style={styles.catWrapper}>
-          <Text style={styles.catIcon}>{this.props.icon}</Text>
-          <Text style={styles.catName}>{this.props.name}</Text>
+      <View style={styles.outerWrapper}>
+        <TouchableNativeFeedback onPress={this.onTouchablePress}>
+          <View style={styles.catWrapper}>
+            <Text style={styles.catIcon}>{this.props.icon}</Text>
+            <Text 
+              ellipsizeMode='tail' 
+              numberOfLines={1} 
+              style={styles.catName}
+            >
+              {this.props.name}
+            </Text>
+          </View>
+        </TouchableNativeFeedback>
+        <View style={styles.checkWrapper}>
+          <TouchableOpacity onPress={this.onToggleCheck}>
+            <Icon 
+              size={22}
+              name='square-o' 
+              style={styles.checkStyle} 
+              color={'#212121'} 
+            />            
+          </TouchableOpacity>
         </View>
-      </TouchableNativeFeedback>
+      </View>
     );
   }
 
@@ -65,31 +91,42 @@ export default CategoryItem;
 */
 
 const styles = StyleSheet.create({
+  outerWrapper: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
   catWrapper: {
-    elevation: 2,
     borderRadius: 2,
-    //width: '100%',
-    //marginBottom: 5,
-    padding: 2,
-    paddingLeft: 15,
-    paddingRight: 15,
+    padding: 3,
+    height: 45,
+    width: '88%',
+    paddingLeft: 12,
     paddingBottom: 5,
     backgroundColor: 'white',
     flexDirection: 'row',
+    alignItems: 'center'
+  },
+  checkWrapper: {
+    padding: 3,
+    width: '12%',
+    height: 45,
+    backgroundColor: 'white',
+    flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#121212',
-    shadowOffset: { width: 1, height: 3 },
-    shadowOpacity: 0.5,
-    shadowRadius: 3
+    justifyContent: 'center'
+  },
+  checkStyle: {
+    paddingTop: 3
   },
   catName: {
-    //marginRight: 8,
-    fontSize: 18,
+    fontSize: 17,
+    width: '90%',
     fontWeight: '500',
     color: '#333'
   },
   catIcon: {
-    marginRight: 12,
+    marginRight: 10,
     fontSize: 30,
     color: 'black'
   }

@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { 
   Text, 
   View,
@@ -6,8 +6,8 @@ import {
   Image,
   FlatList,
   Platform,
-  Dimensions, 
-  //ScrollView,
+  TextInput,
+  Dimensions,
   //Animated,
   StyleSheet,
   TouchableNativeFeedback 
@@ -20,14 +20,15 @@ import HappyGuy from '../images/1f603.png';
 //import Emoticons from 'react-native-emoticons';  ... 2) also broken ...
 //import EmojiPicker from 'react-native-emoji-picker';   // ... 3) also broken ProcTypes ...
 import AppColors from '../templates/appColors';
-import MDInput from '../components/common/mdInput';
+//import MDInput from '../components/common/mdInput';
 import MDButton from '../components/common/mdButton';
 import { UniqueId } from '../components/common/UniqueId';
 import CategoryItem from '../components/CategoryItem';
 import { 
   addCategory,
   saveCategories,
-  loadCategories
+  loadCategories,
+  itemTextChanged
 } from '../store/actions';
 
 /*
@@ -50,10 +51,10 @@ const mapStateToProps = state => {
   };
 };
 
-class EditCategories extends Component {
+class EditCategories extends PureComponent {
   static navigatorStyle = {
     drawUnderNavBar: false,
-    screenBackgroundColor: AppColors.paperColor,
+    screenBackgroundColor: 'white',   // ...AppColors.paperColor,
     navBarTextColor: AppColors.mainLiteColor,
     navBarBackgroundColor: AppColors.hiliteColor,
     navBarTranslucent: false
@@ -80,9 +81,6 @@ class EditCategories extends Component {
     toggled: false,
     hasloaded: false,
     itemsCount: 0,
-    itemName: '',
-    itemDesc: '',
-    //itemIcon: '',
     //removeAnim: new Animated.Value(1),
     //categoriesAnim: new Animated.Value(0),
     scrWidth: Dimensions.get('window').width,
@@ -123,6 +121,10 @@ class EditCategories extends Component {
     console.log('A category item was pressed.');
   }
 
+  itemSelectedHandler = key => {
+    Alert.alert(`A list item was selected with ${JSON.stringify(key)}`);
+  };
+
 /*
   toggleDescription = () => {
     this.setState({ toggled: !this.state.toggled });
@@ -130,15 +132,11 @@ class EditCategories extends Component {
 */
 
   itemNameChanged(text) {
-    // ... update the redux store with the current value ...
-    // ... don't save anything or set the dirty flag ...
-    this.setState({ itemName: text });
+    this.props.dispatch(itemTextChanged('name', text));
   }
 
   itemDescChanged(text) {
-    // ... update the redux store with the current value ...
-    // ... don't save anything or set the dirty flag ...
-    this.setState({ itemDesc: text });
+    this.props.dispatch(itemTextChanged('desc', text));
   }
 
   itemIconChanged(icon) {
@@ -147,47 +145,29 @@ class EditCategories extends Component {
     this.setState({ itemIcon: icon });
   }
 
-  itemSelectedHandler = key => {
-    Alert.alert(`A list item was selected with ${JSON.stringify(key)}`);
-    /*
-    const selPlace = this.props.places.find(place => {
-      return place.key === key;
-    });
-    */
-  };
-
   addThisItem = () => {
-    this.props.dispatch(addCategory(
-      UniqueId(), 
-      this.state.itemName, 
-      '', 
-      this.props.emojiCode));
-    this.setState({ itemsCount: this.state.itemsCount + 1 });
+    if (this.props.currentCat.name !== '') {
+      this.props.dispatch(addCategory(
+        UniqueId(),
+        this.props.currentCat.name,
+        this.props.currentCat.desc,
+        this.props.emojiCode));
+      this.setState({ itemsCount: this.state.itemsCount + 1 });
+    }
   }
 
   itemSeparator = () => {
-    return (<View style={{ height: 1, width: '100%', backgroundColor: '#d2d2d2' }} />);
+    return (<View style={styles.separatorStyle} />);
   };
 
 /*
+
 icons on the image server;
 https://res.cloudinary.com/profivideos/icons/apple-64/1f4a3.png
 
 Used for other module - but here it is.
 react-native-image-resizer
-*/
 
-  renderCategoryItem = ({ item }) => (
-    <CategoryItem 
-      id={item.key}
-      icon={item.icon}
-      name={item.name}
-      description={item.desc}
-      onPressItem={this.onCatItemPress}
-    />
-  );
-
-/*
   renderMoreFields() {
     if (this.state.toggled) {
       return (
@@ -209,9 +189,17 @@ react-native-image-resizer
             />
             {this.renderMoreFields()}fa-plus-circle
 
-<Icon name='insert-emoticon' size={40} color={AppColors.hiliteColor} />            
-      <Text style={styles.iconPreview}>{this.props.emojiCode}</Text>
 */
+
+  renderCategoryItem = ({ item }) => (
+    <CategoryItem 
+      id={item.key}
+      icon={item.icon}
+      name={item.name}
+      description={item.desc}
+      onPressItem={this.onCatItemPress}
+    />
+  );
 
   render() {
     const showIconOrEmoji = (this.props.emojiCode === '' ?
@@ -241,18 +229,19 @@ react-native-image-resizer
               </View>
             </TouchableNativeFeedback>
             <View style={styles.inputContainer}>
-              <MDInput
-                label='Category Name'
-                dense
-                placeholder='A short category name ... '
-                // ... these values should be under redux control ...
-                value={this.state.itemName}
-                onChangeText={text => this.itemNameChanged(text)}
+              <TextInput
+                style={styles.textInputStyle}
+                autoCorrect={false}
+                disableFullscreenUI
+                underlineColorAndroid={'transparent'}
+                placeholder={'A short category name ... '}
+                value={this.props.currentCat.name}
+                onChangeText={(text) => this.itemNameChanged(text)}
               />
             </View>
             <MDButton
               iconSize={50} iconColor='#333' iconName='add' 
-              onPress={this.addThisItem} 
+              onPress={this.addThisItem.bind(this)} 
             />
           </View>
           <FlatList
@@ -265,10 +254,6 @@ react-native-image-resizer
   }
 
 /*
-              <Button transparent onPress={this.addThisItem}>
-                <Icon ios='ios-add' android='md-add' style={{ fontSize: 56 }} />
-              </Button>            
-
             <MDInput
               label='Icon (optional)'
               placeholder='A nice Icon for this category? '
@@ -280,87 +265,9 @@ react-native-image-resizer
             title="Add this Category"
             onPress={this.addThisItem}
           />
-
-    // this.props.navigator.switchToTab({tabIndex: 0});
-    //this.props.navigator.setSubTitle({
-    //  subtitle: ''
-    //});
-            <CategoryList
-              data={this.props.itemList}
-              onItemSelected={this.itemSelectedHandler}
-            />
-            <CategoryList
-              data={this.props.itemList}
-              onItemSelected={this.itemSelectedHandler}
-            />
-
-            <FlatList
-              data={superHeros}
-              renderItem={({ item }) => (
-                <ListItem
-                  title={`${item.name}`}
-                />
-              )}
-            />            
-
-            <CategoryList
-              data={this.props.itemList}
-              onItemSelected={this.itemSelectedHandler}
-            />
-
-              onItemSelected={this.itemSelectedHandler}
-
-            <FlatList
-              data={this.props.itemList}
-              renderItem={({ item }) => this.renderItem(item)}
-            />
-
- {item.catName}
-            <Text>{this.props.itemList.catName}</Text>
-          <CategoryList
-            categories={this.props.itemList}
-            onItemSelected={this.itemSelectedHandler}
-          />
-<FlatList
-      style={styles.listContainer}
-      data={props.categories}
-      renderItem={(info) => (
-        <CategoryItem
-          categoryName={info.categories.catName}
-          categoryIcon={info.categories.catIcon}
-          onItemPressed={() => props.onItemSelected(info.categories.catId)}
-        />
-      )}
-    />
 */
 
 }
-
-/*
-const mapDispatchToProps = dispatch => {
-  return {
-    onAddCategory: (categoryId, categoryName, categoryDesc, categoryIcon) =>
-      dispatch(addCategory(categoryId, categoryName, categoryDesc, categoryIcon)),
-  };
-};
-
-const mapDispatchToProps = dispatch => {
-  return {
-    onLoadPlaces: () => dispatch(getPlaces())
-  };
-};
-
-  historyBar: {
-    height: 32,
-    //paddingBottom: 2,
-    flexDirection: 'row',
-    borderRadius: 15,
-    alignItems: 'center',
-    width: '65%',
-    backgroundColor: '#d5d5d5'
-  },
-
-*/
 
 export default connect(mapStateToProps)(EditCategories);
 
@@ -370,13 +277,26 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#979797',
     borderRadius: 20,
-    paddingTop: 4,
+    //paddingTop: 4,
     paddingLeft: 12,
     paddingRight: 12,
     backgroundColor: 'white',
     justifyContent: 'center',
-    height: 44
+    height: 40
   },
+  separatorStyle: {
+    //flex: 1,
+    backgroundColor: 'white',
+    width: '12%',
+    alignSelf: 'flex-end',
+    height: 1
+  },
+  textInputStyle: {
+    color: '#121212',
+    padding: 3,
+    fontSize: 18,
+    fontWeight: '300'
+  },  
   overlayPlus: {
     elevation: 2,
     marginTop: -36,
@@ -401,12 +321,18 @@ const styles = StyleSheet.create({
     resizeMode: 'contain'
   },
   statusBar: {
-    height: 54, //48,
+    elevation: 3,
+    height: 50, //48,
     flexDirection: 'row',
-    padding: (Platform.OS === 'android' ? 2 : 2),
+    //marginBottom: 3,
+    padding: (Platform.OS === 'android' ? 3 : 3),
     alignItems: 'center',
     backgroundColor: AppColors.accentColor,  // ... medium orange ...
-    justifyContent: 'space-around'
+    justifyContent: 'space-around',
+    shadowColor: '#121212',
+    shadowOffset: { width: 1, height: 3 },
+    shadowOpacity: 0.5,
+    shadowRadius: 3
   },
 /*  
   rowInputBar: {

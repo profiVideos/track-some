@@ -291,9 +291,11 @@ class EmojiPicker extends PureComponent {
         numColumns={6}
         horizontal={false}
         data={emojiGroup}
-        initialNumToRender={3}
-        extraData={this.state}
+        initialNumToRender={10}  // ... 3 ...
+        extraData={this.props}
         // ... not sure how these work??? refreshing={this.state.refreshing}
+        // ...... Set this true while waiting for new data from a refresh.
+        // legacyImplementation - does not work on multiple columns ...
         //onRefresh={this.onEmojiListRefresh}
         removeClippedSubviews
         getItemLayout={this.getItemLayout}

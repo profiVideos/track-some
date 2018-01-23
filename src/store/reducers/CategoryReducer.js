@@ -8,6 +8,7 @@ import {
   //SORT_CATEGORIES, 
   CURRENT_CATEGORY,
   //PURGE_CATEGORIES,
+  CATEGORY_EDIT_CHANGE,
   SAVE_CATEGORIES_SUCCESS,
   //SAVE_CATEGORIES_FAILURE,
   LOAD_CATEGORIES_SUCCESS,
@@ -20,14 +21,24 @@ const initialState = {
   catsDirty: false,
   detailView: false,
   catCurrent: {
-    itemName: '',
-    itemDesc: '',
-    itemIcon: ''
+    name: '',
+    desc: '',
+    icon: ''
   }
 };
 
 const CategoryReducer = (state = initialState, action) => {
+  //console.log('Category Reducer State: ', state, '  Action: ', action);
   switch (action.type) {
+
+    case CATEGORY_EDIT_CHANGE:
+      return {
+        ...state,
+        catCurrent: {
+          ...state.catCurrent,
+          [action.payload.prop]: action.payload.value
+        }
+      };
 
     case ADD_CATEGORY:
       // ... add this item to the top of the category list ...
@@ -47,7 +58,7 @@ const CategoryReducer = (state = initialState, action) => {
     case UPDATE_CATEGORY:
       return {
         ...state,
-        [action.payload.prop]: action.payload.value
+        //[action.payload.prop]: action.payload.value
       };
 
     case REMOVE_CATEGORY:
@@ -57,9 +68,9 @@ const CategoryReducer = (state = initialState, action) => {
           return category.catId !== action.payload.catId;
         }),
         catCurrent: {
-          itemName: '',
-          itemDesc: '',
-          itemIcon: ''
+          name: '',
+          desc: '',
+          icon: ''
         }
       };
 
@@ -67,9 +78,9 @@ const CategoryReducer = (state = initialState, action) => {
       return {
         ...state,
         catCurrent: {
-          itemName: '',
-          itemDesc: '',
-          itemIcon: ''
+          name: '',
+          desc: '',
+          icon: ''
         }
       };
 
@@ -81,9 +92,9 @@ const CategoryReducer = (state = initialState, action) => {
           return category.catKey === action.payload.catKey;
         }),
         catCurrent: {
-          itemName: this.catFound.name,
-          itemDesc: this.catFound.desc,
-          itemIcon: this.catFound.icon
+          name: this.catFound.name,
+          desc: this.catFound.desc,
+          icon: this.catFound.icon
         }
       };
 
@@ -99,9 +110,9 @@ const CategoryReducer = (state = initialState, action) => {
         ...state,
         catsDirty: false,   // ... list has been saved ...
         catCurrent: {       // ... clear the current record ...
-          itemName: '',
-          itemDesc: '',
-          itemIcon: ''
+          name: '',
+          desc: '',
+          icon: ''
         }
       };
 
