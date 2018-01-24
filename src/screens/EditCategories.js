@@ -12,6 +12,13 @@ import {
   StyleSheet,
   TouchableNativeFeedback 
 } from 'react-native';
+import {
+  Menu,
+  MenuOptions,
+  MenuOption,
+  MenuTrigger,
+  MenuProvider
+} from 'react-native-popup-menu';
 import { connect } from 'react-redux';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import HappyGuy from '../images/1f603.png';
@@ -26,9 +33,12 @@ import { UniqueId } from '../components/common/UniqueId';
 import CategoryItem from '../components/CategoryItem';
 import { 
   addCategory,
+  updateCategory,
   saveCategories,
   loadCategories,
-  itemTextChanged
+  sortCategories,
+  itemTextChanged,
+  deleteCategories
 } from '../store/actions';
 
 /*
@@ -62,19 +72,11 @@ class EditCategories extends PureComponent {
 
   constructor(props) {
     super(props);
-    this.onEmojiSelect = this.onEmojiSelect.bind(this);    
-    //console.log('Edit Categories Props: ', this.props);
     //this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
-    /*
-    Dimensions.addEventListener('change', () => {
-      this.setState({
-        scrWidth: Dimensions.get('window').width,
-        scrHeight: Dimensions.get('window').height,
-        viewMode: Dimensions.get('window').height > Dimensions.get('window').width 
-          ? 'portrait' : 'landscape'
-      });
-    });
-    */
+    //this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent);
+    this.onSelectEmoji = this.onSelectEmoji.bind(this);
+    this.onCatItemPress = this.onCatItemPress.bind(this);
+    this.onCatItemToggle = this.onCatItemToggle.bind(this);
   }
 
   state = {
@@ -88,15 +90,37 @@ class EditCategories extends PureComponent {
     viewMode: this.scrHeight > this.scrWidth ? 'portrait' : 'landscape'
   }
 
+
   componentWillMount() {
     this.props.dispatch(loadCategories());
   }
 
   componentWillReceiveProps(nextProps) {
+    //console.log(this);
+    this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     // ... if the categories list is dirty (used) then we should save it ...
     if (nextProps.listUpdated) {
       const myCategories = nextProps.itemList;
       this.props.dispatch(saveCategories(myCategories));
+    }
+  }
+
+  onNavigatorEvent(event) {
+    if (event.type === 'NavBarButtonPress') { // this is the event type for button presses
+      switch (event.id) {
+        case 'menu': {
+          this.props.navigator.toggleDrawer({ side: 'left', animated: true });
+          break;
+        }
+        case 'options': {
+          this.optionsMenu.open();  // ... figure out how to toggle this menu with the "_" ...
+          //if (this.optionsMenu._opened) this.optionsMenu.close();
+          //else this.optionsMenu.open();
+          //console.log(this.optionsMenu);
+          break;
+        }
+        default: break;
+      }  // ... switch ...
     }
   }
 
@@ -110,26 +134,45 @@ class EditCategories extends PureComponent {
   }
 */
 
-  onEmojiSelect() {
+  onSelectEmoji() {
     this.props.navigator.showModal({
        title: 'Select an Emoji', 
       screen: 'tracksome.EmojiPicker' 
     });
   }
 
-  onCatItemPress() {
-    console.log('A category item was pressed.');
+  onCatItemPress(key, name, desc, icon, selected) {
+    // ... update this item in the categories list ...
+    console.log('An item was pressed.', key, ' Name: ', name);
+    // ... open a popup window to allow this item to be changed ...
+    //this.props.dispatch(updateCategory(key, name, desc, icon, selected));
   }
 
-  itemSelectedHandler = key => {
-    Alert.alert(`A list item was selected with ${JSON.stringify(key)}`);
-  };
-
-/*
-  toggleDescription = () => {
-    this.setState({ toggled: !this.state.toggled });
+  onCatItemToggle(key, name, desc, icon, selected) {
+    this.props.dispatch(updateCategory(key, name, desc, icon, selected));
   }
-*/
+
+  onMenuOptionSelect = (value) => {
+    switch (value) {
+      case 'sortCats': {
+        // ... sort the categories by name ...
+        this.props.dispatch(sortCategories());
+        break;
+      }
+      case 'deleteCats': {
+        // ... first count how many items will be affected ...
+        // ... display notice to user - if none then just a notification ...
+        // ... otherwise prompt user to confirm the deletion ...
+        this.props.dispatch(deleteCategories());
+        break;
+      }
+      default: break;
+    }  // ... switch ...
+  }
+
+  menuReference = (menuId) => {
+    this.optionsMenu = menuId;
+  }
 
   itemNameChanged(text) {
     this.props.dispatch(itemTextChanged('name', text));
@@ -196,10 +239,36 @@ react-native-image-resizer
       id={item.key}
       icon={item.icon}
       name={item.name}
-      description={item.desc}
+      desc={item.desc}
+      checkIcon={item.selected ? 'check-square-o' : 'square-o'}
+      selected={item.selected}
       onPressItem={this.onCatItemPress}
+      onToggleItem={this.onCatItemToggle}
     />
   );
+
+  renderOptionMenu = () => (
+    //if (!this.state.canEdit) return null;
+    //console.log('inside render option menu!');
+    //      <Menu onSelect={value => this.onMenuOptionSelect(value)} ref={this.menuReference}>
+    //      <Menu onSelect={value => this.onMenuOptionSelect(value)} ref={this.menuReference}>
+    //return (
+        <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+          <Menu onSelect={value => this.onMenuOptionSelect(value)} ref={this.menuReference}>
+            <MenuTrigger>
+              <View style={styles.menuTrigger} />
+            </MenuTrigger>
+            <MenuOptions customStyles={menuOptionsStyles}>
+              <MenuOption value={0} disabled>
+                <Text style={styles.menuTitle}>Category Options</Text>
+              </MenuOption>
+              <MenuOption value={'sortCats'} text='Sort by Category Name' />
+              <MenuOption value={'deleteCats'} text='Delete All Selected' />
+            </MenuOptions>
+          </Menu>
+        </View>
+  //    );
+  )
 
   render() {
     const showIconOrEmoji = (this.props.emojiCode === '' ?
@@ -210,9 +279,11 @@ react-native-image-resizer
     //const backColor = this.props.selected ? '#fff8b2' : 'white';
     //const buttonType = (Platform.OS === 'android' ? 0 : 64);
     return (
+      <MenuProvider>
+        { this.renderOptionMenu() }
         <View style={styles.outerContainer}>
           <View style={styles.statusBar}>
-            <TouchableNativeFeedback onPress={this.onEmojiSelect}>
+            <TouchableNativeFeedback onPress={this.onSelectEmoji}>
               <View 
                 style={{ 
                 flexDirection: 'column', 
@@ -250,6 +321,7 @@ react-native-image-resizer
             ItemSeparatorComponent={this.itemSeparator}
           />            
         </View>
+      </MenuProvider>
     );
   }
 
@@ -271,6 +343,30 @@ react-native-image-resizer
 
 export default connect(mapStateToProps)(EditCategories);
 
+const menuOptionsStyles = {
+  optionsContainer: {
+    //backgroundColor: 'green',
+    //padding: 5,
+    width: 175
+  },
+  /*
+  optionsWrapper: {
+    backgroundColor: 'red',
+  },
+  optionWrapper: {
+    backgroundColor: 'yellow',
+    margin: 5,
+  },
+  optionTouchable: {
+    underlayColor: 'gold',
+    activeOpacity: 70,
+  },
+  */
+  optionText: {
+    color: 'blue',
+  },
+};
+
 const styles = StyleSheet.create({
   inputContainer: {
     width: '65%',
@@ -283,6 +379,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     justifyContent: 'center',
     height: 40
+  },
+  menuTrigger: {
+    flex: 1,
+    justifyContent: 'flex-end'
   },
   separatorStyle: {
     //flex: 1,

@@ -4,7 +4,7 @@ import {
   Text, 
   StyleSheet, 
   TouchableOpacity,
-  TouchableWithoutFeedback,
+  //TouchableWithoutFeedback,
   TouchableNativeFeedback 
   //Image 
 } from 'react-native';
@@ -20,8 +20,24 @@ class CategoryItem extends React.PureComponent {
   }
 
   onTouchablePress = () => { 
-    this.props.onPressItem(this.props.id, this.props.name);
-  } 
+    this.props.onPressItem(
+      this.props.id, 
+      this.props.name,
+      this.props.desc,
+      this.props.icon,
+      this.props.selected
+    );
+  }
+
+  onToggleCheck = () => { 
+    this.props.onToggleItem(
+      this.props.id, 
+      this.props.name,
+      this.props.desc,
+      this.props.icon,
+      !this.props.selected
+    );
+  }
 
   render() {
     //console.log(this.props);
@@ -32,23 +48,25 @@ class CategoryItem extends React.PureComponent {
     //   </View>) : null;
     //const backColor = this.state.selected ? '#fff8b2' : 'white';
 /*
-      key={item.key}
+  onTogglePress  
+    <CategoryItem 
+      id={item.key}
       icon={item.icon}
       name={item.name}
-      description={item.desc}
+      desc={item.desc}
+      selected={item.selected}
       onPressItem={this.onCatItemPress}
-
-FontAwesome
-square-o
-check-square-o
-
+    />
 */
-
     return (
       <View style={styles.outerWrapper}>
-        <TouchableNativeFeedback onPress={this.onTouchablePress}>
-          <View style={styles.catWrapper}>
+        <View style={styles.iconWrapper}>
+          <TouchableOpacity onPress={this.onIconChange}>
             <Text style={styles.catIcon}>{this.props.icon}</Text>
+          </TouchableOpacity>
+        </View>
+        <TouchableNativeFeedback onPress={this.onTouchablePress}>
+          <View style={styles.infoWrapper}>
             <Text 
               ellipsizeMode='tail' 
               numberOfLines={1} 
@@ -62,7 +80,7 @@ check-square-o
           <TouchableOpacity onPress={this.onToggleCheck}>
             <Icon 
               size={22}
-              name='square-o' 
+              name={this.props.checkIcon} 
               style={styles.checkStyle} 
               color={'#212121'} 
             />            
@@ -94,25 +112,36 @@ const styles = StyleSheet.create({
   outerWrapper: {
     flex: 1,
     flexDirection: 'row',
+    backgroundColor: 'white',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  iconWrapper: {
+    borderRadius: 3,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: '#b9b9b9',
+    padding: 3,
+    marginLeft: 3,
+    paddingLeft: 10,
+    paddingRight: 10,
+    paddingBottom: 3,
+    backgroundColor: '#f5f5f5',  //#282828',
+    justifyContent: 'center',
     alignItems: 'center'
   },
-  catWrapper: {
-    borderRadius: 2,
-    padding: 3,
+  infoWrapper: {
     height: 45,
-    width: '88%',
-    paddingLeft: 12,
-    paddingBottom: 5,
+    padding: 3,
+    paddingLeft: 7,
+    width: '71%',
+    justifyContent: 'center',
     backgroundColor: 'white',
-    flexDirection: 'row',
-    alignItems: 'center'
   },
   checkWrapper: {
-    padding: 3,
-    width: '12%',
-    height: 45,
+    padding: 5,
+    width: '13%',
     backgroundColor: 'white',
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center'
   },
@@ -121,12 +150,10 @@ const styles = StyleSheet.create({
   },
   catName: {
     fontSize: 17,
-    width: '90%',
     fontWeight: '500',
     color: '#333'
   },
   catIcon: {
-    marginRight: 10,
     fontSize: 30,
     color: 'black'
   }

@@ -5,9 +5,9 @@ import {
   CLEAR_CATEGORY,
   UPDATE_CATEGORY,
   REMOVE_CATEGORY,
-  //SORT_CATEGORIES, 
+  SORT_CATEGORIES, 
   CURRENT_CATEGORY,
-  //PURGE_CATEGORIES,
+  DELETE_SELECTED_CATS,
   CATEGORY_EDIT_CHANGE,
   SAVE_CATEGORIES_SUCCESS,
   //SAVE_CATEGORIES_FAILURE,
@@ -27,6 +27,14 @@ const initialState = {
   }
 };
 
+const compareString = (a, b) => {
+  const itemA = a.toUpperCase(); // ignore upper and lowercase
+  const itemB = b.toUpperCase(); // ignore upper and lowercase
+  if (itemA < itemB) return -1;
+  if (itemA > itemB) return 1;
+  return 0;  // ... items are equal ...
+};
+
 const CategoryReducer = (state = initialState, action) => {
   //console.log('Category Reducer State: ', state, '  Action: ', action);
   switch (action.type) {
@@ -38,6 +46,23 @@ const CategoryReducer = (state = initialState, action) => {
           ...state.catCurrent,
           [action.payload.prop]: action.payload.value
         }
+      };
+
+    case SORT_CATEGORIES:
+      return {
+        ...state,
+        itemList: state.itemList.slice().sort((a, b) => compareString(a.name, b.name)),
+        catsDirty: true
+      };
+
+    case DELETE_SELECTED_CATS:
+      return {
+        ...state,
+        itemList: state.itemList.filter(item => {
+          return item.selected !== true;
+        }),
+        detailView: false,
+        catsDirty: true
       };
 
     case ADD_CATEGORY:
@@ -58,7 +83,14 @@ const CategoryReducer = (state = initialState, action) => {
     case UPDATE_CATEGORY:
       return {
         ...state,
-        //[action.payload.prop]: action.payload.value
+        itemList: state.itemList.map(category => 
+          (category.key === action.payload.key ? 
+            { ...category, 
+              name: action.payload.name,
+              desc: action.payload.desc,
+              icon: action.payload.icon,
+              selected: action.payload.isSelected } : category)),
+        catsDirty: true 
       };
 
     case REMOVE_CATEGORY:

@@ -5,9 +5,9 @@ import {
   CLEAR_CATEGORY,
   UPDATE_CATEGORY,
   REMOVE_CATEGORY,
-  //SORT_CATEGORIES, 
+  SORT_CATEGORIES, 
   CURRENT_CATEGORY,
-  //PURGE_CATEGORIES,
+  DELETE_SELECTED_CATS,
   CATEGORY_EDIT_CHANGE,
   CATEGORIES_STORAGE_KEY,
   SAVE_CATEGORIES_SUCCESS,
@@ -23,6 +23,18 @@ export const itemTextChanged = (prop, value) => {
   };
 };
 
+export const deleteCategories = () => {
+  return {
+    type: DELETE_SELECTED_CATS
+  };
+};
+
+export const sortCategories = () => {
+  return {
+    type: SORT_CATEGORIES
+  };
+};
+
 export const addCategory = (catKey, catName, catDesc, catIcon) => {
   return {
     type: ADD_CATEGORY,
@@ -30,10 +42,10 @@ export const addCategory = (catKey, catName, catDesc, catIcon) => {
   };
 };
 
-export const updateCategory = ({ catKey, catName, catDesc, catIcon }) => {
+export const updateCategory = (key, name, desc, icon, isSelected) => {
   return {
     type: UPDATE_CATEGORY,
-    payload: { catKey, catName, catDesc, catIcon }
+    payload: { key, name, desc, icon, isSelected }
   };
 };
 

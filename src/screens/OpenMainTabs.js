@@ -15,11 +15,12 @@ const AppColors = {
 const OpenMainTabs = () => {
   //console.log('OpenMainTabs: ', props);
     Promise.all([
-        getImageSource('md-thumbs-up', 30),      // ... emojis ...
-        getImageSource('logo-buffer', 30),      // ... categories ...
-        getImageSource('md-paper', 30),        // ... build card ...
-        getImageSource('ios-desktop', 30),    // ... show card ...
-        getImageSource('md-menu', 30)        // ... the menu button ...
+        getImageSource('md-thumbs-up', 30),       // ... emojis ...
+        getImageSource('logo-buffer', 30),       // ... categories ...
+        getImageSource('md-paper', 30),         // ... build card ...
+        getImageSource('ios-desktop', 30),     // ... show card ...
+        getImageSource('md-menu', 30),        // ... the menu button ...
+        getImageSource('md-more', 30)        // ... the options button ...
     ]).then(sources => {
         Navigation.startTabBasedApp({
           tabs: [
@@ -27,8 +28,46 @@ const OpenMainTabs = () => {
               screen: 'tracksome.EditCategories',
               label: 'Categories',
               title: 'Maintain Categories',
-              icon: sources[1]
+              icon: sources[1],
+              leftButtons: [{ icon: sources[4], id: 'menu' }],
+              rightButtons: [{ icon: sources[5], id: 'options' }]
             },
+            {
+              screen: 'tracksome.BuildCard',
+              label: 'Build Card',
+              title: 'New Card',
+              icon: sources[2]
+            },
+            {
+              screen: 'tracksome.ShowCard',
+              label: 'Show Card',
+              title: 'Show Card',
+              icon: sources[3]
+            },
+          ],
+          drawer: {
+            left: {
+              screen: 'tracksome.ConfigMenu'   // unique ID you registered
+            },
+            disableOpenGesture: false // optional, the drawer can be opened with a swipe 
+          },
+          tabsStyle: {
+              tabBarButtonColor: 'orange'
+            },
+          appStyle: {
+            keepStyleAcrossPush: false,
+            tabBarBackgroundColor: AppColors.darkerColor,
+            tabBarButtonColor: AppColors.accentColor,
+            tabBarSelectedButtonColor: AppColors.hiliteColor,
+            tabBarTranslucent: false,
+          },
+          animationType: 'fade'
+        });
+    });
+};
+
+export default OpenMainTabs;
+
 /*            
             {
               screen: 'tracksome.EmojiPicker',
@@ -54,41 +93,3 @@ const OpenMainTabs = () => {
               ]
             },
 */            
-            {
-              screen: 'tracksome.BuildCard',
-              label: 'Build Card',
-              title: 'New Card',
-              icon: sources[2]
-            },
-            {
-              screen: 'tracksome.ShowCard',
-              label: 'Show Card',
-              title: 'Show Card',
-              icon: sources[3]
-            },
-            
-          ],
-          
-          drawer: {
-            left: {
-              screen: 'tracksome.ConfigMenu'   // unique ID you registered
-            },
-            disableOpenGesture: false // optional, the drawer can be opened with a swipe 
-          },
-          
-          tabsStyle: {
-              tabBarButtonColor: 'orange'
-            },
-          appStyle: {
-            keepStyleAcrossPush: false,
-            tabBarBackgroundColor: AppColors.darkerColor,
-            tabBarButtonColor: AppColors.accentColor,
-            tabBarSelectedButtonColor: AppColors.hiliteColor,
-            tabBarTranslucent: false,
-          },
-          animationType: 'fade'
-        });
-    });
-};
-
-export default OpenMainTabs;
