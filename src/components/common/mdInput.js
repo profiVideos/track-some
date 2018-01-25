@@ -57,13 +57,13 @@ Padding below text input line: 4dp
           //inputContainerStyle={{ justifyContent: 'center', alignItems: 'center' }}
           labelColor={this.props.darkInput ? AppColors.accentColor : AppColors.mainLiteColor}
           color={this.props.darkInput ? AppColors.hiliteColor : 'black'}
-          fontSize={16}
-          marginLeft={2}
-          marginRight={2}
-          paddingBottom={this.props.dense ? 0 : 0}
-          paddingTop={this.props.dense ? 18 : 0}
-          labelPadding={this.props.dense ? 0 : 0}
-          inputContainerPadding={this.props.dense ? 0 : 0}
+          fontSize={17}
+          //marginLeft={2}
+          //marginRight={2}
+          paddingBottom={this.props.dense ? 0 : 2}
+          //paddingTop={this.props.dense ? 18 : 0}
+          labelPadding={this.props.dense ? 4 : 8}
+          inputContainerPadding={this.props.dense ? 4 : 8}
           labelActiveColor={this.props.darkInput ? AppColors.accentColor : AppColors.darkerColor}
           labelActiveScale={0.70}
           autoCorrect={false}
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     //marginBottom: 8
   },
   lightContainerStyle: {
-    //width: '90%',
+    width: '100%',
     //paddingLeft: 4,
     //paddingRight: 4,
     //borderColor: '#929292',

@@ -4,6 +4,8 @@ import {
   View,
   Alert,
   Image,
+  Modal,
+  Button,
   FlatList,
   Platform,
   TextInput,
@@ -83,6 +85,7 @@ class EditCategories extends PureComponent {
     toggled: false,
     hasloaded: false,
     itemsCount: 0,
+    modalVisible: false,    
     //removeAnim: new Animated.Value(1),
     //categoriesAnim: new Animated.Value(0),
     scrWidth: Dimensions.get('window').width,
@@ -96,7 +99,7 @@ class EditCategories extends PureComponent {
   }
 
   componentWillReceiveProps(nextProps) {
-    //console.log(this);
+    //console.log(nextProps);
     this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     // ... if the categories list is dirty (used) then we should save it ...
     if (nextProps.listUpdated) {
@@ -113,6 +116,7 @@ class EditCategories extends PureComponent {
           break;
         }
         case 'options': {
+          //this.openModal();  // ... opens the semi-transparent category edit screen ...
           this.optionsMenu.open();  // ... figure out how to toggle this menu with the "_" ...
           //if (this.optionsMenu._opened) this.optionsMenu.close();
           //else this.optionsMenu.open();
@@ -152,6 +156,8 @@ class EditCategories extends PureComponent {
     this.props.dispatch(updateCategory(key, name, desc, icon, selected));
   }
 
+//             { cancelable: false });
+
   onMenuOptionSelect = (value) => {
     switch (value) {
       case 'sortCats': {
@@ -161,17 +167,36 @@ class EditCategories extends PureComponent {
       }
       case 'deleteCats': {
         // ... first count how many items will be affected ...
-        // ... display notice to user - if none then just a notification ...
-        // ... otherwise prompt user to confirm the deletion ...
-        this.props.dispatch(deleteCategories());
+        const numSelected = this.countSelectedItems();
+        if (numSelected > 0) {
+          Alert.alert('Delete Selected Categories', 
+            `You are about to remove ${numSelected} categories.\nIs this what you wish to do?`,
+            [{ text: 'Cancel', style: 'cancel' },
+             { text: 'OK', onPress: () => this.props.dispatch(deleteCategories()) }]);
+        } else {
+          Alert.alert('Delete Selected Categories', 
+          'There were no categories selected for removal!');
+        }        
         break;
       }
       default: break;
     }  // ... switch ...
   }
 
+  openModal() {
+    this.setState({ modalVisible: true });
+  }
+
+  closeModal() {
+    this.setState({ modalVisible: false });
+  }
+
   menuReference = (menuId) => {
     this.optionsMenu = menuId;
+  }
+
+  countSelectedItems() {
+    return this.props.itemList.filter(item => item.selected === true).length;
   }
 
   itemNameChanged(text) {
@@ -232,6 +257,11 @@ react-native-image-resizer
             />
             {this.renderMoreFields()}fa-plus-circle
 
+      <Button
+          onPress={() => this.openModal()}
+          title="Open modal"
+      />
+
 */
 
   renderCategoryItem = ({ item }) => (
@@ -245,6 +275,27 @@ react-native-image-resizer
       onPressItem={this.onCatItemPress}
       onToggleItem={this.onCatItemToggle}
     />
+  );
+
+  renderModalEditScreen = () => (
+    <View style={styles.container}>
+      <Modal
+          visible={this.state.modalVisible}
+          transparent
+          animationType={'fade'}
+          onRequestClose={() => this.closeModal()}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.innerContainer}>
+            <Text>This is content inside of modal component</Text>
+            <Button
+                onPress={() => this.closeModal()}
+                title="Close modal"
+            />
+          </View>
+        </View>
+      </Modal>
+    </View>
   );
 
   renderOptionMenu = () => (
@@ -270,6 +321,9 @@ react-native-image-resizer
   //    );
   )
 
+/*
+*/
+
   render() {
     const showIconOrEmoji = (this.props.emojiCode === '' ?
       <Image style={styles.imageStyle} source={HappyGuy} /> :
@@ -282,6 +336,7 @@ react-native-image-resizer
       <MenuProvider>
         { this.renderOptionMenu() }
         <View style={styles.outerContainer}>
+          { this.renderModalEditScreen() }
           <View style={styles.statusBar}>
             <TouchableNativeFeedback onPress={this.onSelectEmoji}>
               <View 
@@ -324,21 +379,6 @@ react-native-image-resizer
       </MenuProvider>
     );
   }
-
-/*
-            <MDInput
-              label='Icon (optional)'
-              placeholder='A nice Icon for this category? '
-              value={this.state.itemIcon}
-              onChangeText={icon => this.itemIconChanged(icon)}
-            />
-          <Button
-            style={styles.button}
-            title="Add this Category"
-            onPress={this.addThisItem}
-          />
-*/
-
 }
 
 export default connect(mapStateToProps)(EditCategories);
@@ -368,6 +408,21 @@ const menuOptionsStyles = {
 };
 
 const styles = StyleSheet.create({
+
+  container: {
+    //flex: 1,
+    justifyContent: 'center',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.75)',
+  },
+  innerContainer: {
+    alignItems: 'center',
+    backgroundColor: 'white'
+  },
+
   inputContainer: {
     width: '65%',
     borderWidth: 1,

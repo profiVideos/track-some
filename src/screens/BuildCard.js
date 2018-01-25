@@ -3,12 +3,13 @@ import {
   View, 
   Text, 
   Image, 
-  Alert, 
+  Alert,
+  Picker,
+  FlatList, 
   StyleSheet, 
   ScrollView,
   TouchableNativeFeedback } from 'react-native';
 import ImagePicker from 'react-native-image-crop-picker';
-import { Button } from 'react-native-elements';
 import MDInput from '../components/common/mdInput';
 import selectCameraImage from '../images/Source-Camera.jpg';
 import selectFolderImage from '../images/Source-Folder.jpg';
@@ -27,7 +28,9 @@ const AppColors = {
 class BuildCard extends Component {
   static navigatorStyle = {
     drawUnderNavBar: false,
+    disabledButtonColor: '#333',
     screenBackgroundColor: AppColors.paperColor,
+    navBarButtonColor: AppColors.hiliteColor,
     navBarTextColor: AppColors.accentColor,
     navBarBackgroundColor: AppColors.mainDarkColor,
     navBarTranslucent: false
@@ -124,22 +127,34 @@ class BuildCard extends Component {
       </View>);
   }
 
+/*
+            <Button title="Get an Image to Crop" onPress={() => this.pickSingle(true)} />
+*/
+
   render() {
     return (
         <View style={styles.outerContainer}>
           <ScrollView>
 
           <View style={styles.cardContainer}>
-            <Text style={styles.normalText}>Markus is here!</Text>
-            <MDInput
-              style={styles.inputStyle}
-              label='Item Title'
-              placeholder='Please enter a name for this item ... '
-              //value={this.state.emailAddr}
-              //onChangeText={value => this.handleTextChange(value)}
-            />
-
-            <Button title="Get an Image to Crop" onPress={() => this.pickSingle(true)} />
+            <View style={styles.textContainer}>
+              <MDInput
+                style={styles.inputStyle}
+                label='Item Name'
+                placeholder='Please enter a name for this item ... '
+                //value={this.state.emailAddr}
+                //onChangeText={value => this.handleTextChange(value)}
+              />
+              <Picker
+                selectedValue={this.state.language}
+                onValueChange={(itemValue, itemIndex) => this.setState({ language: itemValue })}
+              >
+                <Picker.Item label="Java" value="java" />
+                <Picker.Item label="Pascal" value="pascal" />
+                <Picker.Item label="Informix" value="informix" />
+                <Picker.Item label="JavaScript" value="js" />
+              </Picker>              
+            </View>
           </View>
 
           <View style={styles.cardContainer}>
@@ -162,6 +177,12 @@ class BuildCard extends Component {
               </View>
             </View>
           </View>
+
+          <FlatList
+            data={this.props.itemList}
+            renderItem={this.renderCardItem}
+            ItemSeparatorComponent={this.itemSeparator}
+          />            
 
           </ScrollView>
         </View>
@@ -186,23 +207,39 @@ class BuildCard extends Component {
 
 const styles = StyleSheet.create({
   outerContainer: {
-    margin: 7,
-    marginBottom: 25,
+    flex: 1,
+    //margin: 7,
+    //marginBottom: 25,
     borderRadius: 2,
-    backgroundColor: 'white',
+    //backgroundColor: 'blue',
     shadowColor: '#121212',
     shadowOffset: { width: 1, height: 3 },
     shadowOpacity: 0.85,
     elevation: 2
   },
+  textContainer: {
+    width: '90%',
+    paddingTop: 5,
+    paddingBottom: 10,
+    //backgroundColor: 'transparent',
+    shadowColor: '#121212',
+    shadowOffset: { width: 1, height: 3 },
+    shadowOpacity: 0.85,
+    alignSelf: 'center',
+    elevation: 2,
+  },
   cardContainer: {
-    padding: 7,
+    //width: '90%',
+    //padding: 7,
+    backgroundColor: 'white',
     paddingBottom: 15,
     shadowColor: '#121212',
     shadowOffset: { width: 1, height: 3 },
     shadowOpacity: 0.85,
     elevation: 2,
+    justifyContent: 'center',
     alignItems: 'center'
+    //alignItems: 'center'
   },
   buttonRow: {
     width: '100%',

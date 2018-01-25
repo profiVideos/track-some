@@ -25,24 +25,28 @@ const OpenMainTabs = () => {
         Navigation.startTabBasedApp({
           tabs: [
             {
+              screen: 'tracksome.BuildCard',
+              label: 'Build Cards',
+              title: 'New Card',
+              icon: sources[2],
+              leftButtons: [{ icon: sources[4], id: 'menu' }],
+              rightButtons: [{ icon: sources[5], id: 'options', disabled: true  }]
+            },
+            {
+              screen: 'tracksome.ShowCard',
+              label: 'Show Cards',
+              title: 'Show Card List',
+              icon: sources[3],
+              leftButtons: [{ icon: sources[4], id: 'menu' }],
+              rightButtons: [{ icon: sources[5], id: 'options', disabled: true }]
+            },
+            {
               screen: 'tracksome.EditCategories',
               label: 'Categories',
               title: 'Maintain Categories',
               icon: sources[1],
               leftButtons: [{ icon: sources[4], id: 'menu' }],
               rightButtons: [{ icon: sources[5], id: 'options' }]
-            },
-            {
-              screen: 'tracksome.BuildCard',
-              label: 'Build Card',
-              title: 'New Card',
-              icon: sources[2]
-            },
-            {
-              screen: 'tracksome.ShowCard',
-              label: 'Show Card',
-              title: 'Show Card',
-              icon: sources[3]
             },
           ],
           drawer: {
