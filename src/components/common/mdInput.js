@@ -54,16 +54,16 @@ Padding below text input line: 4dp
         <TextField 
           //style={this.props.style}  ... doesn't appear to work ...
           //containerStyle={{ justifyContent: 'center', alignItems: 'center' }}
-          //inputContainerStyle={{ justifyContent: 'center', alignItems: 'center' }}
+          //inputContainerStyle={{ padding: 24, margin: 24 }}
           labelColor={this.props.darkInput ? AppColors.accentColor : AppColors.mainLiteColor}
-          color={this.props.darkInput ? AppColors.hiliteColor : 'black'}
-          fontSize={17}
+          color={this.props.darkInput ? AppColors.hiliteColor : '#333'}
+          fontSize={16}
           //marginLeft={2}
           //marginRight={2}
-          paddingBottom={this.props.dense ? 0 : 2}
-          //paddingTop={this.props.dense ? 18 : 0}
-          labelPadding={this.props.dense ? 4 : 8}
-          inputContainerPadding={this.props.dense ? 4 : 8}
+          paddingBottom={this.props.dense ? 2 : 4}
+          //paddingTop={this.props.dense ? 20 : 40}
+          //labelPadding={16}
+          //inputContainerPadding={this.props.dense ? 8 : 16}
           labelActiveColor={this.props.darkInput ? AppColors.accentColor : AppColors.darkerColor}
           labelActiveScale={0.70}
           autoCorrect={false}
@@ -128,6 +128,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '400',
     width: '100%',
+    margin: 12,
     //height: 40,
     shadowColor: '#121212',
     shadowOffset: { width: 1, height: 3 },

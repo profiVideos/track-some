@@ -8,7 +8,10 @@ import {
   FlatList, 
   StyleSheet, 
   ScrollView,
-  TouchableNativeFeedback } from 'react-native';
+  TouchableNativeFeedback 
+} from 'react-native';
+import { connect } from 'react-redux';
+//import Icon from 'react-native-vector-icons/FontAwesome';
 import ImagePicker from 'react-native-image-crop-picker';
 import MDInput from '../components/common/mdInput';
 import selectCameraImage from '../images/Source-Camera.jpg';
@@ -24,6 +27,13 @@ const AppColors = {
   mainDarkColor: '#590d0b',   // ... dark red (burgundy) ...
   darkerColor: '#325a66'      // ... dark cyan ....
 */
+
+const mapStateToProps = state => {
+  return {
+    catList: state.categories.itemList,
+    listUpdated: state.cards.cardsDirty
+  };
+};
 
 class BuildCard extends Component {
   static navigatorStyle = {
@@ -41,15 +51,26 @@ class BuildCard extends Component {
     this.state = {
       compress: 0.25,
       image: null,
-      images: null
+      images: null,
+      myCategories: []
     };
   }
 
-/*componentWillMount() {
-    console.log(this.props.Navigator);
+  componentDidMount() {
+    console.log(this.props);
     //console.log(`removed tmp image ${image.uri} from tmp directory`);
   }
-*/
+
+  componentWillReceiveProps(nextProps) {
+    //console.log(nextProps);
+    this.setState({ myCategories: nextProps.catList });
+    //const myCategories = nextProps.catList;
+    //this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
+    // ... if the categories list is dirty (used) then we should save it ...
+    //if (nextProps.listUpdated) {
+    //  this.props.dispatch(saveCategories(myCategories));
+    //}
+  }
 
   pickSingle(cropit, circular = false) {
     console.log('About to select a photo');
@@ -129,9 +150,16 @@ class BuildCard extends Component {
 
 /*
             <Button title="Get an Image to Crop" onPress={() => this.pickSingle(true)} />
+                onValueChange={(itemValue, itemIndex) => this.setState({ language: itemValue })}
 */
 
   render() {
+    if (this.state.myCategories.length > 0) {
+      console.log(this.state.myCategories);
+      const newValue = this.state.myCategories[0].name;
+      console.log('new Value: ', newValue);
+    }
+    const newValue = this.state.myCategories.length > 0 ? this.state.myCategories[0].name : null;
     return (
         <View style={styles.outerContainer}>
           <ScrollView>
@@ -145,13 +173,19 @@ class BuildCard extends Component {
                 //value={this.state.emailAddr}
                 //onChangeText={value => this.handleTextChange(value)}
               />
+              <View style={styles.pickerStyle}>
+                <Text style={styles.labelText}>Category</Text>
+                <View style={styles.pickerElements}>
+                  <Text>ICON</Text>
+                  <Text style={styles.pickerText}>Markus Griebling</Text>
+                  <Text style={{ position: 'absolute', marginLeft: '92%' }}>ARR</Text>
+                </View>
+              </View>
               <Picker
                 selectedValue={this.state.language}
-                onValueChange={(itemValue, itemIndex) => this.setState({ language: itemValue })}
+                onValueChange={(itemValue) => this.setState({ language: itemValue })}
               >
-                <Picker.Item label="Java" value="java" />
-                <Picker.Item label="Pascal" value="pascal" />
-                <Picker.Item label="Informix" value="informix" />
+                <Picker.Item label={newValue} value="java" />
                 <Picker.Item label="JavaScript" value="js" />
               </Picker>              
             </View>
@@ -191,6 +225,8 @@ class BuildCard extends Component {
 
 }
 
+export default connect(mapStateToProps)(BuildCard);
+
 /*
 
 , resizeMode: 'contain'
@@ -206,6 +242,26 @@ class BuildCard extends Component {
 */
 
 const styles = StyleSheet.create({
+  pickerElements: {
+    flexDirection: 'row',
+    backgroundColor: 'red',
+    alignItems: 'center',
+    //justifyContent: 'space-between'
+  },
+  labelText: {
+    fontSize: 11,
+    color: AppColors.mainLiteColor
+  },
+  pickerText: {
+    fontSize: 16,
+    color: 'rgba(0, 0, 0, .5)',
+    alignSelf: 'flex-start'
+  },
+  pickerStyle: {
+    borderColor: '#c3c3c3',
+    borderBottomWidth: 0.75,
+    paddingBottom: 6
+  },
   outerContainer: {
     flex: 1,
     //margin: 7,
@@ -287,8 +343,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   }
 });
-
-export default BuildCard;
 
 /*
     margin: 0,
