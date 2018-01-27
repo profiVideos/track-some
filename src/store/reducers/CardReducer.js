@@ -16,15 +16,21 @@ import {
 } from '../actions/actionTypes';
 
 const initialState = {
-  itemList: [],
+  itemList: [],   // ... array of cards + selected flag ...
   loading: false,
   cardsDirty: false,
   detailView: false,
   thisCard: {
-     key: '',
+    key: '',
     name: '',
     desc: '',
-    icon: ''
+    icon: '',
+    rating: 0,
+    category: '',
+    image: {},
+    barcode: {},
+    tags: [],
+    notes: []
   }
 };
 
@@ -71,11 +77,17 @@ const CardReducer = (state = initialState, action) => {
       return { 
         ...state,
         itemList: [{
-           key: action.payload.key,
-          name: action.payload.name,
-          desc: action.payload.desc,
-          icon: action.payload.icon,
-          selected: false },
+            key: action.payload.key,
+           name: action.payload.name,
+           desc: action.payload.desc,
+           icon: action.payload.icon,
+         rating: action.payload.rating,
+       category: action.payload.category,
+          image: {},
+        barcode: {},
+           tags: [],
+          notes: [],
+       selected: false },
           ...state.itemList
         ],
         cardsDirty: true
@@ -90,7 +102,9 @@ const CardReducer = (state = initialState, action) => {
               name: action.payload.name,
               desc: action.payload.desc,
               icon: action.payload.icon,
-              selected: action.payload.isSelected } : card)),
+            rating: action.payload.rating,
+          category: action.payload.category,
+          selected: action.payload.isSelected } : card)),
         cardsDirty: true 
       };
 
@@ -101,37 +115,58 @@ const CardReducer = (state = initialState, action) => {
           return card.key !== action.payload.key;
         }),
         thisCard: {
-           key: '',
+          key: '',
           name: '',
           desc: '',
-          icon: ''
-        }
+          icon: '',
+          rating: 0,
+          category: '',
+          image: {},
+          barcode: {},
+          tags: [],
+          notes: []
+        },
+        cardsDirty: true, 
+        detailView: false
       };
 
     case CLEAR_CARD:
       return {
         ...state,
         thisCard: {
-           key: '',
+          key: '',
           name: '',
           desc: '',
-          icon: ''
-        }
+          icon: '',
+          rating: 0,
+          category: '',
+          image: {},
+          barcode: {},
+          tags: [],
+          notes: []
+        },
+        detailView: false
       };
 
     case CURRENT_CARD:
       return {
         ...state,
-        detailView: true,
         cardFound: state.categories.find(card => {
           return card.key === action.payload.key;
         }),
         thisCard: {
-           key: this.cardFound.key,
+          key: this.cardFound.key,
           name: this.cardFound.name,
           desc: this.cardFound.desc,
-          icon: this.cardFound.icon
-        }
+          icon: this.cardFound.icon,
+          rating: this.cardFound.rating,
+          category: this.cardFound.category,
+          image: this.cardFound.image,
+          barcode: this.cardFound.barcode,
+          tags: this.cardFound.tags,
+          notes: this.cardFound.notes
+        },
+        detailView: true
       };
 
     case LOAD_CARDS_SUCCESS:
@@ -146,10 +181,16 @@ const CardReducer = (state = initialState, action) => {
         ...state,
         cardsDirty: false,   // ... list has been saved ...
         thisCard: {       // ... clear the current record ...
-           key: '',
+          key: '',
           name: '',
           desc: '',
-          icon: ''
+          icon: '',
+          rating: 0,
+          category: '',
+          image: {},
+          barcode: {},
+          tags: [],
+          notes: []
         }
       };
 

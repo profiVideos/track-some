@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-class CategoryItem extends React.PureComponent {
+class CardItem extends React.PureComponent {
   constructor(props) {
     super(props);
     //console.log(props);
@@ -57,12 +57,13 @@ class CategoryItem extends React.PureComponent {
       selected={item.selected}
       onPressItem={this.onCatItemPress}
     />
+          <Text style={styles.catIcon}>✏️</Text>
 */
     return (
       <View style={styles.outerWrapper}>
         <View style={styles.iconWrapper}>
           <TouchableOpacity onPress={this.onIconChange}>
-            <Text style={styles.catIcon}>{this.props.icon}</Text>
+            <Text style={styles.itemIcon}>{this.props.icon}</Text>
           </TouchableOpacity>
         </View>
         <TouchableNativeFeedback onPress={this.onTouchablePress}>
@@ -70,12 +71,25 @@ class CategoryItem extends React.PureComponent {
             <Text 
               ellipsizeMode='tail' 
               numberOfLines={1} 
-              style={styles.catName}
+              style={styles.itemName}
             >
               {this.props.name}
             </Text>
+            <Text>
+              {this.props.catDesc}
+            </Text>
           </View>
         </TouchableNativeFeedback>
+        <View style={styles.checkWrapper}>
+          <TouchableOpacity onPress={this.onToggleCheck}>
+            <Icon 
+              size={18}
+              name={'pencil'} 
+              style={styles.checkStyle} 
+              color={'#212191'} 
+            />            
+          </TouchableOpacity>
+        </View>
         <View style={styles.checkWrapper}>
           <TouchableOpacity onPress={this.onToggleCheck}>
             <Icon 
@@ -92,7 +106,7 @@ class CategoryItem extends React.PureComponent {
 
 }
 
-export default CategoryItem;
+export default CardItem;
 
 /*
         <View style={styles.container}>
@@ -112,7 +126,8 @@ const styles = StyleSheet.create({
   outerWrapper: {
     //flex: 1,
     width: '100%',
-    height: 45,
+    height: 60,
+    paddingRight: 5,
     flexDirection: 'row',
     backgroundColor: 'white',
     alignItems: 'center',
@@ -123,26 +138,26 @@ const styles = StyleSheet.create({
     borderLeftWidth: 1,
     borderRightWidth: 1,
     borderColor: '#b9b9b9',
-    padding: 3,
+    padding: 7,
     //marginLeft: 3,
-    paddingLeft: 10,
-    paddingRight: 10,
-    paddingBottom: 3,
+    //paddingLeft: 7,
+    //paddingRight: 7,
+    //paddingBottom: 3,
     backgroundColor: '#f5f5f5',  //#282828',
     justifyContent: 'center',
     alignItems: 'center'
   },
   infoWrapper: {
-    height: 45,
+    //height: 55,
     padding: 3,
     paddingLeft: 7,
-    width: '71%',
+    width: '70%',
     justifyContent: 'center',
     backgroundColor: 'white',
   },
   checkWrapper: {
     padding: 5,
-    width: '13%',
+    //width: '10%',
     backgroundColor: 'white',
     alignItems: 'center',
     justifyContent: 'center'
@@ -150,13 +165,13 @@ const styles = StyleSheet.create({
   checkStyle: {
     paddingTop: 3
   },
-  catName: {
+  itemName: {
     fontSize: 17,
     fontWeight: '500',
     color: '#333'
   },
-  catIcon: {
-    fontSize: 30,
+  itemIcon: {
+    fontSize: 36,
     color: 'black'
   }
 });

@@ -1,22 +1,44 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { 
   View, 
   Text, 
   Image, 
-  Alert,
+  //Alert,
+  //Modal,
   Picker,
+  //Button,
   FlatList, 
   StyleSheet, 
-  ScrollView,
+  //ScrollView,
+  TouchableOpacity,
   TouchableNativeFeedback 
 } from 'react-native';
 import { connect } from 'react-redux';
-//import Icon from 'react-native-vector-icons/FontAwesome';
+//import { bindActionCreators } from 'redux';
+//import IconIon from 'react-native-vector-icons/Ionicons';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import ImagePicker from 'react-native-image-crop-picker';
+import { UniqueId } from '../components/common/UniqueId';
 import MDInput from '../components/common/mdInput';
-import selectCameraImage from '../images/Source-Camera.jpg';
-import selectFolderImage from '../images/Source-Folder.jpg';
+import PictureFrame from '../images/PictureFrame.png';
+import ItemTags from '../images/ItemTags.png';
+import ItemNotes from '../images/ItemNotes.png';
+import SmileyFace from '../images/SmileyGlasses.png';
+import PhotoAdd from '../images/PhotoAdd.png';
+//import selectCameraImage from '../images/Source-Camera.jpg';
+//import selectFolderImage from '../images/Source-Folder.jpg';
 import AppColors from '../templates/appColors';
+import CardItem from '../components/CardItem';
+
+import { 
+  addCard, 
+  //updateCard,
+  //currentCard,
+  loadMyCards,
+  saveMyCards, 
+  //sortMyCards,
+  itemCardChanged
+} from '../store/actions';
 
 /*
 const AppColors = {
@@ -28,14 +50,25 @@ const AppColors = {
   darkerColor: '#325a66'      // ... dark cyan ....
 */
 
-const mapStateToProps = state => {
+const whatDoYouNeed = state => {
   return {
     catList: state.categories.itemList,
+    emojiCode: state.emojis.emojiCode,     // ... current emoji selected in PickEmojis ...
+    itemList: state.cards.itemList,
+    thisCard: state.cards.thisCard, 
     listUpdated: state.cards.cardsDirty
   };
 };
 
-class BuildCard extends Component {
+/*
+const whatShouldIDo = dispatch => {
+  return {
+    loadCardsList: dispatch(loadMyCards())
+  };
+};
+*/
+
+class BuildCard extends PureComponent {
   static navigatorStyle = {
     drawUnderNavBar: false,
     disabledButtonColor: '#333',
@@ -48,28 +81,95 @@ class BuildCard extends Component {
 
   constructor(props) {
     super(props);
+    this.onSelectEmoji = this.onSelectEmoji.bind(this);
     this.state = {
       compress: 0.25,
       image: null,
       images: null,
-      myCategories: []
+      getIcon4Card: false,
+      modalVisible: false,
+      //thisCategory: '',
+      pickerItems: []
     };
   }
 
-  componentDidMount() {
-    console.log(this.props);
+  componentWillMount() {
+    //console.log('inside build cards ...');
+    this.props.dispatch(loadMyCards());
     //console.log(`removed tmp image ${image.uri} from tmp directory`);
   }
 
   componentWillReceiveProps(nextProps) {
     //console.log(nextProps);
-    this.setState({ myCategories: nextProps.catList });
-    //const myCategories = nextProps.catList;
-    //this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
-    // ... if the categories list is dirty (used) then we should save it ...
-    //if (nextProps.listUpdated) {
-    //  this.props.dispatch(saveCategories(myCategories));
-    //}
+    //console.log(this.state);
+    if (nextProps.catList.length !== null) {
+      this.buildPickerItems(nextProps.catList);
+    }
+    if (this.props.emojiCode !== nextProps.emojiCode) {
+      if (this.state.getIcon4Card) {
+        this.props.dispatch(itemCardChanged('icon', nextProps.emojiCode));
+      }
+      // ... clean up and go home ...
+      this.setState({ getIcon4Card: false });
+      //console.log('A new Emoji Code was selected');
+    }
+    this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
+    // ... if the cards list is dirty (used) then we should save it ...
+    if (nextProps.listUpdated) {
+      const myCards = nextProps.itemList;
+      this.props.dispatch(saveMyCards(myCards));
+    }
+  }
+
+  onNavigatorEvent(event) {
+    if (event.type === 'NavBarButtonPress') { // this is the event type for button presses
+      switch (event.id) {
+        case 'menu': {
+          console.log('pressed the menu icon');
+          this.props.navigator.toggleDrawer({ side: 'left', animated: true });
+          break;
+        }
+        case 'options': {
+          //this.openModal();  // ... opens the semi-transparent category edit screen ...
+          //this.optionsMenu.open();  // ... figure out how to toggle this menu with the "_" ...
+          //if (this.optionsMenu._opened) this.optionsMenu.close();
+          //else this.optionsMenu.open();
+          console.log('pressed the options icon');
+          break;
+        }
+        default: break;
+      }  // ... switch ...
+    }
+  }
+
+  onChangeSelection(selection) {
+    if (selection === 'addCategory') {
+      console.log('Wants to add a category!');
+      this.props.navigator.showModal({
+        title: 'Add a new Category',
+        screen: 'tracksome.EditCategories'
+      });
+      //this.setState({ modalVisible: true });
+      //this.setState({ thisCategory: '' });
+    } else if (selection !== '') {
+      this.props.dispatch(itemCardChanged('category', selection));
+    }
+  }
+
+  onSelectEmoji() {
+    this.setState({ getIcon4Card: true });
+    this.props.navigator.showModal({
+       title: 'Select an Emoji', 
+      screen: 'tracksome.EmojiPicker' 
+    });
+  }
+
+  openModal() {
+    this.setState({ modalVisible: true });
+  }
+
+  closeModal() {
+    this.setState({ modalVisible: false });
   }
 
   pickSingle(cropit, circular = false) {
@@ -114,8 +214,28 @@ class BuildCard extends Component {
     });
   }
 
+  itemNameChanged(text) {
+    //console.log('New Text: ', text);
+    this.props.dispatch(itemCardChanged('name', text));
+  }
+
+  addThisCard = () => {
+    console.log('Inside Add This Card: ', this.props.thisCard.name);
+    if (this.props.thisCard.name !== '') {
+      this.props.dispatch(addCard(
+        UniqueId(),
+        this.props.thisCard.name,
+        this.props.thisCard.desc,
+        this.props.thisCard.icon,
+        this.props.thisCard.rating,
+        this.props.thisCard.category
+      ));
+    }
+  }
+
   doSomeFunction() {
-    Alert.alert('About to do something');
+    console.log('About to do something');
+    //Alert.alert('About to do something');
     /*
     this.props.navigator.setSubTitle({
       subtitle: 'Connecting...'
@@ -130,9 +250,81 @@ class BuildCard extends Component {
     */
   }
 
+  buildPickerItems(items) {
+    //this.state.pickerItems: '';
+    const catsList = items.map((item, index) => {
+      return <Picker.Item key={index} label={`${item.icon}  ${item.name}`} value={item.key} />;
+    });
+    //console.log('The built Object: ', catsList);
+    this.setState({ pickerItems: catsList }); 
+  }
+
+  itemSeparator = () => {
+    return (<View style={styles.separatorStyle} />);
+  };
+
+  findCategoryByKey(key) {
+    return this.props.catList.findIndex((item) => { return item.key === key; });
+  }
+
+  renderCatDescription(category) {
+    const indexPos = this.findCategoryByKey(category);
+    //console.log('Found @ ', indexPos);
+    if (indexPos >= 0) {
+      //const desc = `${this.props.catList[indexPos].icon} ${this.props.catList[indexPos].name}`;
+      //console.log(desc);
+      return `${this.props.catList[indexPos].icon} ${this.props.catList[indexPos].name}`;
+    }
+    return category;
+  }
+
   renderImage(image) {
     return <Image style={{ width: 308, height: 224, resizeMode: 'contain' }} source={image} />;
   }
+
+/*
+        <Text style={styles.pickerText}>Thumbnails go here</Text>
+*/
+
+  renderItemIcons() {
+    return (
+      <View style={styles.statusBar}>
+        <View style={styles.iconsPadding}>
+          <Text style={styles.emojiIcon}>{this.props.thisCard.icon}</Text>
+        </View>
+      </View>
+    );
+  }
+
+  renderActionIcons = () => (
+    <View style={styles.actionBar}>
+      <TouchableNativeFeedback onPress={this.doSomeFunction}>
+        <View style={styles.iconsPadding}>
+          <Image style={styles.imageIconStyle} source={PictureFrame} />
+        </View>
+      </TouchableNativeFeedback>
+      <TouchableNativeFeedback onPress={this.onSelectEmoji}>
+        <View style={styles.iconsPadding}>
+          <Image style={styles.imageIconStyle} source={SmileyFace} />
+        </View>
+      </TouchableNativeFeedback>
+      <TouchableNativeFeedback onPress={this.doSomeFunction}>
+        <View style={styles.iconsPadding}>
+          <Image style={styles.imageIconStyle} source={PhotoAdd} />
+        </View>
+      </TouchableNativeFeedback>
+      <TouchableNativeFeedback onPress={this.doSomeFunction}>
+        <View style={styles.iconsPadding}>
+          <Image style={styles.imageIconStyle} source={ItemNotes} />
+        </View>
+      </TouchableNativeFeedback>
+      <TouchableNativeFeedback onPress={this.doSomeFunction}>
+        <View style={styles.iconsPadding}>
+          <Image style={styles.imageIconStyle} source={ItemTags} />
+        </View>
+      </TouchableNativeFeedback>
+    </View>
+  );
 
   renderImageStats(image) {
     //const rightNow = new Date().toLocaleString('de-DE', { hour12: false });
@@ -148,49 +340,129 @@ class BuildCard extends Component {
       </View>);
   }
 
+  renderCardItem = ({ item }) => {
+    return (
+      <CardItem 
+        id={item.key}
+        icon={item.icon}
+        name={item.name}
+        desc={item.desc}
+        catDesc={this.renderCatDescription(item.category)}
+        checkIcon={item.selected ? 'check-square-o' : 'square-o'}
+        selected={item.selected}
+        onPressItem={this.onCardItemPress}
+        onToggleItem={this.onCardItemToggle}
+      />
+    );
+  }
+
 /*
             <Button title="Get an Image to Crop" onPress={() => this.pickSingle(true)} />
                 onValueChange={(itemValue, itemIndex) => this.setState({ language: itemValue })}
-*/
-
-  render() {
-    if (this.state.myCategories.length > 0) {
-      console.log(this.state.myCategories);
-      const newValue = this.state.myCategories[0].name;
-      console.log('new Value: ', newValue);
-    }
-    const newValue = this.state.myCategories.length > 0 ? this.state.myCategories[0].name : null;
-    return (
-        <View style={styles.outerContainer}>
-          <ScrollView>
-
-          <View style={styles.cardContainer}>
-            <View style={styles.textContainer}>
-              <MDInput
-                style={styles.inputStyle}
-                label='Item Name'
-                placeholder='Please enter a name for this item ... '
-                //value={this.state.emailAddr}
-                //onChangeText={value => this.handleTextChange(value)}
-              />
-              <View style={styles.pickerStyle}>
-                <Text style={styles.labelText}>Category</Text>
                 <View style={styles.pickerElements}>
                   <Text>ICON</Text>
                   <Text style={styles.pickerText}>Markus Griebling</Text>
                   <Text style={{ position: 'absolute', marginLeft: '92%' }}>ARR</Text>
                 </View>
+
+                <TouchableNativeFeedback onPress={this.addThisCard.bind(this)}>
+*/
+
+  render() {
+    //if (this.state.myCategories.length > 0) {
+    //  console.log(this.state.myCategories);
+    //  const newValue = this.state.myCategories[0].name;
+    //  console.log('new Value: ', newValue);
+    //}
+    //const newValue = this.state.myCategories.length > 0 ? this.state.myCategories[0].name : null;
+    return (
+        <View style={styles.outerContainer}>
+
+          <View style={styles.cardContainer}>
+            <View style={styles.textContainer}>
+              <View style={styles.topRowStyle}>
+                <MDInput
+                  style={styles.inputStyle}
+                  label='Item Name'
+                  placeholder='Please enter a name for this item ... '
+                  value={this.props.thisCard.name}
+                  onChangeText={text => this.itemNameChanged(text)}
+                />
+                <TouchableOpacity 
+                  disabled={this.props.thisCard.name === ''} 
+                  onPress={this.addThisCard.bind(this)}
+                >
+                  <View style={{ alignItems: 'center', padding: 5 }}>
+                    <Icon size={42} name='plus' color={AppColors.darkerColor} />
+                  </View>
+                </TouchableOpacity>
               </View>
-              <Picker
-                selectedValue={this.state.language}
-                onValueChange={(itemValue) => this.setState({ language: itemValue })}
-              >
-                <Picker.Item label={newValue} value="java" />
-                <Picker.Item label="JavaScript" value="js" />
-              </Picker>              
+              <View style={styles.pickerStyle}>
+                <View style={styles.pickerWrapper}>
+                  <Text style={styles.labelText}>Category</Text>
+                  <Picker 
+                    style={styles.pickerElements}
+                    selectedValue={this.props.thisCard.category}
+                    onValueChange={(value) => this.onChangeSelection(value)}
+                  >
+                    <Picker.Item label="Please choose a category ..." value="" />
+                    { this.state.pickerItems }
+                    <Picker.Item label="+ Add a new category" value="addCategory" />
+                  </Picker>              
+                </View>
+              </View>
             </View>
           </View>
 
+          <View style={styles.tagsBar}>
+            <Text style={styles.tagsText}>Tags go here</Text>
+          </View>
+          { this.renderItemIcons() }
+          { this.renderActionIcons() }
+
+          <FlatList
+            data={this.props.itemList}
+            renderItem={this.renderCardItem}
+            ItemSeparatorComponent={this.itemSeparator}
+          />            
+
+        </View>
+    );
+  }
+
+}
+
+export default connect(whatDoYouNeed)(BuildCard);
+
+/*
+          <FlatList
+            data={this.props.itemList}
+            renderItem={this.renderCardItem}
+            ItemSeparatorComponent={this.itemSeparator}
+          />            
+
+, resizeMode: 'contain'
+
+          { this.renderModalEditScreen() }
+
+  renderModalEditScreen = () => (
+    <View style={styles.container}>
+    <Modal
+      style={styles.container}
+      visible={this.state.modalVisible}
+      transparent
+      animationType={'slide'}
+      onRequestClose={() => this.closeModal()}
+    >
+      <View style={styles.modalContainer}>
+        <View style={styles.innerContainer}>
+          <EditCategories />
+          <Button onPress={() => this.closeModal()} title="Close modal" />
+        </View>
+      </View>
+    </Modal>
+    </View>
+  );
           <View style={styles.cardContainer}>
             <View style={styles.buttonRow}>
               <View style={styles.columnContainer}>         
@@ -212,25 +484,6 @@ class BuildCard extends Component {
             </View>
           </View>
 
-          <FlatList
-            data={this.props.itemList}
-            renderItem={this.renderCardItem}
-            ItemSeparatorComponent={this.itemSeparator}
-          />            
-
-          </ScrollView>
-        </View>
-    );
-  }
-
-}
-
-export default connect(mapStateToProps)(BuildCard);
-
-/*
-
-, resizeMode: 'contain'
-
 //      <ScrollView style={{ flex: 1 }}>
             <TouchableOpacity onPress={() => this.doSomeFunction} style={styles.photoContainer}>
           <View style={styles.cardContainer}>         
@@ -242,11 +495,66 @@ export default connect(mapStateToProps)(BuildCard);
 */
 
 const styles = StyleSheet.create({
-  pickerElements: {
+  emojiIcon: {
+    color: 'black',
+    fontSize: 38,
+    textAlign: 'center',
+    paddingBottom: 1
+  },  
+  iconsPadding: {
+    alignItems: 'center', 
+    padding: 5
+  },
+  topRowStyle: {
     flexDirection: 'row',
-    backgroundColor: 'red',
     alignItems: 'center',
-    //justifyContent: 'space-between'
+    justifyContent: 'space-between'
+  },
+  imageIconStyle: {
+    height: 52,
+    width: 52,
+    resizeMode: 'contain'
+  },
+  actionBar: {
+    height: 58,
+    flexDirection: 'row',
+    //paddingTop: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.25)',
+    width: '100%',
+    alignItems: 'center',
+    backgroundColor: AppColors.paperColor,  // ... light grey ...
+    justifyContent: 'space-around'
+  },
+  tagsBar: {
+    height: 30,
+    flexDirection: 'row',
+    //paddingTop: 5,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.25)',
+    width: '100%',
+    alignItems: 'center',
+    backgroundColor: AppColors.paperColor,  // ... light grey ...
+    justifyContent: 'space-around'
+  },
+  tagsText: {
+    fontSize: 14,
+    color: 'rgba(0, 0, 0, .5)',
+    //alignSelf: 'flex-start'
+  },
+  statusBar: {
+    width: '100%',
+    height: 64,
+    flexDirection: 'row',
+    padding: 2,
+    alignItems: 'center',
+    backgroundColor: AppColors.darkerColor,  // ... dark cyan ...
+    justifyContent: 'space-around'
+  },
+  pickerElements: {
+    marginLeft: -8,
+    color: 'blue',
+    height: 22
   },
   labelText: {
     fontSize: 11,
@@ -254,18 +562,32 @@ const styles = StyleSheet.create({
   },
   pickerText: {
     fontSize: 16,
-    color: 'rgba(0, 0, 0, .5)',
-    alignSelf: 'flex-start'
+    color: 'rgba(255, 255, 255, .5)',
+    //alignSelf: 'flex-start'
   },
   pickerStyle: {
     borderColor: '#c3c3c3',
     borderBottomWidth: 0.75,
-    paddingBottom: 6
+    paddingBottom: 5
+  },
+  container: {
+    //flex: 1,
+    justifyContent: 'center',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    //backgroundColor: 'grey',
+    borderRadius: 15,
+    backgroundColor: 'rgba(0,0,0,0.65)',
+  },
+  innerContainer: {
+    width: '90%',
+    alignSelf: 'center',
+    borderRadius: 15
   },
   outerContainer: {
     flex: 1,
-    //margin: 7,
-    //marginBottom: 25,
     borderRadius: 2,
     //backgroundColor: 'blue',
     shadowColor: '#121212',
@@ -273,9 +595,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.85,
     elevation: 2
   },
+  separatorStyle: {
+    backgroundColor: 'white',
+    width: '12%',
+    alignSelf: 'flex-end',
+    height: 1
+  },
   textContainer: {
     width: '90%',
-    paddingTop: 5,
+    paddingTop: 4,
     paddingBottom: 10,
     //backgroundColor: 'transparent',
     shadowColor: '#121212',
@@ -288,7 +616,7 @@ const styles = StyleSheet.create({
     //width: '90%',
     //padding: 7,
     backgroundColor: 'white',
-    paddingBottom: 15,
+    paddingBottom: 12,
     shadowColor: '#121212',
     shadowOffset: { width: 1, height: 3 },
     shadowOpacity: 0.85,
@@ -310,9 +638,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.85,
     resizeMode: 'contain'
   },
-  inputStyle: {
-    color: '#111111',
-    width: '100%'
+  inputStyle: {   // ... used to define the item name input width ...
+    width: '85%'
   },
   buttonText: {
     alignSelf: 'center',
@@ -338,7 +665,7 @@ const styles = StyleSheet.create({
     elevation: 2,
     alignItems: 'center'
   },
-  normalText: {
+  boldText: {   // ... not used ...
     color: 'black',
     fontWeight: '700',
   }

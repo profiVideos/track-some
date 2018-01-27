@@ -30,7 +30,7 @@ const OpenMainTabs = () => {
               title: 'New Card',
               icon: sources[2],
               leftButtons: [{ icon: sources[4], id: 'menu' }],
-              rightButtons: [{ icon: sources[5], id: 'options', disabled: true  }]
+              rightButtons: [{ icon: sources[5], id: 'options', disabled: true }]
             },
             {
               screen: 'tracksome.ShowCard',
@@ -38,7 +38,7 @@ const OpenMainTabs = () => {
               title: 'Show Card List',
               icon: sources[3],
               leftButtons: [{ icon: sources[4], id: 'menu' }],
-              rightButtons: [{ icon: sources[5], id: 'options', disabled: true }]
+              //rightButtons: [{ icon: sources[5], id: 'options', disabled: true }]
             },
             {
               screen: 'tracksome.EditCategories',
@@ -46,7 +46,7 @@ const OpenMainTabs = () => {
               title: 'Maintain Categories',
               icon: sources[1],
               leftButtons: [{ icon: sources[4], id: 'menu' }],
-              rightButtons: [{ icon: sources[5], id: 'options' }]
+              //rightButtons: [{ icon: sources[5], id: 'options' }]
             },
           ],
           drawer: {

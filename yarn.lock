@@ -4198,9 +4198,9 @@ react-native-material-textinput@^1.1.0:
   dependencies:
     prop-types "^15.5.10"
 
-react-native-navigation@^1.1.323:
-  version "1.1.323"
-  resolved "https://registry.yarnpkg.com/react-native-navigation/-/react-native-navigation-1.1.323.tgz#4c47d1ba6bbb5e9a4e8e29773f1a0f4e44ee925d"
+react-native-navigation@^1.1.354:
+  version "1.1.354"
+  resolved "https://registry.yarnpkg.com/react-native-navigation/-/react-native-navigation-1.1.354.tgz#27a8bb3fbd2cff5cfc27c6376c81dc45f7b567c2"
   dependencies:
     lodash "4.x.x"
 

@@ -16,7 +16,7 @@ import {
   DELETE_SELECTED_CARDS
 } from './actionTypes';
 
-export const itemTextChanged = (prop, value) => {
+export const itemCardChanged = (prop, value) => {
   return {
     type: CARD_EDIT_CHANGE,
     payload: { prop, value }
@@ -29,23 +29,23 @@ export const deleteCards = () => {
   };
 };
 
-export const sortCards = () => {
+export const sortMyCards = () => {
   return {
     type: SORT_CARDS
   };
 };
 
-export const addCard = (key, name, desc, icon) => {
+export const addCard = (key, name, desc, icon, rating, category) => {
   return {
     type: ADD_CARD,
-    payload: { key, name, desc, icon }
+    payload: { key, name, desc, icon, rating, category }
   };
 };
 
-export const updateCard = (key, name, desc, icon, isSelected) => {
+export const updateCard = (key, name, desc, icon, rating, category, isSelected) => {
   return {
     type: UPDATE_CARD,
-    payload: { key, name, desc, icon, isSelected }
+    payload: { key, name, desc, icon, rating, category, isSelected }
   };
 };
 
@@ -76,7 +76,7 @@ export const cardsSaveSuccess = () => {
   };
 };
 
-export const saveCards = (itemList) => {
+export const saveMyCards = (itemList) => {
   //console.log('Will SAVE! : ', itemList);
   return dispatch => {
     AsyncStorage.setItem(CARDS_STORAGE_KEY, JSON.stringify(itemList), (err, result) => {
@@ -94,7 +94,7 @@ export const cardsLoadSuccess = (jsonData) => {
   };
 };
 
-export const loadCards = () => {
+export const loadMyCards = () => {
   return dispatch => {
     AsyncStorage.getItem(CARDS_STORAGE_KEY, (errorMsg, jsonData) => {
       if (jsonData !== null) dispatch(cardsLoadSuccess(JSON.parse(jsonData)));

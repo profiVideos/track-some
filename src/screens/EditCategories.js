@@ -4,10 +4,10 @@ import {
   View,
   Alert,
   Image,
-  Modal,
-  Button,
+  //Modal,
+  //Button,
   FlatList,
-  Platform,
+  //Platform,
   TextInput,
   Dimensions,
   //Animated,
@@ -22,7 +22,8 @@ import {
   MenuProvider
 } from 'react-native-popup-menu';
 import { connect } from 'react-redux';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import IconFa from 'react-native-vector-icons/FontAwesome';
+import IconIon from 'react-native-vector-icons/Ionicons';
 import HappyGuy from '../images/1f603.png';
 
 //import EmojiPicker from 'react-native-simple-emoji-picker';  ... 1) broken ...
@@ -84,8 +85,7 @@ class EditCategories extends PureComponent {
   state = {
     toggled: false,
     hasloaded: false,
-    itemsCount: 0,
-    modalVisible: false,    
+    modalVisible: false,
     //removeAnim: new Animated.Value(1),
     //categoriesAnim: new Animated.Value(0),
     scrWidth: Dimensions.get('window').width,
@@ -93,14 +93,14 @@ class EditCategories extends PureComponent {
     viewMode: this.scrHeight > this.scrWidth ? 'portrait' : 'landscape'
   }
 
-
   componentWillMount() {
+    //console.log('inside edit categories ...');
     this.props.dispatch(loadCategories());
   }
 
   componentWillReceiveProps(nextProps) {
     //console.log(nextProps);
-    this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
+    //this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     // ... if the categories list is dirty (used) then we should save it ...
     if (nextProps.listUpdated) {
       const myCategories = nextProps.itemList;
@@ -147,7 +147,7 @@ class EditCategories extends PureComponent {
 
   onCatItemPress(key, name, desc, icon, selected) {
     // ... update this item in the categories list ...
-    console.log('An item was pressed.', key, ' Name: ', name);
+    console.log('An item was pressed.', key, ' Name: ', name, selected);
     // ... open a popup window to allow this item to be changed ...
     //this.props.dispatch(updateCategory(key, name, desc, icon, selected));
   }
@@ -156,7 +156,6 @@ class EditCategories extends PureComponent {
     this.props.dispatch(updateCategory(key, name, desc, icon, selected));
   }
 
-//             { cancelable: false });
 
   onMenuOptionSelect = (value) => {
     switch (value) {
@@ -173,6 +172,7 @@ class EditCategories extends PureComponent {
             `You are about to remove ${numSelected} categories.\nIs this what you wish to do?`,
             [{ text: 'Cancel', style: 'cancel' },
              { text: 'OK', onPress: () => this.props.dispatch(deleteCategories()) }]);
+            //{ cancelable: false });
         } else {
           Alert.alert('Delete Selected Categories', 
           'There were no categories selected for removal!');
@@ -182,7 +182,7 @@ class EditCategories extends PureComponent {
       default: break;
     }  // ... switch ...
   }
-
+/*
   openModal() {
     this.setState({ modalVisible: true });
   }
@@ -190,7 +190,7 @@ class EditCategories extends PureComponent {
   closeModal() {
     this.setState({ modalVisible: false });
   }
-
+*/
   menuReference = (menuId) => {
     this.optionsMenu = menuId;
   }
@@ -220,7 +220,6 @@ class EditCategories extends PureComponent {
         this.props.currentCat.name,
         this.props.currentCat.desc,
         this.props.emojiCode));
-      this.setState({ itemsCount: this.state.itemsCount + 1 });
     }
   }
 
@@ -256,12 +255,6 @@ react-native-image-resizer
               onPress={this.toggleDescription} 
             />
             {this.renderMoreFields()}fa-plus-circle
-
-      <Button
-          onPress={() => this.openModal()}
-          title="Open modal"
-      />
-
 */
 
   renderCategoryItem = ({ item }) => (
@@ -276,7 +269,7 @@ react-native-image-resizer
       onToggleItem={this.onCatItemToggle}
     />
   );
-
+/*
   renderModalEditScreen = () => (
     <View style={styles.container}>
       <Modal
@@ -297,46 +290,32 @@ react-native-image-resizer
       </Modal>
     </View>
   );
-
-  renderOptionMenu = () => (
-    //if (!this.state.canEdit) return null;
-    //console.log('inside render option menu!');
-    //      <Menu onSelect={value => this.onMenuOptionSelect(value)} ref={this.menuReference}>
-    //      <Menu onSelect={value => this.onMenuOptionSelect(value)} ref={this.menuReference}>
-    //return (
-        <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
-          <Menu onSelect={value => this.onMenuOptionSelect(value)} ref={this.menuReference}>
-            <MenuTrigger>
-              <View style={styles.menuTrigger} />
-            </MenuTrigger>
-            <MenuOptions customStyles={menuOptionsStyles}>
-              <MenuOption value={0} disabled>
-                <Text style={styles.menuTitle}>Category Options</Text>
-              </MenuOption>
-              <MenuOption value={'sortCats'} text='Sort by Category Name' />
-              <MenuOption value={'deleteCats'} text='Delete All Selected' />
-            </MenuOptions>
-          </Menu>
-        </View>
-  //    );
-  )
-
-/*
 */
+  renderOptionMenu = () => (
+    <Menu onSelect={value => this.onMenuOptionSelect(value)} ref={this.menuReference}>
+      <MenuTrigger>
+        <View style={{ width: 20, alignItems: 'center' }}>
+          <IconIon name='md-more' size={24} color={AppColors.darkerColor} />
+        </View>
+      </MenuTrigger>
+      <MenuOptions customStyles={menuOptionsStyles}>
+        <MenuOption value={0} disabled>
+          <Text style={styles.menuTitle}>Category Options</Text>
+        </MenuOption>
+        <MenuOption value={'sortCats'} text='Sort by Category Name' />
+        <MenuOption value={'deleteCats'} text='Delete All Selected' />
+      </MenuOptions>
+    </Menu>
+  )
 
   render() {
     const showIconOrEmoji = (this.props.emojiCode === '' ?
       <Image style={styles.imageStyle} source={HappyGuy} /> :
       <Text style={styles.iconPreview}>{this.props.emojiCode}</Text>
     );
-    //console.log(this.props.itemList);
-    //const backColor = this.props.selected ? '#fff8b2' : 'white';
-    //const buttonType = (Platform.OS === 'android' ? 0 : 64);
     return (
       <MenuProvider>
-        { this.renderOptionMenu() }
         <View style={styles.outerContainer}>
-          { this.renderModalEditScreen() }
           <View style={styles.statusBar}>
             <TouchableNativeFeedback onPress={this.onSelectEmoji}>
               <View 
@@ -346,8 +325,8 @@ react-native-image-resizer
                 justifyContent: 'center' }}
               >
                 { showIconOrEmoji }
-                <Icon 
-                  size={30}
+                <IconFa 
+                  size={28}
                   name='plus' 
                   style={styles.overlayPlus} 
                   color={'white'} 
@@ -366,15 +345,18 @@ react-native-image-resizer
               />
             </View>
             <MDButton
-              iconSize={50} iconColor='#333' iconName='add' 
+              iconSize={48} iconColor='#333' iconName='add' 
               onPress={this.addThisItem.bind(this)} 
             />
+            <View style={styles.menuTrigger}>
+              { this.renderOptionMenu() }
+            </View>
           </View>
           <FlatList
             data={this.props.itemList}
             renderItem={this.renderCategoryItem}
             ItemSeparatorComponent={this.itemSeparator}
-          />            
+          />
         </View>
       </MenuProvider>
     );
@@ -385,62 +367,29 @@ export default connect(mapStateToProps)(EditCategories);
 
 const menuOptionsStyles = {
   optionsContainer: {
-    //backgroundColor: 'green',
-    //padding: 5,
     width: 175
   },
-  /*
-  optionsWrapper: {
-    backgroundColor: 'red',
-  },
-  optionWrapper: {
-    backgroundColor: 'yellow',
-    margin: 5,
-  },
-  optionTouchable: {
-    underlayColor: 'gold',
-    activeOpacity: 70,
-  },
-  */
   optionText: {
     color: 'blue',
   },
 };
 
 const styles = StyleSheet.create({
-
-  container: {
-    //flex: 1,
-    justifyContent: 'center',
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.75)',
-  },
-  innerContainer: {
-    alignItems: 'center',
-    backgroundColor: 'white'
-  },
-
   inputContainer: {
-    width: '65%',
+    width: '60%',
     borderWidth: 1,
     borderColor: '#979797',
     borderRadius: 20,
-    //paddingTop: 4,
-    paddingLeft: 12,
-    paddingRight: 12,
+    paddingLeft: 10,
+    paddingRight: 10,
     backgroundColor: 'white',
     justifyContent: 'center',
-    height: 40
+    height: 36
   },
   menuTrigger: {
-    flex: 1,
-    justifyContent: 'flex-end'
+    padding: 3
   },
   separatorStyle: {
-    //flex: 1,
     backgroundColor: 'white',
     width: '12%',
     alignSelf: 'flex-end',
@@ -449,27 +398,23 @@ const styles = StyleSheet.create({
   textInputStyle: {
     color: '#121212',
     padding: 3,
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '300'
   },  
   overlayPlus: {
     elevation: 2,
-    marginTop: -36,
-    //paddingRight: 5,
-    marginBottom: 3
+    marginTop: -24,
   },
   iconPreview: {
     color: 'black',
-    fontSize: 34,
+    fontSize: 32,
     textAlign: 'center',
-    padding: 5
+    marginTop: 4,
   },
   imageStyle: {
-    height: 46,
-    width: 46,
-    margin: 5,
-    paddingBottom: 3,
-    //borderRadius: 5,
+    height: 40,
+    width: 40,
+    marginTop: 10,
     shadowColor: '#121212',
     shadowOffset: { width: 1, height: 3 },
     shadowOpacity: 0.85,
@@ -477,10 +422,8 @@ const styles = StyleSheet.create({
   },
   statusBar: {
     elevation: 3,
-    height: 50, //48,
+    height: 44,
     flexDirection: 'row',
-    //marginBottom: 3,
-    padding: (Platform.OS === 'android' ? 3 : 3),
     alignItems: 'center',
     backgroundColor: AppColors.accentColor,  // ... medium orange ...
     justifyContent: 'space-around',
@@ -489,22 +432,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 3
   },
-/*  
-  rowInputBar: {
-    width: '100%',
-    flexDirection: 'row',
-    padding: (Platform.OS === 'android' ? 5 : 5),
-    alignItems: 'center',
-    //margin: 3,
-    backgroundColor: AppColors.accentColor,  // ... medium orange ...
-    justifyContent: 'space-around'
-  },
-*/
-
   outerContainer: {
     flex: 1,
-    //padding: 5,
-    //borderRadius: 2,
     backgroundColor: AppColors.paperColor
   }
 });
@@ -523,5 +452,4 @@ const styles = StyleSheet.create({
       <View style={this.state.itemsLoaded ? null : styles.buttonContainer}>
         {content}
       </View>
-
 */

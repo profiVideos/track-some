@@ -50,9 +50,13 @@ Padding below text input line: 4dp
     const ulineColor = this.props.darkInput ? 'gray' : '#c3c3c3';
     const ulineActiveColor = this.props.darkInput ? AppColors.accentColor : AppColors.accentColor;
     return (
-      <View style={this.props.darkInput ? styles.darkContainerStyle : styles.lightContainerStyle}>
+      <View 
+        style={this.props.darkInput ? 
+          [styles.darkContainerStyle, this.props.style] : 
+          [styles.lightContainerStyle, this.props.style]}
+      >
         <TextField 
-          //style={this.props.style}  ... doesn't appear to work ...
+          //style={this.props.style}  // ... doesn't appear to work ...
           //containerStyle={{ justifyContent: 'center', alignItems: 'center' }}
           //inputContainerStyle={{ padding: 24, margin: 24 }}
           labelColor={this.props.darkInput ? AppColors.accentColor : AppColors.mainLiteColor}
@@ -98,7 +102,7 @@ const styles = StyleSheet.create({
     //marginBottom: 8
   },
   lightContainerStyle: {
-    width: '100%',
+    //width: '100%',
     //paddingLeft: 4,
     //paddingRight: 4,
     //borderColor: '#929292',
