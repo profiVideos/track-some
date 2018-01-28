@@ -3,10 +3,10 @@ import {
   View, 
   Text, 
   Image, 
-  //Alert,
-  //Modal,
+  Alert,
+  Modal,
   Picker,
-  //Button,
+  Button,
   FlatList, 
   StyleSheet, 
   //ScrollView,
@@ -29,6 +29,7 @@ import PhotoAdd from '../images/PhotoAdd.png';
 //import selectFolderImage from '../images/Source-Folder.jpg';
 import AppColors from '../templates/appColors';
 import CardItem from '../components/CardItem';
+import TagEdit from '../components/TagEdit';
 
 import { 
   addCard, 
@@ -82,10 +83,13 @@ class BuildCard extends PureComponent {
   constructor(props) {
     super(props);
     this.onSelectEmoji = this.onSelectEmoji.bind(this);
+    this.openModal = this.openModal.bind(this);
+    //this.openTagsEditScreen = this.openTagsEditScreen.bind(this);
     this.state = {
       compress: 0.25,
       image: null,
       images: null,
+      tagName: 'Markie',
       getIcon4Card: false,
       modalVisible: false,
       //thisCategory: '',
@@ -94,8 +98,8 @@ class BuildCard extends PureComponent {
   }
 
   componentWillMount() {
-    //console.log('inside build cards ...');
-    this.props.dispatch(loadMyCards());
+    console.log('inside build cards ...');
+    //this.props.dispatch(loadMyCards());
     //console.log(`removed tmp image ${image.uri} from tmp directory`);
   }
 
@@ -164,7 +168,33 @@ class BuildCard extends PureComponent {
     });
   }
 
+  itemNameChanged(text) {
+    //console.log('New Text: ', text);
+    this.props.dispatch(itemCardChanged('name', text));
+  }
+
+  fabClicked() {
+    Alert.alert('Button Pressed');
+  }
+
+  displaySnackBarMsg(msg) {
+    this.props.navigator.showSnackbar({
+      text: msg,  //'This option is in development',
+      actionText: 'Stay Tuned', // optional
+      actionId: 'not sure about how to use this', // Mandatory if you've set actionText
+      actionColor: 'white', // optional
+      textColor: AppColors.accentColor, // optional
+      backgroundColor: '#333', // optional
+      duration: 'long' // default is `short`. Available options: short, long, indefinite
+    });
+  }
+
+/*
+  renderModalEditScreen = () => (
+*/
+
   openModal() {
+    console.log('About to open the Modal window ...');
     this.setState({ modalVisible: true });
   }
 
@@ -212,11 +242,6 @@ class BuildCard extends PureComponent {
       console.log(e);
       //Alert.alert(e.message ? e.message : e);
     });
-  }
-
-  itemNameChanged(text) {
-    //console.log('New Text: ', text);
-    this.props.dispatch(itemCardChanged('name', text));
   }
 
   addThisCard = () => {
@@ -318,13 +343,19 @@ class BuildCard extends PureComponent {
           <Image style={styles.imageIconStyle} source={ItemNotes} />
         </View>
       </TouchableNativeFeedback>
-      <TouchableNativeFeedback onPress={this.doSomeFunction}>
+      <TouchableNativeFeedback onPress={this.openModal}>
         <View style={styles.iconsPadding}>
           <Image style={styles.imageIconStyle} source={ItemTags} />
         </View>
       </TouchableNativeFeedback>
     </View>
   );
+
+/*
+      <TouchableNativeFeedback onPress={this.openTagsEditScreen}>
+
+*/
+
 
   renderImageStats(image) {
     //const rightNow = new Date().toLocaleString('de-DE', { hour12: false });
@@ -356,7 +387,30 @@ class BuildCard extends PureComponent {
     );
   }
 
+  renderTagEditScreen() {
+    return (
+    <View style={styles.container}>
+      <Modal
+          visible={this.state.modalVisible}
+          transparent
+          animationType={'fade'}
+          onRequestClose={() => this.closeModal()}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.innerContainer}>
+            <TagEdit
+              tagName={this.state.tagName} 
+              onClosePress={() => this.closeModal()} 
+            />
+          </View>
+        </View>
+      </Modal>
+    </View>
+    );
+  }
+
 /*
+            <Button onPress={() => this.closeModal()} title="Close modal" />
             <Button title="Get an Image to Crop" onPress={() => this.pickSingle(true)} />
                 onValueChange={(itemValue, itemIndex) => this.setState({ language: itemValue })}
                 <View style={styles.pickerElements}>
@@ -414,17 +468,13 @@ class BuildCard extends PureComponent {
             </View>
           </View>
 
+          { this.renderTagEditScreen() }
+
           <View style={styles.tagsBar}>
             <Text style={styles.tagsText}>Tags go here</Text>
           </View>
           { this.renderItemIcons() }
           { this.renderActionIcons() }
-
-          <FlatList
-            data={this.props.itemList}
-            renderItem={this.renderCardItem}
-            ItemSeparatorComponent={this.itemSeparator}
-          />            
 
         </View>
     );
@@ -577,14 +627,14 @@ const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
-    //backgroundColor: 'grey',
-    borderRadius: 15,
+    alignItems: 'center',
     backgroundColor: 'rgba(0,0,0,0.65)',
   },
   innerContainer: {
     width: '90%',
-    alignSelf: 'center',
-    borderRadius: 15
+    //alignSelf: 'center',
+    //backgroundColor: 'white',
+    //borderRadius: 12
   },
   outerContainer: {
     flex: 1,
