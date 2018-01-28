@@ -7,11 +7,12 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
-  TouchableHighlight,
+  //TouchableHighlight,
   //TouchableNativeFeedback
 } from 'react-native';
 import AppColors from '../templates/appColors';
 import ItemTags from '../images/ItemTags.png';
+import RenderTags from './RenderTags';
 
 //const itemHeight = 65;  // ... used to calculate faster scrolls ...
 
@@ -26,62 +27,54 @@ class TagEdit extends PureComponent {
     super(props);
     this.state = {
       didSave: false,
-      tags: [
-        'Runny Nose',
-        'Pink Elephants',
-        'White Rabbits',
-        'Sexy Babes',
-        'Big Boobs',
-        'Huge Cock'
-      ]
     };
   }
 
-  onPressItem = () => { 
-    this.props.onTapItem(this.props.emojiName, this.props.emojiString);
+  onPressTag = (tag) => {
+    console.log('Tag inside TagEdit was clicked: ', tag); 
+    //this.props.onTapItem(this.props.emojiName, this.props.emojiString);
   } 
 
-  onLongPressItem = () => { 
-    this.props.onLongPress(this.props.emojiKey);
-  } 
-
+/*
   addThisTag() {
     console.log('Add this tag ...');
   }
-
+*/
 /*
+  onLongPressItem = () => { 
+    this.props.onLongPress(this.props.emojiKey);
+  } 
       <TouchableNativeFeedback onPress={this.onPressItem} onLongPress={this.onLongPressItem}>
       </TouchableNativeFeedback>
 
+              onTagChange={text => this.itemTagChanged(text)} 
+
 */
 
-  renderTags(myTags) {
-    const myTagsContent = myTags.map((tag, i) => {
-      return (
-        <TouchableHighlight 
-          key={i} 
-          onPress={() => { this.removeThisTag(tag); }} 
-          style={styles.tagItem} 
-          underlayColor='#f1f1f1'
-        >
-          <View key={i}>
-            <Text style={styles.textValue}>{ tag }</Text>
-          </View> 
-        </TouchableHighlight>
-      );                          
-    });
-    return myTagsContent;
+  renderItemTags() {
+    const renderThis = (this.props.tagsList.length === 0 ? ( 
+      <View style={styles.tagsEmpty}>
+        <Text style={styles.sadFace}>😢</Text>
+        <Text style={styles.bigMessage}>You have no tags for this item yet!</Text>
+        <Text style={styles.bigMessage}>Go ahead and enter your first one below.</Text>
+      </View>) : (
+      <View style={styles.tagsContainer}>
+        <RenderTags 
+          myTags={this.props.tagsList} 
+          onPressTag={this.props.onTagRemove} 
+        />
+      </View>));
+    return renderThis;
   }
 
   render() {
-    console.log(this.state.tags);
+    //console.log(this.state.tags);
     //console.log(this.renderTags(this.state.tags));
     //const renderBadge = this.props.canEdit && this.props.isChecked ?
     //  (<View style={[styles.extraInfo, { backgroundColor: 'blue' }]}>
     //     <Icon name='check' style={styles.badgeStyle} />
     //   </View>) : null;
     //const backColor = this.state.selected ? '#fff8b2' : 'white';
-
     return (
       <View style={styles.outerContainer}>
 
@@ -97,9 +90,7 @@ class TagEdit extends PureComponent {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.tagsContainer}>
-          { this.renderTags(this.state.tags) }
-        </View>
+        { this.renderItemTags() }
 
         <View style={styles.statusBar}>
           <View style={styles.inputContainer}>
@@ -110,12 +101,12 @@ class TagEdit extends PureComponent {
               underlineColorAndroid={'transparent'}
               placeholder={'A new tag ... '}
               value={this.props.tagName}
-              //onChangeText={(text) => this.itemNameChanged(text)}
+              onChangeText={this.props.onTagChange}
             />
           </View>
           <TouchableOpacity 
             //disabled={this.props.thisTag.name === ''} 
-            onPress={this.addThisTag.bind(this)}
+            onPress={this.props.onTagAdd} 
           >
             <View style={{ alignItems: 'center', marginLeft: 5 }}>
               <Icon size={28} name='plus' color={AppColors.darkerColor} />
@@ -132,8 +123,6 @@ class TagEdit extends PureComponent {
 export default TagEdit;
 
 /*
-
-
           <View style={styles.tagItem}>
             <Text style={styles.textValue}>
               Jumping Jacks
@@ -182,19 +171,42 @@ export default TagEdit;
 */
 
 const styles = StyleSheet.create({
+  tagsEmpty: {
+    //height: 200,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 20,
+    paddingBottom: 30,
+    backgroundColor: AppColors.paperColor
+  },
+  bigMessage: {
+    fontSize: 16,
+    fontStyle: 'italic',
+    textAlign: 'center',
+    color: 'rgba(0,0,0,0.40)'
+  },
+  sadFace: {
+    fontSize: 72,
+    color: 'rgba(0,0,0,0.40)'
+  },
   tagsContainer: {
     flexDirection: 'row',
     backgroundColor: '#eee',
     padding: 5,
     flexWrap: 'wrap',    
   },
+  smallDot: {
+    fontSize: 5,
+    color: '#ccc',
+    paddingRight: 3,
+  },
   tagItem: {
     elevation: 1,
     //borderRadius: 2,
     padding: 3,
-    paddingLeft: 10,
-    paddingRight: 25,
-    margin: 4,
+    paddingLeft: 4,
+    paddingRight: 6,
+    margin: 3,
     borderTopLeftRadius: 12,
     borderBottomLeftRadius: 12,
     borderRightWidth: 1,
@@ -222,8 +234,8 @@ const styles = StyleSheet.create({
     height: 38,
     flexDirection: 'row',
     alignItems: 'center',
-    borderBottomLeftRadius: 12,
-    borderBottomRightRadius: 12,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
     backgroundColor: AppColors.accentColor,  // ... medium orange ...
     justifyContent: 'center',
     shadowColor: '#121212',
@@ -232,8 +244,8 @@ const styles = StyleSheet.create({
     shadowRadius: 3
   },
   outerContainer: {
-    borderRadius: 12,
-    backgroundColor: 'blue'
+    borderRadius: 8,
+    //backgroundColor: 'blue'
   },
   inputContainer: {
     width: '70%',
@@ -255,8 +267,8 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     backgroundColor: AppColors.mainDarkColor,
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
     padding: 12,
     paddingTop: 8,
     paddingBottom: 8,
@@ -293,10 +305,4 @@ const styles = StyleSheet.create({
     fontSize: 32,
     textAlign: 'center'
   },
-  textValue: {
-    color: 'black',
-    fontSize: 11,
-    fontWeight: 'bold',
-    textAlign: 'center'
-  }
 });

@@ -60,7 +60,7 @@ Padding below text input line: 4dp
           //containerStyle={{ justifyContent: 'center', alignItems: 'center' }}
           //inputContainerStyle={{ padding: 24, margin: 24 }}
           labelColor={this.props.darkInput ? AppColors.accentColor : AppColors.mainLiteColor}
-          color={this.props.darkInput ? AppColors.hiliteColor : '#333'}
+          color={this.props.darkInput ? AppColors.hiliteColor : AppColors.darkerColor}
           fontSize={16}
           //marginLeft={2}
           //marginRight={2}

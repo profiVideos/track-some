@@ -6,7 +6,7 @@ import {
   Alert,
   Modal,
   Picker,
-  Button,
+  //Button,
   FlatList, 
   StyleSheet, 
   //ScrollView,
@@ -30,9 +30,11 @@ import PhotoAdd from '../images/PhotoAdd.png';
 import AppColors from '../templates/appColors';
 import CardItem from '../components/CardItem';
 import TagEdit from '../components/TagEdit';
+import RenderTags from '../components/RenderTags';
 
 import { 
-  addCard, 
+  addCard,
+  addCardTag, 
   //updateCard,
   //currentCard,
   loadMyCards,
@@ -84,6 +86,7 @@ class BuildCard extends PureComponent {
     super(props);
     this.onSelectEmoji = this.onSelectEmoji.bind(this);
     this.openModal = this.openModal.bind(this);
+    //this.addTag2Card = this.addTag2Card.bind(this);
     //this.openTagsEditScreen = this.openTagsEditScreen.bind(this);
     this.state = {
       compress: 0.25,
@@ -93,13 +96,29 @@ class BuildCard extends PureComponent {
       getIcon4Card: false,
       modalVisible: false,
       //thisCategory: '',
-      pickerItems: []
+      pickerItems: [],
     };
   }
 
+/*
+      tags: [
+        'Squirting',
+        'Blowjob',
+        'Sweet Gash',
+        'Ass Fuck',
+        'Cum Swapping',
+        'Doggy Style',
+        'Cow Girl',
+        'Deepthroat',
+        'Big Boobs',
+        'Shaved Pussy',
+        'Massive Cock'
+      ]
+*/
+
   componentWillMount() {
     console.log('inside build cards ...');
-    //this.props.dispatch(loadMyCards());
+    this.props.dispatch(loadMyCards());
     //console.log(`removed tmp image ${image.uri} from tmp directory`);
   }
 
@@ -122,6 +141,7 @@ class BuildCard extends PureComponent {
     if (nextProps.listUpdated) {
       const myCards = nextProps.itemList;
       this.props.dispatch(saveMyCards(myCards));
+      this.displaySnackBarMsg('Your new card has been saved.');
     }
   }
 
@@ -153,8 +173,6 @@ class BuildCard extends PureComponent {
         title: 'Add a new Category',
         screen: 'tracksome.EditCategories'
       });
-      //this.setState({ modalVisible: true });
-      //this.setState({ thisCategory: '' });
     } else if (selection !== '') {
       this.props.dispatch(itemCardChanged('category', selection));
     }
@@ -173,6 +191,15 @@ class BuildCard extends PureComponent {
     this.props.dispatch(itemCardChanged('name', text));
   }
 
+  itemTagChanged(text) {
+    //console.log('New Tag Value: ', text);
+    this.props.dispatch(itemCardChanged('tag', text));
+  }
+
+  itemTagRemove(tag) {
+    console.log('MASTER: About to remove tag: ', tag);
+  }
+
   fabClicked() {
     Alert.alert('Button Pressed');
   }
@@ -189,12 +216,8 @@ class BuildCard extends PureComponent {
     });
   }
 
-/*
-  renderModalEditScreen = () => (
-*/
-
   openModal() {
-    console.log('About to open the Modal window ...');
+    //console.log('About to open the Modal window ...');
     this.setState({ modalVisible: true });
   }
 
@@ -244,7 +267,18 @@ class BuildCard extends PureComponent {
     });
   }
 
-  addThisCard = () => {
+  addTag2Card() {
+    console.log('Inside Add Tag 2 Card: ', this.props.thisCard.tag);
+    if (this.props.thisCard.tag !== '') {
+      // ... if not already in the list for this card - add it & notify ...
+      // ... otherwise notify it was a duplicate ...
+      this.props.dispatch(addCardTag(this.props.thisCard.tag));
+      // ... also consider adding this tag to the master tags list ...
+      // ... naturally after checking for duplicates ...
+    }
+  }
+
+  addThisCard() {
     console.log('Inside Add This Card: ', this.props.thisCard.name);
     if (this.props.thisCard.name !== '') {
       this.props.dispatch(addCard(
@@ -253,7 +287,8 @@ class BuildCard extends PureComponent {
         this.props.thisCard.desc,
         this.props.thisCard.icon,
         this.props.thisCard.rating,
-        this.props.thisCard.category
+        this.props.thisCard.category,
+        this.props.thisCard.tags
       ));
     }
   }
@@ -276,11 +311,9 @@ class BuildCard extends PureComponent {
   }
 
   buildPickerItems(items) {
-    //this.state.pickerItems: '';
     const catsList = items.map((item, index) => {
       return <Picker.Item key={index} label={`${item.icon}  ${item.name}`} value={item.key} />;
     });
-    //console.log('The built Object: ', catsList);
     this.setState({ pickerItems: catsList }); 
   }
 
@@ -292,12 +325,13 @@ class BuildCard extends PureComponent {
     return this.props.catList.findIndex((item) => { return item.key === key; });
   }
 
+  countTags(tags) {
+    return tags.length;
+  }
+
   renderCatDescription(category) {
     const indexPos = this.findCategoryByKey(category);
-    //console.log('Found @ ', indexPos);
     if (indexPos >= 0) {
-      //const desc = `${this.props.catList[indexPos].icon} ${this.props.catList[indexPos].name}`;
-      //console.log(desc);
       return `${this.props.catList[indexPos].icon} ${this.props.catList[indexPos].name}`;
     }
     return category;
@@ -307,16 +341,19 @@ class BuildCard extends PureComponent {
     return <Image style={{ width: 308, height: 224, resizeMode: 'contain' }} source={image} />;
   }
 
-/*
-        <Text style={styles.pickerText}>Thumbnails go here</Text>
-*/
-
-  renderItemIcons() {
+  renderItemExtras() {
     return (
       <View style={styles.statusBar}>
-        <View style={styles.iconsPadding}>
-          <Text style={styles.emojiIcon}>{this.props.thisCard.icon}</Text>
-        </View>
+        <Text style={styles.tagsText}>Image Previews Show Up Here!</Text>
+        <TouchableOpacity 
+          disabled={this.props.thisCard.name === ''} 
+          onPress={this.addThisCard.bind(this)}
+        >
+          <View style={{ alignItems: 'center', padding: 5 }}>
+            <Icon size={42} name='plus' color={AppColors.paperColor} />
+            <Text style={styles.buttonText}>Save Item</Text>
+          </View>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -351,12 +388,6 @@ class BuildCard extends PureComponent {
     </View>
   );
 
-/*
-      <TouchableNativeFeedback onPress={this.openTagsEditScreen}>
-
-*/
-
-
   renderImageStats(image) {
     //const rightNow = new Date().toLocaleString('de-DE', { hour12: false });
     const fileDate = new Date(Number(image.created)).toLocaleString('de-DE', { hour12: false });
@@ -378,6 +409,7 @@ class BuildCard extends PureComponent {
         icon={item.icon}
         name={item.name}
         desc={item.desc}
+        numTags={this.countTags(item.tags)}
         catDesc={this.renderCatDescription(item.category)}
         checkIcon={item.selected ? 'check-square-o' : 'square-o'}
         selected={item.selected}
@@ -399,7 +431,11 @@ class BuildCard extends PureComponent {
         <View style={styles.modalContainer}>
           <View style={styles.innerContainer}>
             <TagEdit
-              tagName={this.state.tagName} 
+              tagsList={this.props.thisCard.tags}
+              tagName={this.props.thisCard.tag}
+              onTagAdd={() => this.addTag2Card()} 
+              onTagChange={text => this.itemTagChanged(text)}
+              onTagRemove={tag => this.itemTagRemove(tag)}
               onClosePress={() => this.closeModal()} 
             />
           </View>
@@ -423,16 +459,11 @@ class BuildCard extends PureComponent {
 */
 
   render() {
-    //if (this.state.myCategories.length > 0) {
-    //  console.log(this.state.myCategories);
-    //  const newValue = this.state.myCategories[0].name;
-    //  console.log('new Value: ', newValue);
-    //}
-    //const newValue = this.state.myCategories.length > 0 ? this.state.myCategories[0].name : null;
     return (
         <View style={styles.outerContainer}>
 
           <View style={styles.cardContainer}>
+
             <View style={styles.textContainer}>
               <View style={styles.topRowStyle}>
                 <MDInput
@@ -442,14 +473,9 @@ class BuildCard extends PureComponent {
                   value={this.props.thisCard.name}
                   onChangeText={text => this.itemNameChanged(text)}
                 />
-                <TouchableOpacity 
-                  disabled={this.props.thisCard.name === ''} 
-                  onPress={this.addThisCard.bind(this)}
-                >
-                  <View style={{ alignItems: 'center', padding: 5 }}>
-                    <Icon size={42} name='plus' color={AppColors.darkerColor} />
-                  </View>
-                </TouchableOpacity>
+                <View style={styles.iconsPadding}>
+                  <Text style={styles.emojiIcon}>{this.props.thisCard.icon}</Text>
+                </View>
               </View>
               <View style={styles.pickerStyle}>
                 <View style={styles.pickerWrapper}>
@@ -466,15 +492,25 @@ class BuildCard extends PureComponent {
                 </View>
               </View>
             </View>
+
+            <View style={styles.tagsBar}>
+              <RenderTags 
+                myTags={this.props.thisCard.tags} 
+                onPressTag={tag => this.itemTagRemove(tag)} 
+              />
+            </View>
+          
           </View>
 
           { this.renderTagEditScreen() }
-
-          <View style={styles.tagsBar}>
-            <Text style={styles.tagsText}>Tags go here</Text>
-          </View>
-          { this.renderItemIcons() }
+          { this.renderItemExtras() }
           { this.renderActionIcons() }
+
+          <FlatList
+            data={this.props.itemList}
+            renderItem={this.renderCardItem}
+            ItemSeparatorComponent={this.itemSeparator}
+          />            
 
         </View>
     );
@@ -547,10 +583,16 @@ export default connect(whatDoYouNeed)(BuildCard);
 const styles = StyleSheet.create({
   emojiIcon: {
     color: 'black',
-    fontSize: 38,
+    fontSize: 34,
     textAlign: 'center',
     paddingBottom: 1
-  },  
+  },
+  buttonText: {
+    color: AppColors.hiliteColor,
+    fontWeight: 'bold',
+    fontSize: 11,
+    marginTop: -7
+  },
   iconsPadding: {
     alignItems: 'center', 
     padding: 5
@@ -577,19 +619,20 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around'
   },
   tagsBar: {
-    height: 30,
+    //height: 30,
     flexDirection: 'row',
-    //paddingTop: 5,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.25)',
+    paddingLeft: 10,
+    paddingRight: 10,
+    flexWrap: 'wrap',    
+    //borderTopWidth: 1,
+    //borderTopColor: 'rgba(0,0,0,0.12)',
     width: '100%',
-    alignItems: 'center',
-    backgroundColor: AppColors.paperColor,  // ... light grey ...
-    justifyContent: 'space-around'
+    alignItems: 'center'
+    //backgroundColor: AppColors.paperColor,  // ... light grey ...
   },
   tagsText: {
     fontSize: 14,
-    color: 'rgba(0, 0, 0, .5)',
+    color: 'rgba(255, 255, 255, .5)',
     //alignSelf: 'flex-start'
   },
   statusBar: {
@@ -603,7 +646,7 @@ const styles = StyleSheet.create({
   },
   pickerElements: {
     marginLeft: -8,
-    color: 'blue',
+    color: AppColors.darkerColor,
     height: 22
   },
   labelText: {
@@ -666,7 +709,7 @@ const styles = StyleSheet.create({
     //width: '90%',
     //padding: 7,
     backgroundColor: 'white',
-    paddingBottom: 12,
+    paddingBottom: 8,
     shadowColor: '#121212',
     shadowOffset: { width: 1, height: 3 },
     shadowOpacity: 0.85,
@@ -691,7 +734,7 @@ const styles = StyleSheet.create({
   inputStyle: {   // ... used to define the item name input width ...
     width: '85%'
   },
-  buttonText: {
+  buttonNotUsedText: {
     alignSelf: 'center',
     fontSize: 17,
     marginTop: -45,

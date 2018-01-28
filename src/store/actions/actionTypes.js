@@ -47,6 +47,7 @@ export const DELETE_SELECTED_CATS = 'DELETE_SELECTED_CATS';
 export const CARDS_STORAGE_KEY = '@track!some:my_cards';
 export const CARD_EDIT_CHANGE = 'CARD_EDIT_CHANGE';
 export const ADD_CARD = 'ADD_CARD';
+export const ADD_CARD_TAG = 'ADD_CARD_TAG';
 export const CLEAR_CARD = 'CLEAR_CARD';
 export const UPDATE_CARD = 'UPDATE_CARD';
 export const REMOVE_CARD = 'REMOVE_CARD';

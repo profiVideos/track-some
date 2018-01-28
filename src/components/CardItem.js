@@ -4,16 +4,13 @@ import {
   Text, 
   StyleSheet, 
   TouchableOpacity,
-  //TouchableWithoutFeedback,
   TouchableNativeFeedback 
-  //Image 
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 class CardItem extends React.PureComponent {
   constructor(props) {
     super(props);
-    //console.log(props);
     this.state = {
       didSave: false
     };
@@ -40,25 +37,13 @@ class CardItem extends React.PureComponent {
   }
 
   render() {
-    //console.log(this.props);
-    //const badgeColor = this.props.canEdit ? 'blue' : 'transparent';
-    //const renderBadge = this.props.canEdit && this.props.isChecked ?
-    //  (<View style={[styles.extraInfo, { backgroundColor: 'blue' }]}>
-    //     <Icon name='check' style={styles.badgeStyle} />
-    //   </View>) : null;
-    //const backColor = this.state.selected ? '#fff8b2' : 'white';
-/*
-  onTogglePress  
-    <CategoryItem 
-      id={item.key}
-      icon={item.icon}
-      name={item.name}
-      desc={item.desc}
-      selected={item.selected}
-      onPressItem={this.onCatItemPress}
-    />
-          <Text style={styles.catIcon}>✏️</Text>
-*/
+    const tagsBadge = (this.props.numTags === 0) ? <View /> :
+      (<View style={{ flexDirection: 'row', alignItems: 'center' }}>
+         <Text>  Tags:</Text>
+         <View style={styles.tagsBadge}>
+           <Text style={styles.badgeTextStyle}>{this.props.numTags}</Text>
+         </View>
+       </View>);
     return (
       <View style={styles.outerWrapper}>
         <View style={styles.iconWrapper}>
@@ -75,9 +60,10 @@ class CardItem extends React.PureComponent {
             >
               {this.props.name}
             </Text>
-            <Text>
-              {this.props.catDesc}
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text>{this.props.catDesc}</Text>
+              {tagsBadge}
+            </View>
           </View>
         </TouchableNativeFeedback>
         <View style={styles.checkWrapper}>
@@ -108,23 +94,20 @@ class CardItem extends React.PureComponent {
 
 export default CardItem;
 
-/*
-        <View style={styles.container}>
-          <Text style={styles.iconValue}>{this.props.emojiString}</Text>
-          { renderBadge }
-          <Text 
-            ellipsizeMode='tail' 
-            numberOfLines={1} 
-            style={styles.textValue}
-          >
-            {this.props.emojiName}
-          </Text>
-        </View>
-*/
-
 const styles = StyleSheet.create({
+  badgeTextStyle: {
+    color: 'white',
+    textAlign: 'center',
+    fontSize: 10,
+  },
+  tagsBadge: {
+    backgroundColor: 'rgba(30,30,200,0.45)',
+    marginLeft: 3,
+    width: 14,
+    height: 14,
+    borderRadius: 14
+  },
   outerWrapper: {
-    //flex: 1,
     width: '100%',
     height: 60,
     paddingRight: 5,
@@ -139,16 +122,11 @@ const styles = StyleSheet.create({
     borderRightWidth: 1,
     borderColor: '#b9b9b9',
     padding: 7,
-    //marginLeft: 3,
-    //paddingLeft: 7,
-    //paddingRight: 7,
-    //paddingBottom: 3,
-    backgroundColor: '#f5f5f5',  //#282828',
+    backgroundColor: '#f5f5f5',
     justifyContent: 'center',
     alignItems: 'center'
   },
   infoWrapper: {
-    //height: 55,
     padding: 3,
     paddingLeft: 7,
     width: '70%',
@@ -157,7 +135,6 @@ const styles = StyleSheet.create({
   },
   checkWrapper: {
     padding: 5,
-    //width: '10%',
     backgroundColor: 'white',
     alignItems: 'center',
     justifyContent: 'center'
@@ -175,8 +152,3 @@ const styles = StyleSheet.create({
     color: 'black'
   }
 });
-
-
-/*
-      <Image resizeMode="cover" source={props.categoryIcon} style={styles.categoryIcon} />
-*/

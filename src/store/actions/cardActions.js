@@ -7,6 +7,7 @@ import {
   REMOVE_CARD,
   SORT_CARDS, 
   CURRENT_CARD,
+  ADD_CARD_TAG,          // ... NEW ...
   CARD_EDIT_CHANGE,
   CARDS_STORAGE_KEY,
   SAVE_CARDS_SUCCESS,
@@ -35,10 +36,17 @@ export const sortMyCards = () => {
   };
 };
 
-export const addCard = (key, name, desc, icon, rating, category) => {
+export const addCard = (key, name, desc, icon, rating, category, tags) => {
   return {
     type: ADD_CARD,
-    payload: { key, name, desc, icon, rating, category }
+    payload: { key, name, desc, icon, rating, category, tags }
+  };
+};
+
+export const addCardTag = (tag) => {
+  return {
+    type: ADD_CARD_TAG,
+    payload: { tag }
   };
 };
 

@@ -2,10 +2,11 @@
 
 import {
   ADD_CARD,
+  SORT_CARDS, 
   CLEAR_CARD,
   UPDATE_CARD,
   REMOVE_CARD,
-  SORT_CARDS, 
+  ADD_CARD_TAG,
   CURRENT_CARD,
   CARD_EDIT_CHANGE,
   SAVE_CARDS_SUCCESS,
@@ -22,6 +23,8 @@ const initialState = {
   detailView: false,
   thisCard: {
     key: '',
+    tag: '',
+    note: '',
     name: '',
     desc: '',
     icon: '',
@@ -72,6 +75,20 @@ const CardReducer = (state = initialState, action) => {
         cardsDirty: true
       };
 
+    case ADD_CARD_TAG:
+      // ... add this item to the top of this card's tag list ...
+      return { 
+        ...state,
+        thisCard: { ...state.thisCard, 
+          tag: '', 
+          tags: [ 
+            action.payload.tag,
+            ...state.thisCard.tags
+          ]
+        },
+        //cardsDirty: true - don't set this as card is not saved (like adding a field)
+      };
+
     case ADD_CARD:
       // ... add this item to the top of the card list ...
       return { 
@@ -85,7 +102,7 @@ const CardReducer = (state = initialState, action) => {
        category: action.payload.category,
           image: {},
         barcode: {},
-           tags: [],
+           tags: action.payload.tags,
           notes: [],
        selected: false },
           ...state.itemList
@@ -116,6 +133,8 @@ const CardReducer = (state = initialState, action) => {
         }),
         thisCard: {
           key: '',
+          tag: '',
+          note: '',
           name: '',
           desc: '',
           icon: '',
@@ -135,6 +154,8 @@ const CardReducer = (state = initialState, action) => {
         ...state,
         thisCard: {
           key: '',
+          tag: '',
+          note: '',
           name: '',
           desc: '',
           icon: '',
@@ -156,6 +177,8 @@ const CardReducer = (state = initialState, action) => {
         }),
         thisCard: {
           key: this.cardFound.key,
+          //tag: '',
+          //note: '',
           name: this.cardFound.name,
           desc: this.cardFound.desc,
           icon: this.cardFound.icon,
@@ -182,6 +205,8 @@ const CardReducer = (state = initialState, action) => {
         cardsDirty: false,   // ... list has been saved ...
         thisCard: {       // ... clear the current record ...
           key: '',
+          tag: '',
+          note: '',
           name: '',
           desc: '',
           icon: '',
