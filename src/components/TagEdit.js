@@ -97,6 +97,7 @@ class TagEdit extends PureComponent {
             <TextInput
               style={styles.textInputStyle}
               //autoCorrect={false}
+              blurOnSubmit={true}
               disableFullscreenUI
               underlineColorAndroid={'transparent'}
               placeholder={'A new tag ... '}
@@ -175,24 +176,26 @@ const styles = StyleSheet.create({
     //height: 200,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: 20,
-    paddingBottom: 30,
+    paddingTop: 2,
+    paddingBottom: 10,
     backgroundColor: AppColors.paperColor
   },
   bigMessage: {
-    fontSize: 16,
+    fontSize: 14,
     fontStyle: 'italic',
     textAlign: 'center',
     color: 'rgba(0,0,0,0.40)'
   },
   sadFace: {
-    fontSize: 72,
+    fontSize: 60,
     color: 'rgba(0,0,0,0.40)'
   },
   tagsContainer: {
     flexDirection: 'row',
     backgroundColor: '#eee',
     padding: 5,
+    paddingTop: 12,
+    paddingBottom: 12,
     flexWrap: 'wrap',    
   },
   smallDot: {

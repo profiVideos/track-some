@@ -6,8 +6,9 @@ import {
   CLEAR_CARD,
   UPDATE_CARD,
   REMOVE_CARD,
-  ADD_CARD_TAG,
   CURRENT_CARD,
+  ADD_CARD_TAG,            // ... NEW ...
+  ADD_CARD_IMAGE,         // ... NEW ...
   CARD_EDIT_CHANGE,
   SAVE_CARDS_SUCCESS,
   //SAVE_CARDS_FAILURE,
@@ -75,6 +76,24 @@ const CardReducer = (state = initialState, action) => {
         cardsDirty: true
       };
 
+    case ADD_CARD_IMAGE:
+      // ... add this image to the card ...
+      return { 
+        ...state,
+        thisCard: { ...state.thisCard, 
+          image: {
+            uri: action.payload.image.path, 
+            width: action.payload.image.width, 
+            height: action.payload.image.height,
+            size: action.payload.image.size,
+            mimeType: action.payload.image.mime,
+            created: action.payload.image.modificationDate,
+            base64: action.payload.image.data
+          }, 
+        },
+        //cardsDirty: true - don't set this yet as card is not saved (like adding a field)
+      };
+
     case ADD_CARD_TAG:
       // ... add this item to the top of this card's tag list ...
       return { 
@@ -100,7 +119,7 @@ const CardReducer = (state = initialState, action) => {
            icon: action.payload.icon,
          rating: action.payload.rating,
        category: action.payload.category,
-          image: {},
+          image: action.payload.image,
         barcode: {},
            tags: action.payload.tags,
           notes: [],

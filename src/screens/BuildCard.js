@@ -9,7 +9,7 @@ import {
   //Button,
   FlatList, 
   StyleSheet, 
-  //ScrollView,
+  ScrollView,
   TouchableOpacity,
   TouchableNativeFeedback 
 } from 'react-native';
@@ -25,8 +25,6 @@ import ItemTags from '../images/ItemTags.png';
 import ItemNotes from '../images/ItemNotes.png';
 import SmileyFace from '../images/SmileyGlasses.png';
 import PhotoAdd from '../images/PhotoAdd.png';
-//import selectCameraImage from '../images/Source-Camera.jpg';
-//import selectFolderImage from '../images/Source-Folder.jpg';
 import AppColors from '../templates/appColors';
 import CardItem from '../components/CardItem';
 import TagEdit from '../components/TagEdit';
@@ -34,7 +32,8 @@ import RenderTags from '../components/RenderTags';
 
 import { 
   addCard,
-  addCardTag, 
+  addCardTag,
+  addCardImage, 
   //updateCard,
   //currentCard,
   loadMyCards,
@@ -63,14 +62,6 @@ const whatDoYouNeed = state => {
   };
 };
 
-/*
-const whatShouldIDo = dispatch => {
-  return {
-    loadCardsList: dispatch(loadMyCards())
-  };
-};
-*/
-
 class BuildCard extends PureComponent {
   static navigatorStyle = {
     drawUnderNavBar: false,
@@ -86,16 +77,12 @@ class BuildCard extends PureComponent {
     super(props);
     this.onSelectEmoji = this.onSelectEmoji.bind(this);
     this.openModal = this.openModal.bind(this);
-    //this.addTag2Card = this.addTag2Card.bind(this);
-    //this.openTagsEditScreen = this.openTagsEditScreen.bind(this);
     this.state = {
       compress: 0.25,
       image: null,
       images: null,
-      tagName: 'Markie',
       getIcon4Card: false,
       modalVisible: false,
-      //thisCategory: '',
       pickerItems: [],
     };
   }
@@ -168,7 +155,7 @@ class BuildCard extends PureComponent {
 
   onChangeSelection(selection) {
     if (selection === 'addCategory') {
-      console.log('Wants to add a category!');
+      //console.log('Wants to add a category!');
       this.props.navigator.showModal({
         title: 'Add a new Category',
         screen: 'tracksome.EditCategories'
@@ -187,13 +174,21 @@ class BuildCard extends PureComponent {
   }
 
   itemNameChanged(text) {
-    //console.log('New Text: ', text);
     this.props.dispatch(itemCardChanged('name', text));
+  }
+
+  itemDescChanged(text) {
+    this.props.dispatch(itemCardChanged('desc', text));
   }
 
   itemTagChanged(text) {
     //console.log('New Tag Value: ', text);
     this.props.dispatch(itemCardChanged('tag', text));
+  }
+
+  itemImageChanged(image) {
+    //console.log('New Image: ', image);
+    this.props.dispatch(addCardImage(image));
   }
 
   itemTagRemove(tag) {
@@ -226,7 +221,7 @@ class BuildCard extends PureComponent {
   }
 
   pickSingle(cropit, circular = false) {
-    console.log('About to select a photo');
+    //console.log('About to select a photo');
     ImagePicker.openPicker({
       width: 1056,
       height: 768,
@@ -248,7 +243,9 @@ class BuildCard extends PureComponent {
       //showCropGuidelines: false,
       cropperToolbarTitle: 'Position Photo',
     }).then(image => {
-      console.log('received image', image);
+      //console.log('received image', image);
+      this.itemImageChanged(image);
+/*      
       this.setState({
         image: { 
           uri: image.path, 
@@ -261,6 +258,7 @@ class BuildCard extends PureComponent {
         },
         images: null
       });
+*/        
     }).catch(e => {
       console.log(e);
       //Alert.alert(e.message ? e.message : e);
@@ -268,7 +266,7 @@ class BuildCard extends PureComponent {
   }
 
   addTag2Card() {
-    console.log('Inside Add Tag 2 Card: ', this.props.thisCard.tag);
+    //console.log('Inside Add Tag 2 Card: ', this.props.thisCard.tag);
     if (this.props.thisCard.tag !== '') {
       // ... if not already in the list for this card - add it & notify ...
       // ... otherwise notify it was a duplicate ...
@@ -279,7 +277,7 @@ class BuildCard extends PureComponent {
   }
 
   addThisCard() {
-    console.log('Inside Add This Card: ', this.props.thisCard.name);
+    //console.log('Inside Add This Card: ', this.props.thisCard.name);
     if (this.props.thisCard.name !== '') {
       this.props.dispatch(addCard(
         UniqueId(),
@@ -288,7 +286,8 @@ class BuildCard extends PureComponent {
         this.props.thisCard.icon,
         this.props.thisCard.rating,
         this.props.thisCard.category,
-        this.props.thisCard.tags
+        this.props.thisCard.tags,
+        this.props.thisCard.image
       ));
     }
   }
@@ -338,29 +337,13 @@ class BuildCard extends PureComponent {
   }
 
   renderImage(image) {
-    return <Image style={{ width: 308, height: 224, resizeMode: 'contain' }} source={image} />;
-  }
-
-  renderItemExtras() {
-    return (
-      <View style={styles.statusBar}>
-        <Text style={styles.tagsText}>Image Previews Show Up Here!</Text>
-        <TouchableOpacity 
-          disabled={this.props.thisCard.name === ''} 
-          onPress={this.addThisCard.bind(this)}
-        >
-          <View style={{ alignItems: 'center', padding: 5 }}>
-            <Icon size={42} name='plus' color={AppColors.paperColor} />
-            <Text style={styles.buttonText}>Save Item</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-    );
+    return <Image style={styles.imageStyle} source={image} />;
+    //return <Image style={{ width: 308, height: 224, resizeMode: 'contain' }} source={image} />;
   }
 
   renderActionIcons = () => (
     <View style={styles.actionBar}>
-      <TouchableNativeFeedback onPress={this.doSomeFunction}>
+      <TouchableNativeFeedback onPress={() => this.pickSingle(true)}>
         <View style={styles.iconsPadding}>
           <Image style={styles.imageIconStyle} source={PictureFrame} />
         </View>
@@ -445,6 +428,324 @@ class BuildCard extends PureComponent {
     );
   }
 
+  renderItemExtras() {
+    return (
+      <View style={styles.mainPanel}>
+        <View style={styles.statusBar}>
+          <Text style={styles.previewText}>Image Previews Show Up Here!</Text>
+        </View>
+        <TouchableOpacity 
+          disabled={this.props.thisCard.name === ''} 
+          onPress={this.addThisCard.bind(this)}
+          style={styles.masterButton}
+        >
+          <View style={styles.innerButton}>
+            <Icon size={42} name='plus' color={'white'} />
+            <Text style={styles.buttonText}>Save Item</Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+/*
+      <View style={styles.outerContainer}>
+*/
+  render() {
+    return (
+      <ScrollView style={{ flex: 1 }} keyboardShouldPersistTaps='always'>
+
+        <View style={styles.cardContainer}>
+
+          <View style={styles.textContainer}>
+            <View style={styles.topRowStyle}>
+              <View style={styles.previewOutline}>
+                {Object.keys(this.props.thisCard.image).length === 0 && 
+                 this.props.thisCard.image.constructor === Object ?  
+                   <Text style={styles.emojiIcon}>{this.props.thisCard.icon}</Text> :
+                 this.renderImage(this.props.thisCard.image)} 
+              </View>
+              <MDInput
+                style={styles.nameWidth}
+                label='Item Name*'
+                placeholder='Please enter a name for this item ... '
+                value={this.props.thisCard.name}
+                onChangeText={text => this.itemNameChanged(text)}
+              />
+            </View>
+            <View style={styles.pickerStyle}>
+              <View style={styles.pickerWrapper}>
+                <Text style={styles.labelText}>Category</Text>
+                <Picker 
+                  style={styles.pickerElements}
+                  selectedValue={this.props.thisCard.category}
+                  onValueChange={(value) => this.onChangeSelection(value)}
+                >
+                  <Picker.Item label="Please choose a category ..." value="" />
+                  { this.state.pickerItems }
+                  <Picker.Item label="+ Add a new category" value="addCategory" />
+                </Picker>              
+              </View>
+            </View>
+            <View style={styles.editFieldStyle}>
+              <MDInput
+                style={styles.inputStyle}
+                label='Description (optional)'
+                placeholder='Briefly describe this item ... '
+                value={this.props.thisCard.desc}
+                onChangeText={text => this.itemDescChanged(text)}
+              />
+            </View>
+          </View>
+
+          <View style={styles.tagsBar}>
+            <RenderTags 
+              myTags={this.props.thisCard.tags} 
+              onPressTag={tag => this.itemTagRemove(tag)} 
+            />
+          </View>
+        
+        </View>
+
+        { this.renderTagEditScreen() }
+        { this.renderItemExtras() }
+        { this.renderActionIcons() }
+
+        <FlatList
+          //style={{ flex: 1 }}
+          data={this.props.itemList}
+          renderItem={this.renderCardItem}
+          ItemSeparatorComponent={this.itemSeparator}
+        />
+
+      </ScrollView>
+    );
+  }
+
+}
+
+export default connect(whatDoYouNeed)(BuildCard);
+
+/*
+
+*/
+
+const styles = StyleSheet.create({
+  mainPanel: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around'
+  },
+  innerButton: {
+    paddingBottom: 4,
+    alignItems: 'center'
+  },
+  masterButton: {
+    elevation: 3,
+    width: 68,
+    height: 68,
+    marginTop: -12,
+    marginLeft: -100,
+    justifyContent: 'center',
+    borderRadius: 34,
+    backgroundColor: AppColors.darkerColor,  // ... dark cyan ...
+  },
+  buttonText: {
+    color: AppColors.hiliteColor,
+    fontWeight: 'bold',
+    fontSize: 10,
+    marginTop: -7,
+  },
+  statusBar: {
+    width: '100%',
+    height: 48,
+    marginTop: -10,
+    marginLeft: -11,
+    flexDirection: 'row',
+    padding: 2,
+    alignItems: 'center',
+    backgroundColor: AppColors.accentColor,  // ... light orange ...
+    justifyContent: 'space-around'
+  },
+  // ... the main icon / photo ...
+  imageStyle: {
+    height: 60,
+    width: 80,
+    borderRadius: 3,
+    resizeMode: 'cover'
+  },
+  previewOutline: {
+    height: 62,
+    width: 82,
+    //padding: 3,
+    alignItems: 'center', 
+    borderRadius: 5,
+    marginTop: 5,
+    marginRight: 8,
+    marginBottom: 3,
+    borderColor: '#aaa',
+    borderWidth: 1
+  },
+  emojiIcon: {
+    color: 'black',
+    fontSize: 42,
+    textAlign: 'center',
+    paddingBottom: 1
+  },
+  iconsPadding: {
+    alignItems: 'center', 
+    padding: 5
+  },
+  topRowStyle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  imageIconStyle: {
+    height: 52,
+    width: 52,
+    resizeMode: 'contain'
+  },
+  actionBar: {
+    height: 62,
+    flexDirection: 'row',
+    marginTop: -10,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.25)',
+    width: '100%',
+    alignItems: 'center',
+    backgroundColor: AppColors.paperColor,  // ... light grey ...
+    justifyContent: 'space-around'
+  },
+  tagsBar: {
+    flexDirection: 'row',
+    paddingLeft: 10,
+    paddingRight: 10,
+    flexWrap: 'wrap',    
+    width: '100%',
+    alignItems: 'center'
+  },
+  previewText: {
+    fontSize: 14,
+    color: 'rgba(0, 0, 0, .5)',
+  },
+  pickerElements: {
+    marginLeft: -8,
+    color: AppColors.darkerColor,
+    height: 22
+  },
+  labelText: {
+    fontSize: 11,
+    color: AppColors.mainLiteColor
+  },
+  pickerText: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, .5)',
+  },
+  editFieldStyle: {   // ... not really used ...
+    paddingBottom: 0,
+    //backgroundColor: 'blue'
+  },
+  pickerStyle: {
+    borderColor: '#c3c3c3',
+    borderBottomWidth: 0.75,
+    paddingBottom: 5
+  },
+  container: {
+    //flex: 1,
+    justifyContent: 'center',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.65)',
+  },
+  innerContainer: {
+    width: '90%',
+  },
+  outerContainer: {
+    flex: 1,
+    borderRadius: 2,
+    //backgroundColor: 'blue',
+    shadowColor: '#121212',
+    shadowOffset: { width: 1, height: 3 },
+    shadowOpacity: 0.85,
+    elevation: 2
+  },
+  separatorStyle: {
+    backgroundColor: 'white',
+    width: '12%',
+    alignSelf: 'flex-end',
+    height: 1
+  },
+  textContainer: {
+    width: '90%',
+    paddingTop: 4,
+    paddingBottom: 10,
+    shadowColor: '#121212',
+    shadowOffset: { width: 1, height: 3 },
+    shadowOpacity: 0.85,
+    alignSelf: 'center',
+    elevation: 2,
+  },
+  cardContainer: {
+    backgroundColor: 'white',
+    paddingBottom: 12,
+    shadowColor: '#121212',
+    shadowOffset: { width: 1, height: 3 },
+    shadowOpacity: 0.85,
+    elevation: 2,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  buttonRow: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  imageNotUsedStyle: {
+    height: 200,
+    borderRadius: 5,
+    shadowColor: '#121212',
+    shadowOffset: { width: 1, height: 3 },
+    shadowOpacity: 0.85,
+    resizeMode: 'contain'
+  },
+  nameWidth: {     // ... used to define the item name input width ...
+    width: '85%'
+  },
+  inputStyle: {   // ... used to define the item desc input width ...
+    width: '100%'
+  },
+  buttonNotUsedText: {
+    alignSelf: 'center',
+    fontSize: 17,
+    marginTop: -45,
+    marginBottom: 25,
+    fontWeight: '600',
+    elevation: 2,
+    color: '#858585'
+  },
+  columnContainer: {
+    width: '50%',
+    alignItems: 'center'
+  },
+  imageContainer: {
+    width: '100%',
+    padding: 3,
+    shadowColor: '#121212',
+    shadowOffset: { width: 1, height: 3 },
+    shadowOpacity: 0.85,
+    elevation: 2,
+    alignItems: 'center'
+  },
+  boldText: {   // ... not used ...
+    color: 'black',
+    fontWeight: '700',
+  }
+});
+
 /*
             <Button onPress={() => this.closeModal()} title="Close modal" />
             <Button title="Get an Image to Crop" onPress={() => this.pickSingle(true)} />
@@ -457,68 +758,6 @@ class BuildCard extends PureComponent {
 
                 <TouchableNativeFeedback onPress={this.addThisCard.bind(this)}>
 */
-
-  render() {
-    return (
-        <View style={styles.outerContainer}>
-
-          <View style={styles.cardContainer}>
-
-            <View style={styles.textContainer}>
-              <View style={styles.topRowStyle}>
-                <MDInput
-                  style={styles.inputStyle}
-                  label='Item Name'
-                  placeholder='Please enter a name for this item ... '
-                  value={this.props.thisCard.name}
-                  onChangeText={text => this.itemNameChanged(text)}
-                />
-                <View style={styles.iconsPadding}>
-                  <Text style={styles.emojiIcon}>{this.props.thisCard.icon}</Text>
-                </View>
-              </View>
-              <View style={styles.pickerStyle}>
-                <View style={styles.pickerWrapper}>
-                  <Text style={styles.labelText}>Category</Text>
-                  <Picker 
-                    style={styles.pickerElements}
-                    selectedValue={this.props.thisCard.category}
-                    onValueChange={(value) => this.onChangeSelection(value)}
-                  >
-                    <Picker.Item label="Please choose a category ..." value="" />
-                    { this.state.pickerItems }
-                    <Picker.Item label="+ Add a new category" value="addCategory" />
-                  </Picker>              
-                </View>
-              </View>
-            </View>
-
-            <View style={styles.tagsBar}>
-              <RenderTags 
-                myTags={this.props.thisCard.tags} 
-                onPressTag={tag => this.itemTagRemove(tag)} 
-              />
-            </View>
-          
-          </View>
-
-          { this.renderTagEditScreen() }
-          { this.renderItemExtras() }
-          { this.renderActionIcons() }
-
-          <FlatList
-            data={this.props.itemList}
-            renderItem={this.renderCardItem}
-            ItemSeparatorComponent={this.itemSeparator}
-          />            
-
-        </View>
-    );
-  }
-
-}
-
-export default connect(whatDoYouNeed)(BuildCard);
 
 /*
           <FlatList
@@ -579,190 +818,6 @@ export default connect(whatDoYouNeed)(BuildCard);
             </Text>
           </View>  
 */
-
-const styles = StyleSheet.create({
-  emojiIcon: {
-    color: 'black',
-    fontSize: 34,
-    textAlign: 'center',
-    paddingBottom: 1
-  },
-  buttonText: {
-    color: AppColors.hiliteColor,
-    fontWeight: 'bold',
-    fontSize: 11,
-    marginTop: -7
-  },
-  iconsPadding: {
-    alignItems: 'center', 
-    padding: 5
-  },
-  topRowStyle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between'
-  },
-  imageIconStyle: {
-    height: 52,
-    width: 52,
-    resizeMode: 'contain'
-  },
-  actionBar: {
-    height: 58,
-    flexDirection: 'row',
-    //paddingTop: 5,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.25)',
-    width: '100%',
-    alignItems: 'center',
-    backgroundColor: AppColors.paperColor,  // ... light grey ...
-    justifyContent: 'space-around'
-  },
-  tagsBar: {
-    //height: 30,
-    flexDirection: 'row',
-    paddingLeft: 10,
-    paddingRight: 10,
-    flexWrap: 'wrap',    
-    //borderTopWidth: 1,
-    //borderTopColor: 'rgba(0,0,0,0.12)',
-    width: '100%',
-    alignItems: 'center'
-    //backgroundColor: AppColors.paperColor,  // ... light grey ...
-  },
-  tagsText: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, .5)',
-    //alignSelf: 'flex-start'
-  },
-  statusBar: {
-    width: '100%',
-    height: 64,
-    flexDirection: 'row',
-    padding: 2,
-    alignItems: 'center',
-    backgroundColor: AppColors.darkerColor,  // ... dark cyan ...
-    justifyContent: 'space-around'
-  },
-  pickerElements: {
-    marginLeft: -8,
-    color: AppColors.darkerColor,
-    height: 22
-  },
-  labelText: {
-    fontSize: 11,
-    color: AppColors.mainLiteColor
-  },
-  pickerText: {
-    fontSize: 16,
-    color: 'rgba(255, 255, 255, .5)',
-    //alignSelf: 'flex-start'
-  },
-  pickerStyle: {
-    borderColor: '#c3c3c3',
-    borderBottomWidth: 0.75,
-    paddingBottom: 5
-  },
-  container: {
-    //flex: 1,
-    justifyContent: 'center',
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.65)',
-  },
-  innerContainer: {
-    width: '90%',
-    //alignSelf: 'center',
-    //backgroundColor: 'white',
-    //borderRadius: 12
-  },
-  outerContainer: {
-    flex: 1,
-    borderRadius: 2,
-    //backgroundColor: 'blue',
-    shadowColor: '#121212',
-    shadowOffset: { width: 1, height: 3 },
-    shadowOpacity: 0.85,
-    elevation: 2
-  },
-  separatorStyle: {
-    backgroundColor: 'white',
-    width: '12%',
-    alignSelf: 'flex-end',
-    height: 1
-  },
-  textContainer: {
-    width: '90%',
-    paddingTop: 4,
-    paddingBottom: 10,
-    //backgroundColor: 'transparent',
-    shadowColor: '#121212',
-    shadowOffset: { width: 1, height: 3 },
-    shadowOpacity: 0.85,
-    alignSelf: 'center',
-    elevation: 2,
-  },
-  cardContainer: {
-    //width: '90%',
-    //padding: 7,
-    backgroundColor: 'white',
-    paddingBottom: 8,
-    shadowColor: '#121212',
-    shadowOffset: { width: 1, height: 3 },
-    shadowOpacity: 0.85,
-    elevation: 2,
-    justifyContent: 'center',
-    alignItems: 'center'
-    //alignItems: 'center'
-  },
-  buttonRow: {
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  imageStyle: {
-    height: 200,
-    borderRadius: 5,
-    shadowColor: '#121212',
-    shadowOffset: { width: 1, height: 3 },
-    shadowOpacity: 0.85,
-    resizeMode: 'contain'
-  },
-  inputStyle: {   // ... used to define the item name input width ...
-    width: '85%'
-  },
-  buttonNotUsedText: {
-    alignSelf: 'center',
-    fontSize: 17,
-    marginTop: -45,
-    marginBottom: 25,
-    fontWeight: '600',
-    elevation: 2,
-    color: '#858585'
-  },
-  columnContainer: {
-    width: '50%',
-    //backgroundColor: 'grey',
-    alignItems: 'center'
-  },
-  imageContainer: {
-    width: '100%',
-    padding: 3,
-    //backgroundColor: 'red',
-    shadowColor: '#121212',
-    shadowOffset: { width: 1, height: 3 },
-    shadowOpacity: 0.85,
-    elevation: 2,
-    alignItems: 'center'
-  },
-  boldText: {   // ... not used ...
-    color: 'black',
-    fontWeight: '700',
-  }
-});
 
 /*
     margin: 0,
