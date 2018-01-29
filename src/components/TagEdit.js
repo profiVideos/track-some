@@ -97,7 +97,7 @@ class TagEdit extends PureComponent {
             <TextInput
               style={styles.textInputStyle}
               //autoCorrect={false}
-              blurOnSubmit={true}
+              //blurOnSubmit={true}
               disableFullscreenUI
               underlineColorAndroid={'transparent'}
               placeholder={'A new tag ... '}

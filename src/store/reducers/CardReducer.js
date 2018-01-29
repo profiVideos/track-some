@@ -7,13 +7,15 @@ import {
   UPDATE_CARD,
   REMOVE_CARD,
   CURRENT_CARD,
-  ADD_CARD_TAG,            // ... NEW ...
-  ADD_CARD_IMAGE,         // ... NEW ...
+  ADD_CARD_TAG,              // ... NEW ...
+  ADD_CARD_IMAGE,            // ... NEW ...
+  HIGHLIGHT_CARD,            // ... NEW ...
   CARD_EDIT_CHANGE,
   SAVE_CARDS_SUCCESS,
   //SAVE_CARDS_FAILURE,
   LOAD_CARDS_SUCCESS,
   //LOAD_CARDS_FAILURE
+  UPDATE_CARD_SELECTED,
   DELETE_SELECTED_CARDS
 } from '../actions/actionTypes';
 
@@ -22,6 +24,7 @@ const initialState = {
   loading: false,
   cardsDirty: false,
   detailView: false,
+  highlighted: '',    // ... the unique key of the currently highlighted item ...
   thisCard: {
     key: '',
     tag: '',
@@ -29,6 +32,7 @@ const initialState = {
     name: '',
     desc: '',
     icon: '',
+    thumb: '',    // ... 'ICO', 'PHO', 'BAR', 'QRC' ...
     rating: 0,
     category: '',
     image: {},
@@ -57,6 +61,13 @@ const CardReducer = (state = initialState, action) => {
           ...state.thisCard,
           [action.payload.prop]: action.payload.value
         }
+      };
+
+    case HIGHLIGHT_CARD:
+      // ... make one item in the list stand out or be selected ...
+      return { 
+        ...state,
+        highlighted: action.payload.key
       };
 
     case SORT_CARDS:
@@ -117,6 +128,7 @@ const CardReducer = (state = initialState, action) => {
            name: action.payload.name,
            desc: action.payload.desc,
            icon: action.payload.icon,
+          thumb: action.payload.thumb,    // ... 'ICO', 'PHO', 'BAR', 'QRC' ...
          rating: action.payload.rating,
        category: action.payload.category,
           image: action.payload.image,
@@ -129,6 +141,16 @@ const CardReducer = (state = initialState, action) => {
         cardsDirty: true
       };
 
+    case UPDATE_CARD_SELECTED:
+      return {
+        ...state,
+        itemList: state.itemList.map(card => 
+          (card.key === action.payload.key ? 
+            { ...card, 
+          selected: action.payload.isSelected } : card)),
+        cardsDirty: true 
+      };
+
     case UPDATE_CARD:
       return {
         ...state,
@@ -138,9 +160,9 @@ const CardReducer = (state = initialState, action) => {
               name: action.payload.name,
               desc: action.payload.desc,
               icon: action.payload.icon,
+             thumb: action.payload.thumb,    // ... 'ICO', 'PHO', 'BAR', 'QRC' ...
             rating: action.payload.rating,
-          category: action.payload.category,
-          selected: action.payload.isSelected } : card)),
+          category: action.payload.category } : card)),
         cardsDirty: true 
       };
 
@@ -157,6 +179,7 @@ const CardReducer = (state = initialState, action) => {
           name: '',
           desc: '',
           icon: '',
+          thumb: '',
           rating: 0,
           category: '',
           image: {},
@@ -178,6 +201,7 @@ const CardReducer = (state = initialState, action) => {
           name: '',
           desc: '',
           icon: '',
+          thumb: '',
           rating: 0,
           category: '',
           image: {},
@@ -196,11 +220,10 @@ const CardReducer = (state = initialState, action) => {
         }),
         thisCard: {
           key: this.cardFound.key,
-          //tag: '',
-          //note: '',
           name: this.cardFound.name,
           desc: this.cardFound.desc,
           icon: this.cardFound.icon,
+          thumb: this.cardFound.thumb,
           rating: this.cardFound.rating,
           category: this.cardFound.category,
           image: this.cardFound.image,
@@ -229,6 +252,7 @@ const CardReducer = (state = initialState, action) => {
           name: '',
           desc: '',
           icon: '',
+          thumb: '',
           rating: 0,
           category: '',
           image: {},

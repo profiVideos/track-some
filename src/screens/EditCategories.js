@@ -156,7 +156,6 @@ class EditCategories extends PureComponent {
     this.props.dispatch(updateCategory(key, name, desc, icon, selected));
   }
 
-
   onMenuOptionSelect = (value) => {
     switch (value) {
       case 'sortCats': {
@@ -354,6 +353,7 @@ react-native-image-resizer
           </View>
           <FlatList
             data={this.props.itemList}
+            extraData={this.props}
             renderItem={this.renderCategoryItem}
             ItemSeparatorComponent={this.itemSeparator}
           />

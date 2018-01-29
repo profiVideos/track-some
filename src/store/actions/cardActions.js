@@ -7,14 +7,16 @@ import {
   REMOVE_CARD,
   SORT_CARDS, 
   CURRENT_CARD,
-  ADD_CARD_TAG,            // ... NEW ...
-  ADD_CARD_IMAGE,         // ... NEW ...
+  ADD_CARD_TAG,              // ... NEW ...
+  ADD_CARD_IMAGE,            // ... NEW ...
+  HIGHLIGHT_CARD,            // ... NEW ...
   CARD_EDIT_CHANGE,
   CARDS_STORAGE_KEY,
   SAVE_CARDS_SUCCESS,
   //SAVE_CARDS_FAILURE,
   LOAD_CARDS_SUCCESS,
   //LOAD_CARDS_FAILURE
+  UPDATE_CARD_SELECTED,      // ... NEW ...
   DELETE_SELECTED_CARDS
 } from './actionTypes';
 
@@ -22,6 +24,13 @@ export const itemCardChanged = (prop, value) => {
   return {
     type: CARD_EDIT_CHANGE,
     payload: { prop, value }
+  };
+};
+
+export const highlightCard = (key) => {
+  return {
+    type: HIGHLIGHT_CARD,
+    payload: { key }
   };
 };
 
@@ -37,10 +46,10 @@ export const sortMyCards = () => {
   };
 };
 
-export const addCard = (key, name, desc, icon, rating, category, tags, image) => {
+export const addCard = (key, name, desc, icon, thumb, rating, category, tags, image) => {
   return {
     type: ADD_CARD,
-    payload: { key, name, desc, icon, rating, category, tags, image }
+    payload: { key, name, desc, icon, thumb, rating, category, tags, image }
   };
 };
 
@@ -58,10 +67,17 @@ export const addCardImage = (image) => {
   };
 };
 
-export const updateCard = (key, name, desc, icon, rating, category, isSelected) => {
+export const updateCard = (key, name, desc, icon, thumb, rating, category) => {
   return {
     type: UPDATE_CARD,
-    payload: { key, name, desc, icon, rating, category, isSelected }
+    payload: { key, name, desc, icon, thumb, rating, category }
+  };
+};
+
+export const setCardSelected = (key, isSelected) => {
+  return {
+    type: UPDATE_CARD_SELECTED,
+    payload: { key, isSelected }
   };
 };
 

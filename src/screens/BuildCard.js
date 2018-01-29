@@ -38,8 +38,10 @@ import {
   //currentCard,
   loadMyCards,
   saveMyCards, 
+  highlightCard,        // ... NEW ...
   //sortMyCards,
-  itemCardChanged
+  itemCardChanged,
+  setCardSelected
 } from '../store/actions';
 
 /*
@@ -57,7 +59,8 @@ const whatDoYouNeed = state => {
     catList: state.categories.itemList,
     emojiCode: state.emojis.emojiCode,     // ... current emoji selected in PickEmojis ...
     itemList: state.cards.itemList,
-    thisCard: state.cards.thisCard, 
+    thisCard: state.cards.thisCard,
+    highlighted: state.cards.highlighted, 
     listUpdated: state.cards.cardsDirty
   };
 };
@@ -77,6 +80,8 @@ class BuildCard extends PureComponent {
     super(props);
     this.onSelectEmoji = this.onSelectEmoji.bind(this);
     this.openModal = this.openModal.bind(this);
+    this.onCardToggle = this.onCardToggle.bind(this);
+    this.onCardItemPress = this.onCardItemPress.bind(this);
     this.state = {
       compress: 0.25,
       image: null,
@@ -128,7 +133,7 @@ class BuildCard extends PureComponent {
     if (nextProps.listUpdated) {
       const myCards = nextProps.itemList;
       this.props.dispatch(saveMyCards(myCards));
-      this.displaySnackBarMsg('Your new card has been saved.');
+      this.displaySnackBarMsg('Your card details have been saved.');
     }
   }
 
@@ -171,6 +176,23 @@ class BuildCard extends PureComponent {
        title: 'Select an Emoji', 
       screen: 'tracksome.EmojiPicker' 
     });
+  }
+
+  onCardToggle(key, selected) {
+    this.props.dispatch(setCardSelected(key, selected));
+  }
+
+  onCardItemPress(key) {
+    //console.log('The main item was pressed with this key: ', key);
+    // ... if item was already selected - and user presses again - deselect ...
+    if (this.props.highlighted === key) {
+      this.props.dispatch(highlightCard(''));
+    } else this.props.dispatch(highlightCard(key));
+  }
+
+  onMenuPress(key) {
+    console.log('Menu press for this item: ', key);
+    //this.props.dispatch(setCardSelected(key, selected));
   }
 
   itemNameChanged(text) {
@@ -284,6 +306,7 @@ class BuildCard extends PureComponent {
         this.props.thisCard.name,
         this.props.thisCard.desc,
         this.props.thisCard.icon,
+        this.props.thisCard.thumb,
         this.props.thisCard.rating,
         this.props.thisCard.category,
         this.props.thisCard.tags,
@@ -392,12 +415,17 @@ class BuildCard extends PureComponent {
         icon={item.icon}
         name={item.name}
         desc={item.desc}
+        image={item.image}
+        thumb={item.thumb}
+        rating={item.rating}
         numTags={this.countTags(item.tags)}
         catDesc={this.renderCatDescription(item.category)}
         checkIcon={item.selected ? 'check-square-o' : 'square-o'}
+        hilite={item.key === this.props.highlighted ? AppColors.hiliteColor : 'white'}
         selected={item.selected}
-        onPressItem={this.onCardItemPress}
-        onToggleItem={this.onCardItemToggle}
+        onPressMenu={this.onMenuPress}
+        onPressItem={this.onCardItemPress}   // ... used to highlight an item (radio control)...
+        onToggleItem={this.onCardToggle}
       />
     );
   }
@@ -441,7 +469,7 @@ class BuildCard extends PureComponent {
         >
           <View style={styles.innerButton}>
             <Icon size={42} name='plus' color={'white'} />
-            <Text style={styles.buttonText}>Save Item</Text>
+            <Text style={styles.buttonText}>Save It!</Text>
           </View>
         </TouchableOpacity>
       </View>
@@ -513,6 +541,7 @@ class BuildCard extends PureComponent {
         <FlatList
           //style={{ flex: 1 }}
           data={this.props.itemList}
+          extraData={this.props}
           renderItem={this.renderCardItem}
           ItemSeparatorComponent={this.itemSeparator}
         />
@@ -527,6 +556,15 @@ export default connect(whatDoYouNeed)(BuildCard);
 
 /*
 
+dropbox upload method
+
+var myFile_Encoded = new encoding.TextEncoder().encode(JSON.stringify(myFile));
+dbx.filesUpload({
+  path: DBX_FILEPATH,
+  contents: myFile_Encoded,
+  mode: 'overwrite',
+});
+
 */
 
 const styles = StyleSheet.create({
@@ -537,7 +575,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around'
   },
   innerButton: {
-    paddingBottom: 4,
     alignItems: 'center'
   },
   masterButton: {
