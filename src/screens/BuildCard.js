@@ -457,10 +457,22 @@ class BuildCard extends PureComponent {
   }
 
   renderItemExtras() {
+    const renderIcon = this.props.thisCard.icon !== '' ?
+                      (<View style={styles.wrapperIcon}> 
+                         <Text style={styles.emojiThumb}>{this.props.thisCard.icon}</Text>
+                       </View>) : 
+                      <Text style={styles.previewText}>Image Previews Here!</Text>;
+    const renderImage = Object.keys(this.props.thisCard.image).length === 0 && 
+                        this.props.thisCard.image.constructor === Object ?  
+                      <Text style={styles.previewText}>Image Previews Here!</Text> :
+                      (<View style={styles.wrapperImage}> 
+                         <Image style={styles.imageThumb} source={this.props.thisCard.image} />
+                       </View>); 
     return (
       <View style={styles.mainPanel}>
         <View style={styles.statusBar}>
-          <Text style={styles.previewText}>Image Previews Show Up Here!</Text>
+          { renderIcon }
+          { renderImage }
         </View>
         <TouchableOpacity 
           disabled={this.props.thisCard.name === ''} 
@@ -469,7 +481,7 @@ class BuildCard extends PureComponent {
         >
           <View style={styles.innerButton}>
             <Icon size={42} name='plus' color={'white'} />
-            <Text style={styles.buttonText}>Save It!</Text>
+            <Text style={styles.buttonText}>Save</Text>
           </View>
         </TouchableOpacity>
       </View>
@@ -568,6 +580,23 @@ dbx.filesUpload({
 */
 
 const styles = StyleSheet.create({
+  wrapperIcon: {
+    height: 46,
+    paddingBottom: 1,
+    paddingLeft: 12,
+    paddingRight: 12,
+    borderRadius: 3,
+    marginRight: 12,
+    backgroundColor: 'white'
+  },
+  wrapperImage: {
+    height: 44,
+    //paddingBottom: 1,
+    //paddingLeft: 5,
+    //paddingRight: 5,
+    borderRadius: 3,
+    backgroundColor: 'white'
+  },
   mainPanel: {
     width: '100%',
     flexDirection: 'row',
@@ -602,9 +631,15 @@ const styles = StyleSheet.create({
     padding: 2,
     alignItems: 'center',
     backgroundColor: AppColors.accentColor,  // ... light orange ...
-    justifyContent: 'space-around'
+    justifyContent: 'center'
   },
   // ... the main icon / photo ...
+  imageThumb: {
+    height: 44,
+    width: 60,
+    borderRadius: 3,
+    resizeMode: 'cover'
+  },
   imageStyle: {
     height: 60,
     width: 80,
@@ -622,6 +657,12 @@ const styles = StyleSheet.create({
     marginBottom: 3,
     borderColor: '#aaa',
     borderWidth: 1
+  },
+  emojiThumb: {
+    color: 'black',
+    fontSize: 30,
+    textAlign: 'center',
+    paddingBottom: 3
   },
   emojiIcon: {
     color: 'black',
@@ -665,6 +706,7 @@ const styles = StyleSheet.create({
   previewText: {
     fontSize: 14,
     color: 'rgba(0, 0, 0, .5)',
+    textAlign: 'center'
   },
   pickerElements: {
     marginLeft: -8,
