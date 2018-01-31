@@ -7,7 +7,7 @@ import {
   Modal,
   Picker,
   //Button,
-  FlatList, 
+  //FlatList, 
   StyleSheet, 
   ScrollView,
   TouchableOpacity,
@@ -90,6 +90,7 @@ class BuildCard extends PureComponent {
       compress: 0.25,
       image: null,
       images: null,
+      showDesc: false,
       getIcon4Card: false,
       modalVisible: false,
       pickerItems: [],
@@ -115,6 +116,7 @@ class BuildCard extends PureComponent {
   componentWillMount() {
     console.log('inside build cards ...');
     this.props.dispatch(loadMyCards());
+    this.cleanTempSpace();  // ... cleans up images in tmp directory ...
     //console.log(`removed tmp image ${image.uri} from tmp directory`);
   }
 
@@ -137,7 +139,7 @@ class BuildCard extends PureComponent {
     if (nextProps.listUpdated) {
       const myCards = nextProps.itemList;
       this.props.dispatch(saveMyCards(myCards));
-      this.displaySnackBarMsg('Your card details have been saved.');
+      this.displaySnackBarMsg('Your details have been saved.', 'Great Job');
     }
   }
 
@@ -169,7 +171,7 @@ class BuildCard extends PureComponent {
         title: 'Add a new Category',
         screen: 'tracksome.EditCategories'
       });
-    } else if (selection !== '') {
+    } else /*if (selection !== '') */ {
       this.props.dispatch(itemCardChanged('category', selection));
     }
   }
@@ -199,6 +201,26 @@ class BuildCard extends PureComponent {
     //this.props.dispatch(setCardSelected(key, selected));
   }
 
+  getCameraImage(cropit) {
+    ImagePicker.openCamera({
+      width: 1056,
+      height: 768,
+      cropping: cropit,
+      compressImageQuality: this.state.compress,
+      includeExif: true,
+      includeBase64: true,
+      cropperToolbarColor: AppColors.mainDarkColor,
+      cropperActiveWidgetColor: AppColors.mainLiteColor,
+      cropperToolbarTitle: 'Position Photo',
+    }).then(image => {
+      console.log('received image', image);
+      this.itemImageChanged(image);
+    }).catch(e => {
+      console.log(e);
+      //Alert.alert(e.message ? e.message : e);
+    });
+  }
+
   itemNameChanged(text) {
     this.props.dispatch(itemCardChanged('name', text));
   }
@@ -225,10 +247,10 @@ class BuildCard extends PureComponent {
     Alert.alert('Button Pressed');
   }
 
-  displaySnackBarMsg(msg) {
+  displaySnackBarMsg(msg, action) {
     this.props.navigator.showSnackbar({
       text: msg,  //'This option is in development',
-      actionText: 'Stay Tuned', // optional
+      actionText: action, // optional
       actionId: 'not sure about how to use this', // Mandatory if you've set actionText
       actionColor: 'white', // optional
       textColor: AppColors.accentColor, // optional
@@ -246,7 +268,15 @@ class BuildCard extends PureComponent {
     this.setState({ modalVisible: false });
   }
 
-  pickSingle(cropit, circular = false) {
+  cleanTempSpace() {
+    ImagePicker.clean().then(() => {
+      console.log('removed all tmp images from tmp directory');
+    }).catch(e => {
+      Alert.alert(e);
+    });
+  }
+
+  pickSingleImage(cropit, circular = false) {
     //console.log('About to select a photo');
     ImagePicker.openPicker({
       width: 1056,
@@ -271,20 +301,6 @@ class BuildCard extends PureComponent {
     }).then(image => {
       //console.log('received image', image);
       this.itemImageChanged(image);
-/*      
-      this.setState({
-        image: { 
-          uri: image.path, 
-          width: image.width, 
-          height: image.height,
-          size: image.size,
-          mimeType: image.mime,
-          created: image.modificationDate,
-          base64: image.data
-        },
-        images: null
-      });
-*/        
     }).catch(e => {
       console.log(e);
       //Alert.alert(e.message ? e.message : e);
@@ -370,7 +386,7 @@ class BuildCard extends PureComponent {
 
   renderActionIcons = () => (
     <View style={styles.actionBar}>
-      <TouchableNativeFeedback onPress={() => this.pickSingle(true)}>
+      <TouchableNativeFeedback onPress={() => this.pickSingleImage(true)}>
         <View style={styles.iconsPadding}>
           <Image style={styles.imageIconStyle} source={PictureFrame} />
         </View>
@@ -380,7 +396,7 @@ class BuildCard extends PureComponent {
           <Image style={styles.imageIconStyle} source={SmileyFace} />
         </View>
       </TouchableNativeFeedback>
-      <TouchableNativeFeedback onPress={this.doSomeFunction}>
+      <TouchableNativeFeedback onPress={() => this.getCameraImage(true)}>
         <View style={styles.iconsPadding}>
           <Image style={styles.imageIconStyle} source={PhotoAdd} />
         </View>
@@ -468,7 +484,7 @@ class BuildCard extends PureComponent {
                        </View>) : <View />;
     const renderImage = Object.keys(this.props.thisCard.image).length === 0 && 
                         this.props.thisCard.image.constructor === Object ?  
-                      <Text style={styles.previewText}>Image Previews Here!</Text> :
+                      <Text style={styles.previewText}>Preview Here!</Text> :
                       (<View style={styles.wrapperImage}> 
                          <Image style={styles.imageThumb} source={this.props.thisCard.image} />
                        </View>); 
@@ -495,6 +511,17 @@ class BuildCard extends PureComponent {
       <View style={styles.outerContainer}>
 */
   render() {
+    const showDescInput = this.state.showDesc ?
+      (<View style={styles.editFieldStyle}>
+        <MDInput
+          style={styles.inputStyle}
+          label='Description (optional)'
+          placeholder='Briefly describe this item ... '
+          value={this.props.thisCard.desc}
+          onChangeText={text => this.itemDescChanged(text)}
+        />
+      </View>) : <View />;
+
     return (
       <MenuProvider>
 
@@ -532,15 +559,9 @@ class BuildCard extends PureComponent {
                 </Picker>              
               </View>
             </View>
-            <View style={styles.editFieldStyle}>
-              <MDInput
-                style={styles.inputStyle}
-                label='Description (optional)'
-                placeholder='Briefly describe this item ... '
-                value={this.props.thisCard.desc}
-                onChangeText={text => this.itemDescChanged(text)}
-              />
-            </View>
+
+            {showDescInput}
+
           </View>
 
           <View style={styles.tagsBar}>
@@ -555,14 +576,28 @@ class BuildCard extends PureComponent {
         { this.renderTagEditScreen() }
         { this.renderItemExtras() }
         { this.renderActionIcons() }
-        
-          <FlatList
-            //style={{ flex: 1 }}
-            data={this.props.itemList}
-            extraData={this.props}
-            renderItem={this.renderCardItem}
-            ItemSeparatorComponent={this.itemSeparator}
+
+        <View style={styles.previewCard}>
+          <Text style={styles.cardPreviewText} >Your New Card - List Preview</Text>
+          <CardItem 
+            id={this.props.thisCard.key}
+            icon={this.props.thisCard.icon}
+            name={this.props.thisCard.name}
+            desc={this.props.thisCard.desc}
+            image={this.props.thisCard.image}
+            thumb={this.props.thisCard.thumb}
+            rating={this.props.thisCard.rating}
+            selected={false}
+            marked={false}
+            numTags={this.countTags(this.props.thisCard.tags)}
+            catDesc={this.renderCatDescription(this.props.thisCard.category)}
+            checkIcon={this.props.thisCard.selected ? 'check-square-o' : 'square-o'}
+            hilite={'white'}
+            onPressMenu={this.doSomeFunction}
+            onPressItem={this.doSomeFunction}   // ... simulate an item press ...
+            onToggleItem={this.doSomeFunction}  // ... simulate a check box press ...
           />
+        </View>
 
       </ScrollView>
       </MenuProvider>
@@ -574,6 +609,15 @@ class BuildCard extends PureComponent {
 export default connect(whatDoYouNeed)(BuildCard);
 
 /*
+
+          <FlatList
+            //style={{ flex: 1 }}
+            data={this.props.itemList}
+            extraData={this.props}
+            renderItem={this.renderCardItem}
+            ItemSeparatorComponent={this.itemSeparator}
+          />
+
 
 dropbox upload method
 
@@ -587,6 +631,17 @@ dbx.filesUpload({
 */
 
 const styles = StyleSheet.create({
+  cardPreviewText: {
+    color: AppColors.accentColor,
+    fontSize: 15,
+    padding: 7,
+    textAlign: 'center',
+    backgroundColor: AppColors.mainDarkColor
+  },
+  previewCard: {
+    marginTop: 6,
+    marginBottom: 6
+  },
   wrapperIcon: {
     height: 46,
     paddingBottom: 1,
@@ -594,6 +649,8 @@ const styles = StyleSheet.create({
     paddingRight: 12,
     borderRadius: 3,
     marginRight: 12,
+    borderColor: '#888',
+    borderWidth: 1,
     backgroundColor: 'white'
   },
   wrapperImage: {
@@ -602,6 +659,8 @@ const styles = StyleSheet.create({
     //paddingLeft: 5,
     //paddingRight: 5,
     borderRadius: 3,
+    borderColor: '#888',
+    borderWidth: 1,
     backgroundColor: 'white'
   },
   mainPanel: {
@@ -631,8 +690,8 @@ const styles = StyleSheet.create({
   },
   statusBar: {
     width: '100%',
-    height: 48,
-    marginTop: -10,
+    height: 50,
+    marginTop: -4,
     marginLeft: -11,
     flexDirection: 'row',
     padding: 2,
@@ -694,7 +753,7 @@ const styles = StyleSheet.create({
   actionBar: {
     height: 62,
     flexDirection: 'row',
-    marginTop: -10,
+    marginTop: -4,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0,0,0,0.25)',
     width: '100%',
@@ -799,7 +858,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain'
   },
   nameWidth: {     // ... used to define the item name input width ...
-    width: '85%'
+    width: '72%'
   },
   inputStyle: {   // ... used to define the item desc input width ...
     width: '100%'

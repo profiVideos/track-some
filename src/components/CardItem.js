@@ -12,13 +12,12 @@ import {
   MenuOptions,
   MenuOption,
   MenuTrigger,
-  renderers
-  //MenuProvider
+  //renderers
 } from 'react-native-popup-menu';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import AppColors from '../templates/appColors';
 
-const { Popover } = renderers;
+//const { Poopover } = renderers;
 const IconMenuOption = (props) => (
   <MenuOption 
     value={props.value} 
@@ -77,7 +76,7 @@ class CardItem extends React.PureComponent {
     <Menu 
       onSelect={(value) => this.onMenuOptionSelection(value, this.props.id)} 
       //ref={this.menuReference}
-      renderer={Popover}
+      //renderer={Poopover}
     >
       <MenuTrigger>
         <Icon 
@@ -100,11 +99,17 @@ class CardItem extends React.PureComponent {
     const renderFull = this.props.marked ? <Text>Show Everything!</Text> : <View />;
     const tagsBadge = (this.props.numTags === 0) ? <View /> :
       (<View style={{ flexDirection: 'row', alignItems: 'center' }}>
-         <Text style={styles.extraInfo}>  Tags:</Text>
+         <Text style={styles.extraInfo}>Tags:</Text>
          <View style={styles.tagsBadge}>
            <Text style={styles.badgeTextStyle}>{this.props.numTags}</Text>
          </View>
        </View>);
+    const itemDesc = (this.props.desc === '') ? <View /> :
+      (<Text ellipsizeMode='tail' numberOfLines={1} style={styles.subHeading}>
+         {this.props.desc}
+       </Text>);
+    const categoryDesc = (this.props.catDesc === '') ? <View /> :
+      <Text style={styles.extraInfo} >{`${this.props.catDesc}  `}</Text>;
     return (
       <View>
         <View style={[styles.outerWrapper, { backgroundColor: backColor }]}>
@@ -117,31 +122,25 @@ class CardItem extends React.PureComponent {
             </TouchableOpacity>
           </View>
           <TouchableNativeFeedback onPress={this.onTouchablePress}>
-            <View style={styles.infoWrapper}>
-              <Text 
-                ellipsizeMode='tail' 
-                numberOfLines={1} 
-                style={styles.itemName}
-              >
-                {this.props.name}
-              </Text>
-              <Text 
-                ellipsizeMode='tail' 
-                numberOfLines={1} 
-                style={styles.subHeading}
-              >
-                {this.props.desc}
-              </Text>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text style={styles.extraInfo} >{this.props.catDesc}</Text>
-                {tagsBadge}
+              <View style={styles.infoWrapper}>
+                <Text 
+                  ellipsizeMode='tail' 
+                  numberOfLines={1} 
+                  style={styles.itemName}
+                >
+                  {this.props.name}
+                </Text>
+                {itemDesc}
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  {categoryDesc}
+                  {tagsBadge}
+                </View>
               </View>
-            </View>
-          </TouchableNativeFeedback>
-          <TouchableNativeFeedback onPress={this.onMenuPress}>
-            { this.renderOptionMenu() }
           </TouchableNativeFeedback>
           <View style={styles.checkWrapper}>
+            <TouchableNativeFeedback onPress={this.onMenuPress}>
+              { this.renderOptionMenu() }
+            </TouchableNativeFeedback>
             <TouchableOpacity onPress={this.onToggleCheck}>
               <Icon 
                 size={20}
@@ -166,7 +165,7 @@ export default CardItem;
 const menuOptionsStyles = {
   optionsContainer: {
     width: 105,
-    backgroundColor: AppColors.darkerColor,  // ... light grey ...
+    backgroundColor: AppColors.darkerColor,  // ... dark cyan ...
   },
   optionText: {
     color: 'white',
@@ -184,15 +183,19 @@ const styles = StyleSheet.create({
   subHeading: {
     fontSize: 13,
     //height: 15
-    marginTop: -3
+    marginTop: -4,
   },
   extraInfo: {
     fontSize: 11,
+    paddingBottom: 3,
+    //backgroundColor: 'grey'
   },
   imageStyle: {
     height: 60,
     width: 80,
-    borderRadius: 3,
+    borderTopRightRadius: 3,
+    borderBottomRightRadius: 3,
+    //borderRadius: 3,
     resizeMode: 'cover'
   },
   badgeTextStyle: {
@@ -205,44 +208,42 @@ const styles = StyleSheet.create({
     marginLeft: 3,
     width: 14,
     height: 14,
-    borderRadius: 14
+    borderRadius: 14,
+    marginBottom: 3,
   },
   outerWrapper: {
     width: '100%',
     height: 60,
-    paddingRight: 5,
+    paddingRight: 10,
+    elevation: 2,
     flexDirection: 'row',
     alignItems: 'center',
+    //backgroundColor: 'blue',
     justifyContent: 'space-between'
   },
   imageWrapper: {
-    borderRadius: 3,
-    borderLeftWidth: 1,
+    borderTopRightRadius: 3,
+    borderBottomRightRadius: 3,
+    //borderLeftWidth: 1,
     borderRightWidth: 1,
     borderColor: '#b9b9b9',
-    //padding: 7,
     backgroundColor: '#f5f5f5',
     justifyContent: 'center',
     alignItems: 'center'
   },
   infoWrapper: {
-    //padding: 3,
     paddingLeft: 7,
-    width: '68%',
-    //justifyContent: 'center',
-    //backgroundColor: 'yellow', //white',
+    width: '70%',
   },
   checkWrapper: {
-    //padding: 3,
-    width: 22,
-    //backgroundColor: 'white',
+    //width: '12%',
+    width: 32,
     alignItems: 'center',
     justifyContent: 'center'
   },
   menuWrapper: {
-    padding: 5,
-    //width: 22,
-    //backgroundColor: 'white',
+    padding: 7,
+    paddingTop: 3,
     alignItems: 'center',
     justifyContent: 'center'
   },
@@ -250,10 +251,8 @@ const styles = StyleSheet.create({
     //paddingTop: 3
   },
   itemName: {
-    marginTop: -3,
     fontSize: 16,
     fontWeight: '500',
-    //backgroundColor: 'grey', //white',
     color: '#333'
   },
   itemIcon: {
