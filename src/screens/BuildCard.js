@@ -18,6 +18,10 @@ import { connect } from 'react-redux';
 //import IconIon from 'react-native-vector-icons/Ionicons';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import ImagePicker from 'react-native-image-crop-picker';
+import { 
+  MenuProvider
+} from 'react-native-popup-menu';
+
 import { UniqueId } from '../components/common/UniqueId';
 import MDInput from '../components/common/mdInput';
 import PictureFrame from '../images/PictureFrame.png';
@@ -418,11 +422,12 @@ class BuildCard extends PureComponent {
         image={item.image}
         thumb={item.thumb}
         rating={item.rating}
+        selected={item.selected}
+        marked={item.key === this.props.highlighted}
         numTags={this.countTags(item.tags)}
         catDesc={this.renderCatDescription(item.category)}
         checkIcon={item.selected ? 'check-square-o' : 'square-o'}
         hilite={item.key === this.props.highlighted ? AppColors.hiliteColor : 'white'}
-        selected={item.selected}
         onPressMenu={this.onMenuPress}
         onPressItem={this.onCardItemPress}   // ... used to highlight an item (radio control)...
         onToggleItem={this.onCardToggle}
@@ -460,8 +465,7 @@ class BuildCard extends PureComponent {
     const renderIcon = this.props.thisCard.icon !== '' ?
                       (<View style={styles.wrapperIcon}> 
                          <Text style={styles.emojiThumb}>{this.props.thisCard.icon}</Text>
-                       </View>) : 
-                      <Text style={styles.previewText}>Image Previews Here!</Text>;
+                       </View>) : <View />;
     const renderImage = Object.keys(this.props.thisCard.image).length === 0 && 
                         this.props.thisCard.image.constructor === Object ?  
                       <Text style={styles.previewText}>Image Previews Here!</Text> :
@@ -492,6 +496,8 @@ class BuildCard extends PureComponent {
 */
   render() {
     return (
+      <MenuProvider>
+
       <ScrollView style={{ flex: 1 }} keyboardShouldPersistTaps='always'>
 
         <View style={styles.cardContainer}>
@@ -549,16 +555,17 @@ class BuildCard extends PureComponent {
         { this.renderTagEditScreen() }
         { this.renderItemExtras() }
         { this.renderActionIcons() }
-
-        <FlatList
-          //style={{ flex: 1 }}
-          data={this.props.itemList}
-          extraData={this.props}
-          renderItem={this.renderCardItem}
-          ItemSeparatorComponent={this.itemSeparator}
-        />
+        
+          <FlatList
+            //style={{ flex: 1 }}
+            data={this.props.itemList}
+            extraData={this.props}
+            renderItem={this.renderCardItem}
+            ItemSeparatorComponent={this.itemSeparator}
+          />
 
       </ScrollView>
+      </MenuProvider>
     );
   }
 

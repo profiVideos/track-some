@@ -1,6 +1,21 @@
-import React, { Component } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import React from 'react';
 import { connect } from 'react-redux';
+import {
+  View,
+  //Text,
+  StyleSheet,
+  TouchableOpacity,
+  TouchableHighlight,
+  TouchableWithoutFeedback,
+  Button,
+} from 'react-native';
+import {
+  Menu,
+  MenuProvider,
+  MenuOptions,
+  MenuOption,
+  MenuTrigger,
+} from 'react-native-popup-menu';
 import AppColors from '../templates/appColors';
 
 /*
@@ -23,12 +38,34 @@ const whatDoYouNeed = state => {
   };
 };
 
-class ShowCard extends Component {
+const touchableOpacityProps = {
+  activeOpacity: 0.6,
+};
+
+const touchableHighlightProps = {
+  activeOpacity: 0.5,
+  underlayColor: 'green',
+};
+
+const getDisplayName = Component => (
+  Component.displayName ||
+  Component.name ||
+  (typeof Component === 'string' ? Component : 'Component')
+);
+
+class ShowCard extends React.Component {
   static navigatorStyle = {
     drawUnderNavBar: false,
     navBarBackgroundColor: AppColors.accentColor,
     navBarTranslucent: false
   };
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      Touchable: Button
+    };
+  }
 
   componentDidMount() {
     console.log('Show Card Props: ', this.props);
@@ -43,10 +80,77 @@ class ShowCard extends Component {
   }
 
   render() {
+    const { Touchable } = this.state;
+    const buttonText = 'Select ' + (Touchable ? (getDisplayName(Touchable)) : 'default');
     return (
-      <View style={styles.container}>
-        <Text>Inside Show Card</Text>
-      </View>
+      <MenuProvider style={{ flexDirection: 'column', padding: 30 }}>
+        <View style={styles.container}>
+
+          <Menu onSelect={NewTouchable => this.setState({ Touchable: NewTouchable })}>
+            <MenuTrigger
+              customStyles={{
+                TriggerTouchableComponent: Button,
+                triggerTouchable: { title: 'Select (Custom Touchables)' }
+              }}
+            />
+          <MenuOptions>
+              <MenuOption text='Default' />
+              <MenuOption 
+                text='TouchableOpacity' 
+                customStyles={{
+                  OptionTouchableComponent: TouchableOpacity,
+                  optionTouchable: touchableOpacityProps,
+                }}
+                value={TouchableOpacity}
+              />
+              <MenuOption 
+                text='TouchableHighlight' 
+                customStyles={{
+                  OptionTouchableComponent: TouchableHighlight,
+                  optionTouchable: touchableHighlightProps,
+                }}
+                value={TouchableHighlight}
+              />
+              <MenuOption 
+                text='TouchableWithoutFeedback' 
+                customStyles={{
+                  OptionTouchableComponent: TouchableWithoutFeedback,
+                }}
+                value={TouchableWithoutFeedback}
+              />
+              <MenuOption 
+                customStyles={{
+                  OptionTouchableComponent: Button,
+                  optionTouchable: { title: 'Button' }
+                }}
+                value={Button}
+              />
+            </MenuOptions>
+          </Menu>
+
+          <Menu style={{ paddingTop: 30 }}>
+            <MenuTrigger
+              customStyles={{
+                TriggerTouchableComponent: Touchable,
+                triggerTouchable: { title: buttonText }
+              }}
+              text={buttonText}
+            />
+            <MenuOptions 
+              customStyles={{
+                OptionTouchableComponent: TouchableOpacity,
+                optionTouchable: touchableOpacityProps,
+              }}
+            >
+              <MenuOption text='Option 1' />
+              <MenuOption text='Option 2' />
+              <MenuOption text='Option 3' />
+              <MenuOption text='Option 4' />
+            </MenuOptions>
+          </Menu>
+
+        </View>
+      </MenuProvider>
     );
   }
 

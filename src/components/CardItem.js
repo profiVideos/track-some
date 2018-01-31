@@ -7,7 +7,24 @@ import {
   TouchableOpacity,
   TouchableNativeFeedback 
 } from 'react-native';
+import {
+  Menu,
+  MenuOptions,
+  MenuOption,
+  MenuTrigger,
+  renderers
+  //MenuProvider
+} from 'react-native-popup-menu';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import AppColors from '../templates/appColors';
+
+const { Popover } = renderers;
+const IconMenuOption = (props) => (
+  <MenuOption 
+    value={props.value} 
+    text={`${props.icon}  ${props.text}`} 
+  />
+);
 
 class CardItem extends React.PureComponent {
   constructor(props) {
@@ -29,9 +46,58 @@ class CardItem extends React.PureComponent {
     this.props.onPressMenu(this.props.id);
   }
 
+  onMenuOptionSelection(value, key) {
+    switch (value) {
+      case 'edit': {
+        console.log('Edit was selected for item key ', key);
+        break;
+      }
+      case 'tags': {
+        console.log('Tags was selected for item key ', key);
+        break;
+      }
+      case 'notes': {
+        console.log('Notes was selected for item key ', key);
+        break;
+      }
+      default: break;
+    }  // ... switch ...
+  }
+
+  //menuReference = (menuId) => {
+  //  this.optionsMenu = menuId;
+  //}
+  /*
+        <MenuOption value={0} disabled>
+          <Text style={styles.menuTitle}>Select Option</Text>
+        </MenuOption>
+  */
+
+  renderOptionMenu = () => (
+    <Menu 
+      onSelect={(value) => this.onMenuOptionSelection(value, this.props.id)} 
+      //ref={this.menuReference}
+      renderer={Popover}
+    >
+      <MenuTrigger>
+        <Icon 
+          size={18}
+          name={'ellipsis-v'} 
+          style={styles.menuWrapper} 
+          color={'#212191'} 
+        />            
+      </MenuTrigger>
+      <MenuOptions customStyles={menuOptionsStyles}>
+        <IconMenuOption value={'edit'} icon='✏️' text='Edit' />
+        <IconMenuOption value={'tags'} icon='🏷️' text='Tags' />
+        <IconMenuOption value={'notes'} icon='🗒️' text='Notes' />
+      </MenuOptions>
+    </Menu>
+  )
+
   render() {
-    //console.log('Item & Color: ', this.props.id, '  ', this.props.hilite);
     const backColor = this.props.hilite;   // ... AppsColor.hiliteColor, otherwise white ...
+    const renderFull = this.props.marked ? <Text>Show Everything!</Text> : <View />;
     const tagsBadge = (this.props.numTags === 0) ? <View /> :
       (<View style={{ flexDirection: 'row', alignItems: 'center' }}>
          <Text style={styles.extraInfo}>  Tags:</Text>
@@ -40,54 +106,54 @@ class CardItem extends React.PureComponent {
          </View>
        </View>);
     return (
-      <View style={[styles.outerWrapper, { backgroundColor: backColor }]}>
-        <View style={styles.imageWrapper}>
-          <TouchableOpacity onPress={this.onIconChange}>
-            {Object.keys(this.props.image).length === 0 && 
-             this.props.image.constructor === Object ?  
-               <Text style={styles.itemIcon}>{this.props.icon}</Text> :
-             <Image style={styles.imageStyle} source={this.props.image} />} 
-          </TouchableOpacity>
-        </View>
-        <TouchableNativeFeedback onPress={this.onTouchablePress}>
-          <View style={styles.infoWrapper}>
-            <Text 
-              ellipsizeMode='tail' 
-              numberOfLines={1} 
-              style={styles.itemName}
-            >
-              {this.props.name}
-            </Text>
-            <Text 
-              ellipsizeMode='tail' 
-              numberOfLines={1} 
-              style={styles.subHeading}
-            >
-              {this.props.desc}
-            </Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={styles.extraInfo} >{this.props.catDesc}</Text>
-              {tagsBadge}
-            </View>
+      <View>
+        <View style={[styles.outerWrapper, { backgroundColor: backColor }]}>
+          <View style={styles.imageWrapper}>
+            <TouchableOpacity onPress={this.onIconChange}>
+              {Object.keys(this.props.image).length === 0 && 
+               this.props.image.constructor === Object ?  
+                 <Text style={styles.itemIcon}>{this.props.icon}</Text> :
+               <Image style={styles.imageStyle} source={this.props.image} />} 
+            </TouchableOpacity>
           </View>
-        </TouchableNativeFeedback>
-        <TouchableNativeFeedback onPress={this.onMenuPress}>
-          <Icon 
-            size={18}
-            name={'ellipsis-v'} 
-            style={styles.menuWrapper} 
-            color={'#212191'} 
-          />            
-        </TouchableNativeFeedback>
-        <View style={styles.checkWrapper}>
-          <TouchableOpacity onPress={this.onToggleCheck}>
-            <Icon 
-              size={20}
-              name={this.props.checkIcon} 
-              style={styles.checkStyle} 
-              color={'#212121'} 
-            />            
-          </TouchableOpacity>
+          <TouchableNativeFeedback onPress={this.onTouchablePress}>
+            <View style={styles.infoWrapper}>
+              <Text 
+                ellipsizeMode='tail' 
+                numberOfLines={1} 
+                style={styles.itemName}
+              >
+                {this.props.name}
+              </Text>
+              <Text 
+                ellipsizeMode='tail' 
+                numberOfLines={1} 
+                style={styles.subHeading}
+              >
+                {this.props.desc}
+              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={styles.extraInfo} >{this.props.catDesc}</Text>
+                {tagsBadge}
+              </View>
+            </View>
+          </TouchableNativeFeedback>
+          <TouchableNativeFeedback onPress={this.onMenuPress}>
+            { this.renderOptionMenu() }
+          </TouchableNativeFeedback>
+          <View style={styles.checkWrapper}>
+            <TouchableOpacity onPress={this.onToggleCheck}>
+              <Icon 
+                size={20}
+                name={this.props.checkIcon} 
+                style={styles.checkStyle} 
+                color={'#212121'} 
+              />            
+            </TouchableOpacity>
+          </View>
+        </View>
+        <View style={styles.fullView}>
+          { renderFull }
         </View>
       </View>
     );
@@ -97,7 +163,24 @@ class CardItem extends React.PureComponent {
 
 export default CardItem;
 
+const menuOptionsStyles = {
+  optionsContainer: {
+    width: 105,
+    backgroundColor: AppColors.darkerColor,  // ... light grey ...
+  },
+  optionText: {
+    color: 'white',
+  },
+};
+
 const styles = StyleSheet.create({
+  menuTitle: {
+    fontWeight: '500', 
+    color: AppColors.darkerColor,
+    paddingBottom: 3,
+    borderBottomColor: '#ccc',
+    borderBottomWidth: 1
+  },
   subHeading: {
     fontSize: 13,
     //height: 15
