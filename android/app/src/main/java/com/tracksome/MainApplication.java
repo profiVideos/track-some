@@ -3,6 +3,7 @@ package com.tracksome;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import io.realm.react.RealmReactPackage;
 import com.reactnative.ivpusic.imagepicker.PickerPackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
@@ -27,7 +28,8 @@ public class MainApplication extends NavigationApplication {
      // No need to add RnnPackage and MainReactPackage
      return Arrays.<ReactPackage>asList(
        new VectorIconsPackage(),
-       new PickerPackage()
+       new PickerPackage(),
+       new RealmReactPackage()
      );
   }
 
@@ -56,6 +58,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new RealmReactPackage(),
             new PickerPackage()
       );
     }
