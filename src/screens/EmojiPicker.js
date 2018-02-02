@@ -24,15 +24,12 @@ import {
 import AppColors from '../templates/appColors';
 import emojiData from '../store/data/sorted-emojis.json';
 import EmojiTabBar from './EmojiTabBar';
-import { UniqueId } from '../components/common/UniqueId';
 import EmojiItem from '../components/EmojiItem';
 import { 
   addEmoji, 
   updateEmoji, 
   currentEmoji,
-  loadMyEmojis,
-  saveMyEmojis, 
-  sortMyEmojis 
+  loadMyEmojis
 } from '../store/actions';
 
 //console.warn('Emojis are loading ... ');
@@ -77,13 +74,20 @@ const emojiCats = [
 
 const listItemHeight = 65;          // ... used to calculate faster scrolls (pass to EmojiItem) ...
 
+const IconMenuOption = (props) => (
+  <MenuOption 
+    value={props.value} 
+    text={`${props.icon}  ${props.text}`} 
+  />
+);
+
 const whatDoYouNeed = state => {
   return {
     saveMode: state.login.saveMode,
+    myEmojis: state.emojis.myEmojis,
     emojiCode: state.emojis.emojiCode,
     emojiName: state.emojis.emojiName,
-    listUpdated: state.emojis.emojisDirty,
-    myEmojis: state.emojis.myEmojis
+    listUpdated: state.emojis.lastUpdated   // ... tells FlatList we have updated Realm data ...
   };
 };
 
@@ -103,11 +107,10 @@ class EmojiPicker extends PureComponent {
     this.onEmojiCloseSelf = this.onEmojiCloseSelf.bind(this);    
     this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     this.state = {
-      checked: false,
+      checked: false,   // ... used to test the switch component ...
       loading: false,
       canEdit: false,
       refresh: false,
-      language: '',
       emojisClicked: ''
     };
   }
@@ -124,13 +127,17 @@ class EmojiPicker extends PureComponent {
     this.props.dispatch(loadMyEmojis());
   }
 
-  componentWillReceiveProps(nextProps) {
+  //componentWillReceiveProps(nextProps) {
     // ... if the emojis list is dirty (used) then we should save it ...
-    if (nextProps.listUpdated) {
-      const myEmojis = nextProps.myEmojis;
-      this.props.dispatch(saveMyEmojis(myEmojis));
-    }
-  }
+    //console.log('Emoji List Updated: ', nextProps.listUpdated);
+    //------------------------------------------------------
+    // ... do this purely for debugging purposes so we ...
+    // ... can see the data being returned from Realm ...
+    //------------------------------------------------------
+    //if (this.props.listUpdated !== nextProps.listUpdated) {
+      //console.log('New MyEmojis: ', JSON.stringify(nextProps.myEmojis));
+    //}
+  //}
 
   onNavigatorEvent(event) {
     if (event.type === 'NavBarButtonPress') { // this is the event type for button presses
@@ -167,7 +174,7 @@ class EmojiPicker extends PureComponent {
         this.props.myEmojis[locatePos].numUsed + 1));
     } else {
       // ... call the GUID function to generate a new unique id or key ...
-      dataStore.dispatch(addEmoji(UniqueId(), emoji, name));
+      dataStore.dispatch(addEmoji(emoji, name));
     }
   }
 
@@ -190,6 +197,7 @@ class EmojiPicker extends PureComponent {
       animationType: 'slide-down'
     });
   }   
+
 /*
   onToggleItem = (name, emoji) => {
     this.setState({ emojisClicked: `${emoji} ${this.state.emojisClicked}` });
@@ -212,9 +220,7 @@ class EmojiPicker extends PureComponent {
       dataStore.dispatch(addEmoji(UniqueId(), emoji, name));
     }
   };
-*/
 
-/*
     this.setState((state) => {
       // ... copy the map rather than modifying state ...
       const selected = new Map(state.selected);
@@ -224,31 +230,23 @@ class EmojiPicker extends PureComponent {
 */
 
   onEmojiListRefresh() {
-    console.log('The flatlist component has done a refresh ... ');
-    console.log('Refreshing flag is ', this.state.refreshing);
+    //console.log('The flatlist component has done a refresh ... ');
+    //console.log('Refreshing flag is ', this.state.refreshing);
   }
 
   onMenuOptionSelect = (value) => {
     switch (value) {
-      case 'sortEmojis': {
-        // ... sort the emojis by frequency of use ...
-        const dataStore = this.props;
-        dataStore.dispatch(sortMyEmojis());
-        // ... since the sort routines marks the list as "dirty", the ...
-        // ... componentWillReceiveProps(nextProps) will force a save ...
-        break;
-      }
       case 'clearEmojis': {
         // ... delete all selected emojis without asking ...
-        Alert.alert('We need to remove all selected Emojis!');
+        Alert.alert('We need to unselect ALL selected Emojis!');
         break;
       }
-      case 'deleteEmojis': {
+      case 'deleteSelected': {
         // ... delete all selected emojis without asking ...
         Alert.alert('We need to delete all selected Emojis!');
         break;
       }
-      case 'deleteALLEmojis': {
+      case 'deleteAllEmojis': {
         // ... delete all selected emojis without asking ...
         Alert.alert('We are going to delete ALL Emojis!');
         break;
@@ -292,7 +290,7 @@ class EmojiPicker extends PureComponent {
         horizontal={false}
         data={emojiGroup}
         initialNumToRender={10}  // ... 3 ...
-        extraData={this.props}
+        extraData={this.props.listUpdated}
         // ... not sure how these work??? refreshing={this.state.refreshing}
         // ...... Set this true while waiting for new data from a refresh.
         // legacyImplementation - does not work on multiple columns ...
@@ -330,15 +328,14 @@ class EmojiPicker extends PureComponent {
           <View style={{ width: 20, alignItems: 'center' }}>
             <Icon name='md-more' size={24} color={AppColors.darkerColor} />
           </View>
-        </MenuTrigger>      
+        </MenuTrigger>
         <MenuOptions customStyles={menuOptionsStyles}>
           <MenuOption value={0} disabled>
             <Text style={styles.menuTitle}>Emoji Options</Text>
           </MenuOption>
-          <MenuOption value={'sortEmojis'} text='Sort by Most Used' />
-          <MenuOption value={'clearEmojis'} text='Clear All Selected' />
-          <MenuOption value={'deleteEmojis'} text='Delete All Selected' />
-          <MenuOption value={'deleteALLEmojis'} text='Purge Entire List' />
+          <IconMenuOption value={'clearEmojis'} icon='🔄' text='Clear All Selected' />
+          <IconMenuOption value={'deleteSelected'} icon='🗑️' text='Delete All Selected' />
+          <IconMenuOption value={'deleteAllEmojis'} icon='✂' text='Remove Your Emojis' />
         </MenuOptions>
       </Menu>
     //);
@@ -425,35 +422,104 @@ class EmojiPicker extends PureComponent {
 }
 
 export default connect(whatDoYouNeed)(EmojiPicker);
-//export default connect(whatDoYouNeed, whatShouldIDo)(EmojiPicker);
 
 const menuOptionsStyles = {
   optionsContainer: {
-    //backgroundColor: 'green',
-    //padding: 5,
-    width: 150
+    width: 180,
+    padding: 2,
+    paddingLeft: 5,
+    paddingRight: 5,
+    backgroundColor: AppColors.darkerColor,  // ... dark cyan ...
   },
-  /*
-  optionsWrapper: {
-    backgroundColor: 'red',
-  },
-  optionWrapper: {
-    backgroundColor: 'yellow',
-    margin: 5,
-  },
-  optionTouchable: {
-    underlayColor: 'gold',
-    activeOpacity: 70,
-  },
-  */
   optionText: {
-    color: 'blue',
+    color: 'white',
   },
 };
 
+const styles = StyleSheet.create({
+  outerContainer: {
+    flex: 1,
+    backgroundColor: AppColors.paperColor
+  },
+  menuTitle: {
+    fontWeight: '500', 
+    color: AppColors.accentColor,
+    paddingBottom: 3,
+    borderBottomColor: '#aaa',
+    borderBottomWidth: 0.75
+  },
+  statusBar: {
+    height: 44,
+    flexDirection: 'row',
+    padding: (Platform.OS === 'android' ? 2 : 2),
+    alignItems: 'center',
+    backgroundColor: AppColors.darkerColor,  // ... dark cyan ...
+    justifyContent: 'space-around'
+  },
+  historyBar: {
+    height: 32,
+    //paddingBottom: 2,
+    flexDirection: 'row',
+    borderRadius: 15,
+    alignItems: 'center',
+    width: '65%',
+    backgroundColor: '#d5d5d5'
+  },
+  textHistory: {
+    color: 'black',
+    fontSize: 18,
+    alignSelf: 'center',
+    marginBottom: 2,
+    paddingLeft: 8,
+    paddingRight: 8
+  },
+  tabView: {
+    flex: 1,
+    padding: 0,
+    backgroundColor: AppColors.paperColor
+  },
+  iconPaper: {
+    paddingBottom: 1,
+    paddingLeft: 5,
+    paddingRight: 5,
+    borderRadius: 3,
+    backgroundColor: 'transparent'
+  },
+  iconPreview: {
+    color: 'black',
+    fontSize: 29,
+    textAlign: 'center',
+    paddingBottom: 1
+  },  
+  card: {
+    borderWidth: 1,
+    backgroundColor: '#fff',
+    borderColor: 'rgba(0,0,0,0.25)',
+    margin: 5,
+    height: 150,
+    padding: 15,
+    shadowColor: '#ccc',
+    shadowOffset: { width: 2, height: 2, },
+    shadowOpacity: 0.5,
+    shadowRadius: 3,
+  },  
+  icon: {
+    width: 300,
+    height: 300,
+    alignSelf: 'center'
+  },  
+  textInput: {
+    alignSelf: 'stretch',
+    borderRadius: 5,
+    borderWidth: 1,
+    height: 44,
+    paddingHorizontal: 10,
+    marginHorizontal: 20,
+    marginBottom: 20,
+  },
+});
+
 /*
-
-
               {(this.state.emojiCode === '' ? null : this.state.emojiCode)}
             {this.showEmojiList(sortedEmojis.filter((item) => item.category === 'flag'))}
 sortedEmojis.filter((item) => item.category === thisGroup)
@@ -551,89 +617,6 @@ onPress={() => this.setState({checked: !this.state.checked})
                 </View>
 
 */
-
-const styles = StyleSheet.create({
-  outerContainer: {
-    flex: 1,
-    backgroundColor: AppColors.paperColor
-  },
-  menuTitle: {
-    fontWeight: '500', 
-    color: AppColors.darkerColor,
-    paddingBottom: 3,
-    borderBottomColor: '#ccc',
-    borderBottomWidth: 1
-  },
-  statusBar: {
-    height: 44,
-    flexDirection: 'row',
-    padding: (Platform.OS === 'android' ? 2 : 2),
-    alignItems: 'center',
-    backgroundColor: AppColors.darkerColor,  // ... dark cyan ...
-    justifyContent: 'space-around'
-  },
-  historyBar: {
-    height: 32,
-    //paddingBottom: 2,
-    flexDirection: 'row',
-    borderRadius: 15,
-    alignItems: 'center',
-    width: '65%',
-    backgroundColor: '#d5d5d5'
-  },
-  textHistory: {
-    color: 'black',
-    fontSize: 18,
-    alignSelf: 'center',
-    marginBottom: 2,
-    paddingLeft: 8,
-    paddingRight: 8
-  },
-  tabView: {
-    flex: 1,
-    padding: 0,
-    backgroundColor: AppColors.paperColor
-  },
-  iconPaper: {
-    paddingBottom: 1,
-    paddingLeft: 5,
-    paddingRight: 5,
-    borderRadius: 3,
-    backgroundColor: 'transparent'
-  },
-  iconPreview: {
-    color: 'black',
-    fontSize: 29,
-    textAlign: 'center',
-    paddingBottom: 1
-  },  
-  card: {
-    borderWidth: 1,
-    backgroundColor: '#fff',
-    borderColor: 'rgba(0,0,0,0.25)',
-    margin: 5,
-    height: 150,
-    padding: 15,
-    shadowColor: '#ccc',
-    shadowOffset: { width: 2, height: 2, },
-    shadowOpacity: 0.5,
-    shadowRadius: 3,
-  },  
-  icon: {
-    width: 300,
-    height: 300,
-    alignSelf: 'center'
-  },  
-  textInput: {
-    alignSelf: 'stretch',
-    borderRadius: 5,
-    borderWidth: 1,
-    height: 44,
-    paddingHorizontal: 10,
-    marginHorizontal: 20,
-    marginBottom: 20,
-  },
-});
 
 /*-------------------------------------------------------------------------
 /* ... 11.1.2018 - other notes on EmojiList handling ...

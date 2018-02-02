@@ -1,26 +1,80 @@
-// ... later (uses thunk - import firebase from 'firebase';
-
-//import { connect } from 'react-redux';
-import { AsyncStorage } from 'react-native';
 import {
   ADD_EMOJI,
   CLEAR_EMOJI,
-  SORT_EMOJIS,
-  PURGE_EMOJIS,
+  //SORT_EMOJIS,
   UPDATE_EMOJI, 
   REMOVE_EMOJI,
   CURRENT_EMOJI,
-  EMOJIS_STORAGE_KEY, 
-  SAVE_EMOJIS_SUCCESS,   // ... not really needed - just being thorough ...
-  //SAVE_EMOJIS_FAILURE,   // ... not used right now as AsyncStorage does not return error ...
-  LOAD_EMOJIS_SUCCESS,    // ... gets the current emojis database ( AsyncStorage / Cloud Storage )
-  //LOAD_EMOJIS_FAILURE    // ... reports an error condition to the store / user )
+  DELETE_ALL_EMOJIS,  
+  LOAD_EMOJIS_SUCCESS,    // ... gets the current emojis database ...
+  DELETE_SELECTED_EMOJIS
 } from './actionTypes';
+import store from '../../store';   // ... Realm DB Routines ...
 
-export const addEmoji = (key, emoji, name) => {
+export const addEmoji = (emoji, name) => {
+  store.createEmoji(emoji, name);
+  const emojiData = store.getMyEmojis();    // ... retrieves the newly updated list ...
   return {
     type: ADD_EMOJI,
-    payload: { key, emoji, name }
+    payload: { emojis: emojiData }
+  };
+};
+
+export const updateEmoji = (key, selected, numUsed) => {
+  store.updateEmoji(key, selected, numUsed);
+  const emojiData = store.getMyEmojis();    // ... retrieves the newly updated list ...
+  return {
+    type: UPDATE_EMOJI,
+    payload: { emojis: emojiData }
+  };
+};
+
+export const deleteEmojis = () => {
+  store.deleteSelectedEmojis();
+  const emojiData = store.getMyEmojis();    // ... retrieves the newly updated list ...
+  return {
+    type: DELETE_SELECTED_EMOJIS,
+    payload: { emojis: emojiData }
+  };
+};
+
+export const deleteAllEmojis = () => {
+  store.deleteAllEmojis();
+  const emojiData = store.getMyEmojis();    // ... retrieves the newly updated list ...
+  return {
+    type: DELETE_ALL_EMOJIS,
+    payload: { emojis: emojiData }
+  };
+};
+
+export const emojiLoadSuccess = (emojiData) => {
+  return {
+    type: LOAD_EMOJIS_SUCCESS,
+    payload: { emojis: emojiData }
+  };
+};
+
+export const loadMyEmojis = () => {
+  return dispatch => {
+    const emojiData = store.getMyEmojis();
+    dispatch(emojiLoadSuccess(emojiData));
+  };
+};
+
+//---------------------------------------------------------------
+// ... the following functions need to be adjusted for Realm ...
+//---------------------------------------------------------------
+
+export const removeEmoji = (key) => {
+  return {
+    type: REMOVE_EMOJI,
+    payload: { key }
+  };
+};
+
+export const clearEmoji = () => {
+  return {
+    type: CLEAR_EMOJI
   };
 };
 
@@ -31,45 +85,20 @@ export const currentEmoji = (emoji, name) => {
   };
 };
 
-export const clearEmoji = () => {
-  return {
-    type: CLEAR_EMOJI
-  };
-};
-
-export const updateEmoji = (key, selected, numUsed) => {
-  return {
-    type: UPDATE_EMOJI,
-    payload: { key, selected, numUsed }
-  };
-};
-
-export const removeEmoji = (key) => {
-  return {
-    type: REMOVE_EMOJI,
-    payload: { key }
-  };
-};
-
+//----------------------------------------------------------------------
+// ... not required right now as list is sort maintained by Realm ...
+// ... Future: if additional sorts are needed / requested ...
+//----------------------------------------------------------------------
 /*
-return dispatch => {
-    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(myEmojis))
-      .then(console.log('Saved these Emojis', myEmojis))
-      .catch((error) => {
-        console.log('Error - Failed to save name.', error);
-        //dispatch({ ... NEVER DID GET THIS TO WORK RELIABLY ...
-        //  type: SAVE_EMOJIS_FAILURE,
-        //  payload: error
-        //});
-      });
+export const sortMyEmojis = () => {
+  return {
+    type: SORT_EMOJIS
+  };
+};
 */
 
-export const emojiLoadSuccess = (jsonData) => {
-  return {
-    type: LOAD_EMOJIS_SUCCESS,
-    payload: { emojis: jsonData }
-  };
-};
+//----------------------------------------------------------------------
+/*
 
 export const emojiSaveSuccess = () => {
   return {
@@ -77,22 +106,8 @@ export const emojiSaveSuccess = () => {
   };
 };
 
-//  clearPosts: () => async (dispatch, getState) => {
-//    if (getState().posts.length > 0) {
-//      dispatch({type: types.CLEAR_POSTS})
-//    }
-//  }
-//  return (dispatch) => {
-
-export const loadMyEmojis = () => {
-  return dispatch => {
-    AsyncStorage.getItem(EMOJIS_STORAGE_KEY, (errorMsg, jsonData) => {
-      if (jsonData !== null) dispatch(emojiLoadSuccess(JSON.parse(jsonData)));
-    });
-  };
-};
-
 export const saveMyEmojis = (myEmojis) => {
+  //console.log('Inside Save Emojis', myEmojis);
   return dispatch => {
     AsyncStorage.setItem(EMOJIS_STORAGE_KEY, JSON.stringify(myEmojis), (errorMsg, result) => {
       console.log('SAVED! but result is bogus: ', result, '*** Error: ', errorMsg);
@@ -101,20 +116,6 @@ export const saveMyEmojis = (myEmojis) => {
     });
   };
 };
-
-export const sortMyEmojis = () => {
-  return {
-    type: SORT_EMOJIS
-  };
-};
-
-export const deleteMyEmojis = () => {
-  return {
-    type: PURGE_EMOJIS
-  };
-};
-
-/*
 
 -------------------------------------------------------------------------------------------------
 

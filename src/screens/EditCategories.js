@@ -32,17 +32,18 @@ import HappyGuy from '../images/1f603.png';
 import AppColors from '../templates/appColors';
 //import MDInput from '../components/common/mdInput';
 import MDButton from '../components/common/mdButton';
-import { UniqueId } from '../components/common/UniqueId';
+//import { UniqueId } from '../components/common/UniqueId';
 import CategoryItem from '../components/CategoryItem';
 import { 
   addCategory,
   updateCategory,
-  saveCategories,
   loadCategories,
-  sortCategories,
   itemTextChanged,
   deleteCategories
 } from '../store/actions';
+
+//import store from '../store';
+//import { reducerCategories } from '../store/reducers';
 
 /*
 const AppColors = {
@@ -55,14 +56,24 @@ const AppColors = {
 }
 */
 
+//const categoryLiveResults = store.getAllCategories();  // ... Realm updates this in real time ...
+
 const mapStateToProps = state => {
   return {
-    itemList: state.categories.itemList,
-    emojiCode: state.emojis.emojiCode,     // ... current emoji selected in PickEmojis ...
+    //itemList: categoryLiveResults,
+    itemList: state.categories.itemList,        // ... state.categories.itemList,
+    emojiCode: state.emojis.emojiCode,          // ... current emoji selected in PickEmojis ...
     currentCat: state.categories.catCurrent,
-    listUpdated: state.categories.catsDirty
+    listUpdated: state.categories.lastUpdated   // ... tells FlatList we have updated Realm data ...
   };
 };
+
+const IconMenuOption = (props) => (
+  <MenuOption 
+    value={props.value} 
+    text={`${props.icon}  ${props.text}`} 
+  />
+);
 
 class EditCategories extends PureComponent {
   static navigatorStyle = {
@@ -86,6 +97,7 @@ class EditCategories extends PureComponent {
     toggled: false,
     hasloaded: false,
     modalVisible: false,
+    myList: [],
     //removeAnim: new Animated.Value(1),
     //categoriesAnim: new Animated.Value(0),
     scrWidth: Dimensions.get('window').width,
@@ -94,19 +106,20 @@ class EditCategories extends PureComponent {
   }
 
   componentWillMount() {
-    //console.log('inside edit categories ...');
+    console.log('inside edit categories ...');
     this.props.dispatch(loadCategories());
   }
 
   componentWillReceiveProps(nextProps) {
-    //console.log(nextProps);
-    //this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
-    // ... if the categories list is dirty (used) then we should save it ...
-    if (nextProps.listUpdated) {
-      const myCategories = nextProps.itemList;
-      this.props.dispatch(saveCategories(myCategories));
+    //------------------------------------------------------
+    // ... do this purely for debugging purposes so we ...
+    // ... can see the data being returned from Realm ...
+    //------------------------------------------------------
+    if (this.props.listUpdated !== nextProps.listUpdated) {
+      console.log('New Categories: ', JSON.stringify(nextProps.itemList));
     }
   }
+
 
   onNavigatorEvent(event) {
     if (event.type === 'NavBarButtonPress') { // this is the event type for button presses
@@ -158,12 +171,11 @@ class EditCategories extends PureComponent {
 
   onMenuOptionSelect = (value) => {
     switch (value) {
-      case 'sortCats': {
+      case 'somethingNew': {
         // ... sort the categories by name ...
-        this.props.dispatch(sortCategories());
         break;
       }
-      case 'deleteCats': {
+      case 'deleteAll': {
         // ... first count how many items will be affected ...
         const numSelected = this.countSelectedItems();
         if (numSelected > 0) {
@@ -215,10 +227,10 @@ class EditCategories extends PureComponent {
   addThisItem = () => {
     if (this.props.currentCat.name !== '') {
       this.props.dispatch(addCategory(
-        UniqueId(),
         this.props.currentCat.name,
         this.props.currentCat.desc,
-        this.props.emojiCode));
+        this.props.emojiCode)
+      );
     }
   }
 
@@ -301,8 +313,7 @@ react-native-image-resizer
         <MenuOption value={0} disabled>
           <Text style={styles.menuTitle}>Category Options</Text>
         </MenuOption>
-        <MenuOption value={'sortCats'} text='Sort by Category Name' />
-        <MenuOption value={'deleteCats'} text='Delete All Selected' />
+        <IconMenuOption value={'deleteAll'} icon='🗑️' text='Delete All Selected' />
       </MenuOptions>
     </Menu>
   )
@@ -353,7 +364,8 @@ react-native-image-resizer
           </View>
           <FlatList
             data={this.props.itemList}
-            extraData={this.props}
+            extraData={this.props.listUpdated}
+            keyExtractor={(item) => item.key}
             renderItem={this.renderCategoryItem}
             ItemSeparatorComponent={this.itemSeparator}
           />
@@ -367,10 +379,14 @@ export default connect(mapStateToProps)(EditCategories);
 
 const menuOptionsStyles = {
   optionsContainer: {
-    width: 175
+    width: 175,
+    padding: 2,
+    paddingLeft: 5,
+    paddingRight: 5,
+    backgroundColor: AppColors.darkerColor,  // ... dark cyan ...
   },
   optionText: {
-    color: 'blue',
+    color: 'white',
   },
 };
 
@@ -388,6 +404,13 @@ const styles = StyleSheet.create({
   },
   menuTrigger: {
     padding: 3
+  },
+  menuTitle: {
+    fontWeight: '500', 
+    color: AppColors.accentColor,
+    paddingBottom: 3,
+    borderBottomColor: '#aaa',
+    borderBottomWidth: 0.75
   },
   separatorStyle: {
     backgroundColor: 'white',

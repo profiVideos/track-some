@@ -8,8 +8,9 @@ import {
   StyleSheet,
   TouchableOpacity,
   //TouchableHighlight,
-  //TouchableNativeFeedback
+  TouchableNativeFeedback
 } from 'react-native';
+import IonIcon from 'react-native-vector-icons/Ionicons';
 import AppColors from '../templates/appColors';
 import ItemTags from '../images/ItemTags.png';
 import RenderTags from './RenderTags';
@@ -25,9 +26,7 @@ class TagEdit extends PureComponent {
 
   constructor(props) {
     super(props);
-    this.state = {
-      didSave: false,
-    };
+    this.state = { didSave: false };
   }
 
   onPressTag = (tag) => {
@@ -57,6 +56,9 @@ class TagEdit extends PureComponent {
         <Text style={styles.sadFace}>😢</Text>
         <Text style={styles.bigMessage}>You have no tags for this item yet!</Text>
         <Text style={styles.bigMessage}>Go ahead and enter your first one below.</Text>
+        <Text style={styles.bigMessage}>
+          You can enter more than one separated with a comma(s).
+        </Text>
       </View>) : (
       <View style={styles.tagsContainer}>
         <RenderTags 
@@ -96,6 +98,7 @@ class TagEdit extends PureComponent {
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.textInputStyle}
+              autoFocus
               //autoCorrect={false}
               //blurOnSubmit={true}
               disableFullscreenUI
@@ -109,10 +112,15 @@ class TagEdit extends PureComponent {
             //disabled={this.props.thisTag.name === ''} 
             onPress={this.props.onTagAdd} 
           >
-            <View style={{ alignItems: 'center', marginLeft: 5 }}>
+            <View style={{ alignItems: 'center' }}>
               <Icon size={28} name='plus' color={AppColors.darkerColor} />
             </View>
           </TouchableOpacity>
+          <TouchableNativeFeedback onPress={this.props.onClosePress}>
+            <View style={styles.buttonFinish}> 
+              <IonIcon name='md-checkmark-circle-outline' size={34} color={AppColors.paperColor} />
+            </View>
+          </TouchableNativeFeedback>
         </View>
 
       </View>
@@ -172,6 +180,12 @@ export default TagEdit;
 */
 
 const styles = StyleSheet.create({
+  buttonFinish: {
+    padding: 5,
+    paddingLeft: 7,
+    paddingRight: 7,
+    backgroundColor: AppColors.darkerColor
+  },
   tagsEmpty: {
     //height: 200,
     alignItems: 'center',
@@ -181,13 +195,13 @@ const styles = StyleSheet.create({
     backgroundColor: AppColors.paperColor
   },
   bigMessage: {
-    fontSize: 14,
+    fontSize: 13,
     fontStyle: 'italic',
     textAlign: 'center',
     color: 'rgba(0,0,0,0.40)'
   },
   sadFace: {
-    fontSize: 60,
+    fontSize: 44,
     color: 'rgba(0,0,0,0.40)'
   },
   tagsContainer: {
@@ -224,7 +238,7 @@ const styles = StyleSheet.create({
   textInputStyle: {
     color: '#121212',
     padding: 3,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '300'
   },
   imageIconStyle: {
@@ -240,7 +254,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 8,
     borderBottomRightRadius: 8,
     backgroundColor: AppColors.accentColor,  // ... medium orange ...
-    justifyContent: 'center',
+    justifyContent: 'space-around',
     shadowColor: '#121212',
     shadowOffset: { width: 1, height: 3 },
     shadowOpacity: 0.5,
@@ -251,13 +265,13 @@ const styles = StyleSheet.create({
     //backgroundColor: 'blue'
   },
   inputContainer: {
-    width: '70%',
+    width: '60%',
     borderWidth: 1,
     borderColor: '#979797',
     borderRadius: 20,
     paddingLeft: 10,
     paddingRight: 10,
-    marginRight: 7,
+    //marginRight: 7,
     backgroundColor: 'white',
     justifyContent: 'center',
     height: 30

@@ -1,20 +1,14 @@
-// ... later (uses Async & thunk - import firebase from 'firebase';
-import { AsyncStorage } from 'react-native';
 import {
   ADD_CATEGORY,
   CLEAR_CATEGORY,
   UPDATE_CATEGORY,
   REMOVE_CATEGORY,
-  SORT_CATEGORIES, 
   CURRENT_CATEGORY,
   DELETE_SELECTED_CATS,
   CATEGORY_EDIT_CHANGE,
-  CATEGORIES_STORAGE_KEY,
-  SAVE_CATEGORIES_SUCCESS,
-  //SAVE_CATEGORIES_FAILURE,
   LOAD_CATEGORIES_SUCCESS,
-  //LOAD_CATEGORIES_FAILURE
 } from './actionTypes';
+import store from '../../store';   // ... Realm DB Routines ...
 
 export const itemTextChanged = (prop, value) => {
   return {
@@ -23,31 +17,51 @@ export const itemTextChanged = (prop, value) => {
   };
 };
 
-export const deleteCategories = () => {
-  return {
-    type: DELETE_SELECTED_CATS
-  };
-};
-
-export const sortCategories = () => {
-  return {
-    type: SORT_CATEGORIES
-  };
-};
-
-export const addCategory = (catKey, catName, catDesc, catIcon) => {
+export const addCategory = (catName, catDesc, catIcon) => {
+  store.createCategory(catName, catDesc, catIcon);
+  const newList = store.getAllCategories();  // ... retrieves the newly sorted list ...
   return {
     type: ADD_CATEGORY,
-    payload: { catKey, catName, catDesc, catIcon }
+    payload: { itemList: newList }
   };
 };
 
 export const updateCategory = (key, name, desc, icon, isSelected) => {
+  store.updateCategory(key, name, desc, icon, isSelected);
+  const newList = store.getAllCategories();  // ... retrieves the newly updated list ...
   return {
     type: UPDATE_CATEGORY,
-    payload: { key, name, desc, icon, isSelected }
+    payload: { itemList: newList }
   };
 };
+
+export const deleteCategories = () => {
+  store.deleteSelectedCategories();
+  const newList = store.getAllCategories();  // ... retrieves the newly sorted list ...
+  return {
+    type: DELETE_SELECTED_CATS,
+    payload: { itemList: newList }
+  };
+};
+
+export const categoriesLoadSuccess = (catData) => {
+  return {
+    type: LOAD_CATEGORIES_SUCCESS,
+    payload: { itemList: catData }
+  };
+};
+
+export const loadCategories = () => {
+  return dispatch => {
+    const catData = store.getAllCategories();
+    //console.log('Category Data: ', catData);
+    dispatch(categoriesLoadSuccess(catData));
+  };
+};
+
+//---------------------------------------------------------------
+// ... the following functions need to be adjusted for Realm ...
+//---------------------------------------------------------------
 
 export const removeCategory = (catKey) => {
   return {
@@ -69,6 +83,7 @@ export const currentCategory = (catKey) => {
   };
 };
 
+/*
 export const categoriesSaveSuccess = () => {
   //console.log('Did the bloomen SAVE! : ');
   return {
@@ -87,14 +102,7 @@ export const saveCategories = (categoryList) => {
   };
 };
 
-export const categoriesLoadSuccess = (jsonData) => {
-  return {
-    type: LOAD_CATEGORIES_SUCCESS,
-    payload: { itemList: jsonData }
-  };
-};
-
-export const loadCategories = () => {
+export const loadAsyncCategories = () => {
   return dispatch => {
     AsyncStorage.getItem(CATEGORIES_STORAGE_KEY, (errorMsg, jsonData) => {
       if (jsonData !== null) dispatch(categoriesLoadSuccess(JSON.parse(jsonData)));
@@ -102,16 +110,9 @@ export const loadCategories = () => {
   };
 };
 
-/*
-export const loadInitialContacts = () => { 
-  const { currentUser } = firebase.auth();
-  console.log('inside loadInitialContacts - user is:');
-  console.log(currentUser);
-  return (dispatch) => {
-    firebase.database().ref(`/users/${currentUser.uid}/people`)
-      .on('value', snapshot => {
-        dispatch({ type: 'INITIAL_FETCH', payload: snapshot.val() });
-    });
+export const sortCategories = () => {
+  return {
+    type: SORT_CATEGORIES
   };
 };
 */

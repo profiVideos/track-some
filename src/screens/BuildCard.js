@@ -44,9 +44,11 @@ import {
   saveMyCards, 
   highlightCard,        // ... NEW ...
   //sortMyCards,
+  loadCategories,
   itemCardChanged,
   setCardSelected
 } from '../store/actions';
+//import store from '../store';
 
 /*
 const AppColors = {
@@ -58,9 +60,13 @@ const AppColors = {
   darkerColor: '#325a66'      // ... dark cyan ....
 */
 
+//const categoryLiveResults = store.getAllCategories();  // ... Realm updates this in real time ...
+
 const whatDoYouNeed = state => {
   return {
     catList: state.categories.itemList,
+    //catList: store.getAllCategories(),
+    //catList: categories,
     emojiCode: state.emojis.emojiCode,     // ... current emoji selected in PickEmojis ...
     itemList: state.cards.itemList,
     thisCard: state.cards.thisCard,
@@ -93,6 +99,7 @@ class BuildCard extends PureComponent {
       showDesc: false,
       getIcon4Card: false,
       modalVisible: false,
+      catList: [],
       pickerItems: [],
     };
   }
@@ -117,12 +124,25 @@ class BuildCard extends PureComponent {
     console.log('inside build cards ...');
     this.props.dispatch(loadMyCards());
     this.cleanTempSpace();  // ... cleans up images in tmp directory ...
+    if (this.props.catlist === undefined) {
+      this.props.dispatch(loadCategories());
+    }
+    //const categoryResults = store.categoryList();
+    //const categories = store.getAllCategories();
+    //console.log('Categories: ', categoryResults, ' Length = ', categoryResults.length);
+    //if (categoryResults.length > 0) {
+    //  this.buildPickerItems(categoryResults);
+    //}
     //console.log(`removed tmp image ${image.uri} from tmp directory`);
   }
 
   componentWillReceiveProps(nextProps) {
     //console.log(nextProps);
     //console.log(this.state);
+    //const categoryResults = store.categoryList();
+    //if (categoryResults.length > 0) {
+    //  this.buildPickerItems(categoryResults);
+    //}
     if (nextProps.catList.length !== null) {
       this.buildPickerItems(nextProps.catList);
     }
@@ -266,6 +286,7 @@ class BuildCard extends PureComponent {
 
   closeModal() {
     this.setState({ modalVisible: false });
+    if (this.props.thisCard.tag !== '') this.addTag2Card();
   }
 
   cleanTempSpace() {
@@ -307,14 +328,19 @@ class BuildCard extends PureComponent {
     });
   }
 
+  processTag(tag) {
+    console.log('This tag is = ', tag);
+    // ... if not already in the list for this card - add it ...
+    this.props.dispatch(addCardTag(tag));
+    // ... also consider adding this tag to the master tags list ...
+    // ... naturally after checking for duplicates ...
+  }
+
   addTag2Card() {
     //console.log('Inside Add Tag 2 Card: ', this.props.thisCard.tag);
     if (this.props.thisCard.tag !== '') {
-      // ... if not already in the list for this card - add it & notify ...
-      // ... otherwise notify it was a duplicate ...
-      this.props.dispatch(addCardTag(this.props.thisCard.tag));
-      // ... also consider adding this tag to the master tags list ...
-      // ... naturally after checking for duplicates ...
+      const tagParts = this.props.thisCard.tag.split(',');  // ... in case commas entered ...
+      tagParts.map(tag => this.processTag(tag.trim()));
     }
   }
 

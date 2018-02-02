@@ -106,14 +106,14 @@ const CardReducer = (state = initialState, action) => {
       };
 
     case ADD_CARD_TAG:
-      // ... add this item to the top of this card's tag list ...
+      // ... add this item to this card's tag list ...
       return { 
         ...state,
         thisCard: { ...state.thisCard, 
           tag: '', 
           tags: [ 
-            action.payload.tag,
-            ...state.thisCard.tags
+            ...state.thisCard.tags,
+            action.payload.tag
           ]
         },
         //cardsDirty: true - don't set this as card is not saved (like adding a field)
