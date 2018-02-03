@@ -54,11 +54,10 @@ class TagEdit extends PureComponent {
     const renderThis = (this.props.tagsList.length === 0 ? ( 
       <View style={styles.tagsEmpty}>
         <Text style={styles.sadFace}>😢</Text>
-        <Text style={styles.bigMessage}>You have no tags for this item yet!</Text>
+        <Text style={styles.bigMessage}>You haven't any tags for this item!</Text>
         <Text style={styles.bigMessage}>Go ahead and enter your first one below.</Text>
         <Text style={styles.bigMessage}>
-          You can enter more than one separated with a comma(s).
-        </Text>
+        You can enter multiple tags on the same line by separating each one with a comma.</Text>
       </View>) : (
       <View style={styles.tagsContainer}>
         <RenderTags 

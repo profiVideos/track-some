@@ -6,47 +6,36 @@ import {
   Alert,
   Modal,
   Picker,
-  //Button,
-  //FlatList, 
   StyleSheet, 
   ScrollView,
+  ToastAndroid,
   TouchableOpacity,
   TouchableNativeFeedback 
 } from 'react-native';
 import { connect } from 'react-redux';
-//import { bindActionCreators } from 'redux';
-//import IconIon from 'react-native-vector-icons/Ionicons';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import ImagePicker from 'react-native-image-crop-picker';
-import { 
-  MenuProvider
-} from 'react-native-popup-menu';
 
 import { UniqueId } from '../components/common/UniqueId';
 import MDInput from '../components/common/mdInput';
-import PictureFrame from '../images/PictureFrame.png';
-import ItemTags from '../images/ItemTags.png';
-import ItemNotes from '../images/ItemNotes.png';
-import SmileyFace from '../images/SmileyGlasses.png';
-import PhotoAdd from '../images/PhotoAdd.png';
 import AppColors from '../templates/appColors';
 import CardItem from '../components/CardItem';
 import TagEdit from '../components/TagEdit';
 import RenderTags from '../components/RenderTags';
 
+import PictureFrame from '../images/PictureFrame.png';
+import ItemTags from '../images/ItemTags.png';
+import ItemNotes from '../images/ItemNotes.png';
+import SmileyFace from '../images/SmileyGlasses.png';
+import PhotoAdd from '../images/PhotoAdd.png';
+
 import { 
   addCard,
   addCardTag,
   addCardImage, 
-  //updateCard,
-  //currentCard,
-  loadMyCards,
-  saveMyCards, 
-  highlightCard,        // ... NEW ...
-  //sortMyCards,
+  saveMyCards,     // ... this disappears when we move Cards to Realm ...
   loadCategories,
   itemCardChanged,
-  setCardSelected
 } from '../store/actions';
 //import store from '../store';
 
@@ -65,13 +54,10 @@ const AppColors = {
 const whatDoYouNeed = state => {
   return {
     catList: state.categories.itemList,
-    //catList: store.getAllCategories(),
-    //catList: categories,
     emojiCode: state.emojis.emojiCode,     // ... current emoji selected in PickEmojis ...
-    itemList: state.cards.itemList,
+    itemList: state.cards.itemList,        // ... not required when moved to Realm ...
     thisCard: state.cards.thisCard,
-    highlighted: state.cards.highlighted, 
-    listUpdated: state.cards.cardsDirty
+    listUpdated: state.cards.cardsDirty    // ... not required when moved to Realm ...
   };
 };
 
@@ -89,16 +75,18 @@ class BuildCard extends PureComponent {
   constructor(props) {
     super(props);
     this.onSelectEmoji = this.onSelectEmoji.bind(this);
-    this.openModal = this.openModal.bind(this);
-    this.onCardToggle = this.onCardToggle.bind(this);
-    this.onCardItemPress = this.onCardItemPress.bind(this);
+    this.openTagsEditModal = this.openTagsEditModal.bind(this);
     this.state = {
       compress: 0.25,
       image: null,
       images: null,
+      showName: true,
+      showCategory: true,
       showDesc: false,
+      showTags: true,
+      showListPreview: false,
       getIcon4Card: false,
-      modalVisible: false,
+      tagsModalVisible: false,
       catList: [],
       pickerItems: [],
     };
@@ -122,7 +110,7 @@ class BuildCard extends PureComponent {
 
   componentWillMount() {
     console.log('inside build cards ...');
-    this.props.dispatch(loadMyCards());
+    //this.props.dispatch(loadMyCards());
     this.cleanTempSpace();  // ... cleans up images in tmp directory ...
     if (this.props.catlist === undefined) {
       this.props.dispatch(loadCategories());
@@ -133,7 +121,6 @@ class BuildCard extends PureComponent {
     //if (categoryResults.length > 0) {
     //  this.buildPickerItems(categoryResults);
     //}
-    //console.log(`removed tmp image ${image.uri} from tmp directory`);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -156,6 +143,7 @@ class BuildCard extends PureComponent {
     }
     this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     // ... if the cards list is dirty (used) then we should save it ...
+    // ... this disappears once we move this module over to Realm ...
     if (nextProps.listUpdated) {
       const myCards = nextProps.itemList;
       this.props.dispatch(saveMyCards(myCards));
@@ -164,7 +152,7 @@ class BuildCard extends PureComponent {
   }
 
   onNavigatorEvent(event) {
-    if (event.type === 'NavBarButtonPress') { // this is the event type for button presses
+    if (event.type === 'NavBarButtonPress') {
       switch (event.id) {
         case 'menu': {
           console.log('pressed the menu icon');
@@ -172,15 +160,11 @@ class BuildCard extends PureComponent {
           break;
         }
         case 'options': {
-          //this.openModal();  // ... opens the semi-transparent category edit screen ...
-          //this.optionsMenu.open();  // ... figure out how to toggle this menu with the "_" ...
-          //if (this.optionsMenu._opened) this.optionsMenu.close();
-          //else this.optionsMenu.open();
           console.log('pressed the options icon');
           break;
         }
         default: break;
-      }  // ... switch ...
+      }
     }
   }
 
@@ -202,23 +186,6 @@ class BuildCard extends PureComponent {
        title: 'Select an Emoji', 
       screen: 'tracksome.EmojiPicker' 
     });
-  }
-
-  onCardToggle(key, selected) {
-    this.props.dispatch(setCardSelected(key, selected));
-  }
-
-  onCardItemPress(key) {
-    //console.log('The main item was pressed with this key: ', key);
-    // ... if item was already selected - and user presses again - deselect ...
-    if (this.props.highlighted === key) {
-      this.props.dispatch(highlightCard(''));
-    } else this.props.dispatch(highlightCard(key));
-  }
-
-  onMenuPress(key) {
-    console.log('Menu press for this item: ', key);
-    //this.props.dispatch(setCardSelected(key, selected));
   }
 
   getCameraImage(cropit) {
@@ -261,6 +228,7 @@ class BuildCard extends PureComponent {
 
   itemTagRemove(tag) {
     console.log('MASTER: About to remove tag: ', tag);
+    ToastAndroid.show('Need to remove that Tag', ToastAndroid.LONG);
   }
 
   fabClicked() {
@@ -279,13 +247,13 @@ class BuildCard extends PureComponent {
     });
   }
 
-  openModal() {
+  openTagsEditModal() {
     //console.log('About to open the Modal window ...');
-    this.setState({ modalVisible: true });
+    this.setState({ tagsModalVisible: true });
   }
 
-  closeModal() {
-    this.setState({ modalVisible: false });
+  closeTagsEditModal() {
+    this.setState({ tagsModalVisible: false });
     if (this.props.thisCard.tag !== '') this.addTag2Card();
   }
 
@@ -330,6 +298,7 @@ class BuildCard extends PureComponent {
 
   processTag(tag) {
     console.log('This tag is = ', tag);
+    // ... don't add empty tags please ...
     // ... if not already in the list for this card - add it ...
     this.props.dispatch(addCardTag(tag));
     // ... also consider adding this tag to the master tags list ...
@@ -385,10 +354,6 @@ class BuildCard extends PureComponent {
     this.setState({ pickerItems: catsList }); 
   }
 
-  itemSeparator = () => {
-    return (<View style={styles.separatorStyle} />);
-  };
-
   findCategoryByKey(key) {
     return this.props.catList.findIndex((item) => { return item.key === key; });
   }
@@ -397,7 +362,7 @@ class BuildCard extends PureComponent {
     return tags.length;
   }
 
-  renderCatDescription(category) {
+  buildCatDescription(category) {
     const indexPos = this.findCategoryByKey(category);
     if (indexPos >= 0) {
       return `${this.props.catList[indexPos].icon} ${this.props.catList[indexPos].name}`;
@@ -407,7 +372,6 @@ class BuildCard extends PureComponent {
 
   renderImage(image) {
     return <Image style={styles.imageStyle} source={image} />;
-    //return <Image style={{ width: 308, height: 224, resizeMode: 'contain' }} source={image} />;
   }
 
   renderActionIcons = () => (
@@ -432,7 +396,7 @@ class BuildCard extends PureComponent {
           <Image style={styles.imageIconStyle} source={ItemNotes} />
         </View>
       </TouchableNativeFeedback>
-      <TouchableNativeFeedback onPress={this.openModal}>
+      <TouchableNativeFeedback onPress={this.openTagsEditModal}>
         <View style={styles.iconsPadding}>
           <Image style={styles.imageIconStyle} source={ItemTags} />
         </View>
@@ -440,40 +404,90 @@ class BuildCard extends PureComponent {
     </View>
   );
 
-  renderImageStats(image) {
-    //const rightNow = new Date().toLocaleString('de-DE', { hour12: false });
-    const fileDate = new Date(Number(image.created)).toLocaleString('de-DE', { hour12: false });
+  renderNameInput() {
+    if (this.state.showName === false) return;
     return (
-      <View style={styles.container}>
-        <Text>Path: {image.uri}</Text> 
-        <Text style={styles.text}>Pixels: {image.width} x {image.height}</Text> 
-        <Text style={styles.text}>Compressed @ {this.state.compress * 100}%</Text> 
-        <Text style={styles.text}>Size: {image.size} bytes</Text> 
-        <Text style={styles.text}>Type: {image.mimeType}</Text> 
-        <Text style={styles.text}>File Created: {fileDate}</Text> 
-      </View>);
+      <MDInput
+        style={styles.nameWidth}
+        label='Item Name*'
+        placeholder='Please enter a name for this item ... '
+        value={this.props.thisCard.name}
+        onChangeText={text => this.itemNameChanged(text)}
+      />
+    );
   }
 
-  renderCardItem = ({ item }) => {
+  renderDescription() {
+    if (this.state.showDesc === false) return;
     return (
-      <CardItem 
-        id={item.key}
-        icon={item.icon}
-        name={item.name}
-        desc={item.desc}
-        image={item.image}
-        thumb={item.thumb}
-        rating={item.rating}
-        selected={item.selected}
-        marked={item.key === this.props.highlighted}
-        numTags={this.countTags(item.tags)}
-        catDesc={this.renderCatDescription(item.category)}
-        checkIcon={item.selected ? 'check-square-o' : 'square-o'}
-        hilite={item.key === this.props.highlighted ? AppColors.hiliteColor : 'white'}
-        onPressMenu={this.onMenuPress}
-        onPressItem={this.onCardItemPress}   // ... used to highlight an item (radio control)...
-        onToggleItem={this.onCardToggle}
-      />
+      <View style={styles.editFieldStyle}>
+        <MDInput
+          style={styles.inputStyle}
+          label='Description (optional)'
+          placeholder='Briefly describe this item ... '
+          value={this.props.thisCard.desc}
+          onChangeText={text => this.itemDescChanged(text)}
+        />
+      </View>
+    );
+  }
+
+  renderCategory() {
+    if (this.state.showCategory === false) return;
+    return (
+      <View style={styles.pickerStyle}>
+        <View style={styles.pickerWrapper}>
+          <Text style={styles.labelText}>Category</Text>
+          <Picker 
+            style={styles.pickerElements}
+            selectedValue={this.props.thisCard.category}
+            onValueChange={(value) => this.onChangeSelection(value)}
+          >
+            <Picker.Item label="Please choose a category ..." value="" />
+            { this.state.pickerItems }
+            <Picker.Item label="+ Add a new category" value="addCategory" />
+          </Picker>              
+        </View>
+      </View>
+    );
+  }
+
+  renderTags() {
+    if (this.state.showTags === false) return;
+    return (
+      <View style={styles.tagsBar}>
+        <RenderTags 
+          myTags={this.props.thisCard.tags} 
+          onPressTag={tag => this.itemTagRemove(tag)} 
+        />
+      </View>
+    );
+  }
+        
+  renderPreview() {
+    if (this.state.showListPreview === false) return;
+    return (
+      <View style={styles.previewCard}>
+        <Text style={styles.cardPreviewText} >Your New Card - List Preview</Text>
+        <CardItem 
+          id={this.props.thisCard.key}
+          icon={this.props.thisCard.icon}
+          name={this.props.thisCard.name}
+          desc={this.props.thisCard.desc}
+          image={this.props.thisCard.image}
+          thumb={this.props.thisCard.thumb}
+          rating={this.props.thisCard.rating}
+          selected={false}
+          marked={false}
+          numTags={this.countTags(this.props.thisCard.tags)}
+          catDesc={this.buildCatDescription(this.props.thisCard.category)}
+          checkIcon={this.props.thisCard.selected ? 'check-square-o' : 'square-o'}
+          hilite={'white'}
+          onPressMenu={this.doSomeFunction}
+          onPressItem={this.doSomeFunction}   // ... simulate an item press ...
+          onToggleItem={this.doSomeFunction}  // ... simulate a check box press ...
+        />
+      </View>
     );
   }
 
@@ -481,10 +495,10 @@ class BuildCard extends PureComponent {
     return (
     <View style={styles.container}>
       <Modal
-          visible={this.state.modalVisible}
+          visible={this.state.tagsModalVisible}
           transparent
           animationType={'fade'}
-          onRequestClose={() => this.closeModal()}
+          onRequestClose={() => this.closeTagsEditModal()}
       >
         <View style={styles.modalContainer}>
           <View style={styles.innerContainer}>
@@ -494,7 +508,7 @@ class BuildCard extends PureComponent {
               onTagAdd={() => this.addTag2Card()} 
               onTagChange={text => this.itemTagChanged(text)}
               onTagRemove={tag => this.itemTagRemove(tag)}
-              onClosePress={() => this.closeModal()} 
+              onClosePress={() => this.closeTagsEditModal()} 
             />
           </View>
         </View>
@@ -504,6 +518,7 @@ class BuildCard extends PureComponent {
   }
 
   renderItemExtras() {
+    // ... these two constants could be moved into a function ...
     const renderIcon = this.props.thisCard.icon !== '' ?
                       (<View style={styles.wrapperIcon}> 
                          <Text style={styles.emojiThumb}>{this.props.thisCard.icon}</Text>
@@ -533,28 +548,14 @@ class BuildCard extends PureComponent {
       </View>
     );
   }
-/*
-      <View style={styles.outerContainer}>
-*/
+
+  //------------------------------------------------
+  // ... the main render section for this class ...
+  //------------------------------------------------
   render() {
-    const showDescInput = this.state.showDesc ?
-      (<View style={styles.editFieldStyle}>
-        <MDInput
-          style={styles.inputStyle}
-          label='Description (optional)'
-          placeholder='Briefly describe this item ... '
-          value={this.props.thisCard.desc}
-          onChangeText={text => this.itemDescChanged(text)}
-        />
-      </View>) : <View />;
-
     return (
-      <MenuProvider>
-
       <ScrollView style={{ flex: 1 }} keyboardShouldPersistTaps='always'>
-
         <View style={styles.cardContainer}>
-
           <View style={styles.textContainer}>
             <View style={styles.topRowStyle}>
               <View style={styles.previewOutline}>
@@ -563,87 +564,25 @@ class BuildCard extends PureComponent {
                    <Text style={styles.emojiIcon}>{this.props.thisCard.icon}</Text> :
                  this.renderImage(this.props.thisCard.image)} 
               </View>
-              <MDInput
-                style={styles.nameWidth}
-                label='Item Name*'
-                placeholder='Please enter a name for this item ... '
-                value={this.props.thisCard.name}
-                onChangeText={text => this.itemNameChanged(text)}
-              />
+              { this.renderNameInput() }
             </View>
-            <View style={styles.pickerStyle}>
-              <View style={styles.pickerWrapper}>
-                <Text style={styles.labelText}>Category</Text>
-                <Picker 
-                  style={styles.pickerElements}
-                  selectedValue={this.props.thisCard.category}
-                  onValueChange={(value) => this.onChangeSelection(value)}
-                >
-                  <Picker.Item label="Please choose a category ..." value="" />
-                  { this.state.pickerItems }
-                  <Picker.Item label="+ Add a new category" value="addCategory" />
-                </Picker>              
-              </View>
-            </View>
-
-            {showDescInput}
-
+            { this.renderCategory() }
+            { this.renderDescription() }
           </View>
-
-          <View style={styles.tagsBar}>
-            <RenderTags 
-              myTags={this.props.thisCard.tags} 
-              onPressTag={tag => this.itemTagRemove(tag)} 
-            />
-          </View>
-        
+          { this.renderTags() }
         </View>
-
         { this.renderTagEditScreen() }
         { this.renderItemExtras() }
         { this.renderActionIcons() }
-
-        <View style={styles.previewCard}>
-          <Text style={styles.cardPreviewText} >Your New Card - List Preview</Text>
-          <CardItem 
-            id={this.props.thisCard.key}
-            icon={this.props.thisCard.icon}
-            name={this.props.thisCard.name}
-            desc={this.props.thisCard.desc}
-            image={this.props.thisCard.image}
-            thumb={this.props.thisCard.thumb}
-            rating={this.props.thisCard.rating}
-            selected={false}
-            marked={false}
-            numTags={this.countTags(this.props.thisCard.tags)}
-            catDesc={this.renderCatDescription(this.props.thisCard.category)}
-            checkIcon={this.props.thisCard.selected ? 'check-square-o' : 'square-o'}
-            hilite={'white'}
-            onPressMenu={this.doSomeFunction}
-            onPressItem={this.doSomeFunction}   // ... simulate an item press ...
-            onToggleItem={this.doSomeFunction}  // ... simulate a check box press ...
-          />
-        </View>
-
+        { this.renderPreview() }
       </ScrollView>
-      </MenuProvider>
     );
   }
-
 }
 
 export default connect(whatDoYouNeed)(BuildCard);
 
 /*
-
-          <FlatList
-            //style={{ flex: 1 }}
-            data={this.props.itemList}
-            extraData={this.props}
-            renderItem={this.renderCardItem}
-            ItemSeparatorComponent={this.itemSeparator}
-          />
-
 
 dropbox upload method
 
@@ -681,9 +620,6 @@ const styles = StyleSheet.create({
   },
   wrapperImage: {
     height: 44,
-    //paddingBottom: 1,
-    //paddingLeft: 5,
-    //paddingRight: 5,
     borderRadius: 3,
     borderColor: '#888',
     borderWidth: 1,
@@ -844,12 +780,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.85,
     elevation: 2
   },
-  separatorStyle: {
-    backgroundColor: 'white',
-    width: '12%',
-    alignSelf: 'flex-end',
-    height: 1
-  },
   textContainer: {
     width: '90%',
     paddingTop: 4,
@@ -918,7 +848,6 @@ const styles = StyleSheet.create({
 });
 
 /*
-            <Button onPress={() => this.closeModal()} title="Close modal" />
             <Button title="Get an Image to Crop" onPress={() => this.pickSingle(true)} />
                 onValueChange={(itemValue, itemIndex) => this.setState({ language: itemValue })}
                 <View style={styles.pickerElements}>
@@ -928,80 +857,22 @@ const styles = StyleSheet.create({
                 </View>
 
                 <TouchableNativeFeedback onPress={this.addThisCard.bind(this)}>
-*/
 
-/*
-          <FlatList
-            data={this.props.itemList}
-            renderItem={this.renderCardItem}
-            ItemSeparatorComponent={this.itemSeparator}
-          />            
+  renderImageStats(image) {
+    //const rightNow = new Date().toLocaleString('de-DE', { hour12: false });
+    const fileDate = new Date(Number(image.created)).toLocaleString('de-DE', { hour12: false });
+    return (
+      <View style={styles.container}>
+        <Text>Path: {image.uri}</Text> 
+        <Text style={styles.text}>Pixels: {image.width} x {image.height}</Text> 
+        <Text style={styles.text}>Compressed @ {this.state.compress * 100}%</Text> 
+        <Text style={styles.text}>Size: {image.size} bytes</Text> 
+        <Text style={styles.text}>Type: {image.mimeType}</Text> 
+        <Text style={styles.text}>File Created: {fileDate}</Text> 
+      </View>);
+  }
 
-, resizeMode: 'contain'
 
-          { this.renderModalEditScreen() }
-
-  renderModalEditScreen = () => (
-    <View style={styles.container}>
-    <Modal
-      style={styles.container}
-      visible={this.state.modalVisible}
-      transparent
-      animationType={'slide'}
-      onRequestClose={() => this.closeModal()}
-    >
-      <View style={styles.modalContainer}>
-        <View style={styles.innerContainer}>
-          <EditCategories />
-          <Button onPress={() => this.closeModal()} title="Close modal" />
-        </View>
-      </View>
-    </Modal>
-    </View>
-  );
-          <View style={styles.cardContainer}>
-            <View style={styles.buttonRow}>
-              <View style={styles.columnContainer}>         
-                <TouchableNativeFeedback onPress={() => this.doSomeFunction()}>
-                  <View style={styles.imageContainer}>
-                    <Image style={styles.imageStyle} source={selectCameraImage} />
-                    <Text style={styles.buttonText}>Create a Photo</Text>
-                  </View>
-                </TouchableNativeFeedback>
-              </View>
-              <View style={styles.columnContainer}>         
-                <TouchableNativeFeedback onPress={() => this.doSomeFunction()}>
-                  <View style={styles.imageContainer}>
-                    <Image style={styles.imageStyle} source={selectFolderImage} />
-                    <Text style={styles.buttonText}>Choose an Image</Text>
-                  </View>
-                </TouchableNativeFeedback>
-              </View>
-            </View>
-          </View>
-
-//      <ScrollView style={{ flex: 1 }}>
-            <TouchableOpacity onPress={() => this.doSomeFunction} style={styles.photoContainer}>
-          <View style={styles.cardContainer}>         
-            <Text style={{ marginBottom: 10 }}>
-            The idea with React Native Elements is more about component structure 
-            than actual design.
-            </Text>
-          </View>  
-*/
-
-/*
-    margin: 0,
-    padding: 0,
-
-            <Button
-              icon={{ name: 'code' }}
-              backgroundColor='#03A9F4'
-              buttonStyle={{ borderRadius: 3, marginLeft: 0, marginRight: 0, marginBottom: 0 }}
-              title='Save Card' 
-            />
-
-    flex: 1,
 const { overlapContainer, avatarContainer, avatar} = styles;
 
     return (
@@ -1051,16 +922,4 @@ const styles = {
   }
 }
 
-          <Image resizeMode='cover' source={selectSourceImage}/>
-            style={styles.image} resizeMode='contain'
-          image={selectSourceImage}
-          imageStyle={{ height: 260 }}
-          imageProps={{ resizeMode: 'contain' }}
-          <Button title="Get an Image to Crop" onPress={() => this.pickSingle(true)} />
-          <ScrollView>
-            <View style={styles.container}>
-              {this.state.image ? this.renderImage(this.state.image) : null}
-              {this.state.image ? this.renderImageStats(this.state.image) : null}
-            </View>
-          </ScrollView>
 */

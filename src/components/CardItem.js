@@ -2,6 +2,7 @@ import React from 'react';
 import { 
   View, 
   Text, 
+  //Alert,
   Image,
   StyleSheet, 
   TouchableOpacity,
@@ -41,26 +42,8 @@ class CardItem extends React.PureComponent {
     this.props.onToggleItem(this.props.id, !this.props.selected);
   }
 
-  onMenuPress = () => { 
-    this.props.onPressMenu(this.props.id);
-  }
-
-  onMenuOptionSelection(value, key) {
-    switch (value) {
-      case 'edit': {
-        console.log('Edit was selected for item key ', key);
-        break;
-      }
-      case 'tags': {
-        console.log('Tags was selected for item key ', key);
-        break;
-      }
-      case 'notes': {
-        console.log('Notes was selected for item key ', key);
-        break;
-      }
-      default: break;
-    }  // ... switch ...
+  onMenuPress = (value, key) => { 
+    this.props.onDoMenuItem(value, key);
   }
 
   //menuReference = (menuId) => {
@@ -74,7 +57,7 @@ class CardItem extends React.PureComponent {
 
   renderOptionMenu = () => (
     <Menu 
-      onSelect={(value) => this.onMenuOptionSelection(value, this.props.id)} 
+      onSelect={(value) => this.onMenuPress(value, this.props.id)} 
       //ref={this.menuReference}
       //renderer={Poopover}
     >
@@ -90,11 +73,13 @@ class CardItem extends React.PureComponent {
         <IconMenuOption value={'edit'} icon='✏️' text='Edit' />
         <IconMenuOption value={'tags'} icon='🏷️' text='Tags' />
         <IconMenuOption value={'notes'} icon='🗒️' text='Notes' />
+        <IconMenuOption value={'delete'} icon='🗑️' text='Delete' />
       </MenuOptions>
     </Menu>
   )
 
   render() {
+    console.log(this.props);
     const backColor = this.props.hilite;   // ... AppsColor.hiliteColor, otherwise white ...
     const renderFull = this.props.marked ? <Text>Show Everything!</Text> : <View />;
     const tagsBadge = (this.props.numTags === 0) ? <View /> :
@@ -138,7 +123,7 @@ class CardItem extends React.PureComponent {
               </View>
           </TouchableNativeFeedback>
           <View style={styles.checkWrapper}>
-            <TouchableNativeFeedback onPress={this.onMenuPress}>
+            <TouchableNativeFeedback /*onPress={this.onMenuPress}*/>
               { this.renderOptionMenu() }
             </TouchableNativeFeedback>
             <TouchableOpacity onPress={this.onToggleCheck}>
@@ -214,8 +199,8 @@ const styles = StyleSheet.create({
   outerWrapper: {
     width: '100%',
     height: 60,
-    paddingRight: 10,
-    elevation: 2,
+    paddingRight: 16,
+    //elevation: 2,
     flexDirection: 'row',
     alignItems: 'center',
     //backgroundColor: 'blue',

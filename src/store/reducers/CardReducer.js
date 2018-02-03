@@ -169,7 +169,7 @@ const CardReducer = (state = initialState, action) => {
     case REMOVE_CARD:
       return {
         ...state,
-        categories: state.categories.filter(card => {
+        itemList: state.itemList.filter(card => {
           return card.key !== action.payload.key;
         }),
         thisCard: {
@@ -215,7 +215,7 @@ const CardReducer = (state = initialState, action) => {
     case CURRENT_CARD:
       return {
         ...state,
-        cardFound: state.categories.find(card => {
+        cardFound: state.itemList.find(card => {
           return card.key === action.payload.key;
         }),
         thisCard: {

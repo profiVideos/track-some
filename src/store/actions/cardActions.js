@@ -81,7 +81,7 @@ export const setCardSelected = (key, isSelected) => {
   };
 };
 
-export const removeCard = (key) => {
+export const deleteCard = (key) => {
   return {
     type: REMOVE_CARD,
     payload: { key }
