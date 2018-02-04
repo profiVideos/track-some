@@ -15,8 +15,9 @@ import {
 import { connect } from 'react-redux';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import ImagePicker from 'react-native-image-crop-picker';
+import { MenuProvider } from 'react-native-popup-menu';
 
-import { UniqueId } from '../components/common/UniqueId';
+//import { UniqueId } from '../components/common/UniqueId';
 import MDInput from '../components/common/mdInput';
 import AppColors from '../templates/appColors';
 import CardItem from '../components/CardItem';
@@ -33,11 +34,9 @@ import {
   addCard,
   addCardTag,
   addCardImage, 
-  saveMyCards,     // ... this disappears when we move Cards to Realm ...
   loadCategories,
   itemCardChanged,
 } from '../store/actions';
-//import store from '../store';
 
 /*
 const AppColors = {
@@ -49,15 +48,11 @@ const AppColors = {
   darkerColor: '#325a66'      // ... dark cyan ....
 */
 
-//const categoryLiveResults = store.getAllCategories();  // ... Realm updates this in real time ...
-
 const whatDoYouNeed = state => {
   return {
     catList: state.categories.itemList,
     emojiCode: state.emojis.emojiCode,     // ... current emoji selected in PickEmojis ...
-    itemList: state.cards.itemList,        // ... not required when moved to Realm ...
-    thisCard: state.cards.thisCard,
-    listUpdated: state.cards.cardsDirty    // ... not required when moved to Realm ...
+    thisCard: state.cards.thisCard
   };
 };
 
@@ -77,18 +72,21 @@ class BuildCard extends PureComponent {
     this.onSelectEmoji = this.onSelectEmoji.bind(this);
     this.openTagsEditModal = this.openTagsEditModal.bind(this);
     this.state = {
-      compress: 0.25,
       image: null,
       images: null,
+      catList: [],
+      pickerItems: [],
+      getIcon4Card: false,
+      tagsModalVisible: false,
+      // ... these should go in redux / options panel & config file ...
+      compress: 0.25,   // ... could cause huge files if above 50% ...
+      showIcon: true,
       showName: true,
       showCategory: true,
       showDesc: false,
       showTags: true,
+      showRating: true,
       showListPreview: false,
-      getIcon4Card: false,
-      tagsModalVisible: false,
-      catList: [],
-      pickerItems: [],
     };
   }
 
@@ -110,7 +108,6 @@ class BuildCard extends PureComponent {
 
   componentWillMount() {
     console.log('inside build cards ...');
-    //this.props.dispatch(loadMyCards());
     this.cleanTempSpace();  // ... cleans up images in tmp directory ...
     if (this.props.catlist === undefined) {
       this.props.dispatch(loadCategories());
@@ -144,11 +141,11 @@ class BuildCard extends PureComponent {
     this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     // ... if the cards list is dirty (used) then we should save it ...
     // ... this disappears once we move this module over to Realm ...
-    if (nextProps.listUpdated) {
-      const myCards = nextProps.itemList;
-      this.props.dispatch(saveMyCards(myCards));
-      this.displaySnackBarMsg('Your details have been saved.', 'Great Job');
-    }
+    //if (nextProps.listUpdated) {
+    //  const myCards = nextProps.itemList;
+    //  this.props.dispatch(saveMyCards(myCards));
+    //  this.displaySnackBarMsg('Your details have been saved.', 'Great Job');
+    //}
   }
 
   onNavigatorEvent(event) {
@@ -231,15 +228,11 @@ class BuildCard extends PureComponent {
     ToastAndroid.show('Need to remove that Tag', ToastAndroid.LONG);
   }
 
-  fabClicked() {
-    Alert.alert('Button Pressed');
-  }
-
   displaySnackBarMsg(msg, action) {
     this.props.navigator.showSnackbar({
       text: msg,  //'This option is in development',
       actionText: action, // optional
-      actionId: 'not sure about how to use this', // Mandatory if you've set actionText
+      actionId: 'rollback',  // ... ActionId within the Navigator Events ...
       actionColor: 'white', // optional
       textColor: AppColors.accentColor, // optional
       backgroundColor: '#333', // optional
@@ -272,6 +265,7 @@ class BuildCard extends PureComponent {
       height: 768,
       mediaType: 'photo',
       cropping: cropit,
+      writeTempFile: false,    // ... only works on IOS ...
       //multiple: true,
       //circular: true,
       cropperCircleOverlay: circular,
@@ -279,7 +273,7 @@ class BuildCard extends PureComponent {
       //compressImageMaxHeight: 720,
       compressImageQuality: this.state.compress,
       //compressVideoPreset: 'MediumQuality',
-      includeExif: true,
+      includeExif: false, //true,
       includeBase64: true,
       cropperToolbarColor: AppColors.mainDarkColor,
       cropperActiveWidgetColor: AppColors.mainLiteColor,
@@ -317,15 +311,17 @@ class BuildCard extends PureComponent {
     //console.log('Inside Add This Card: ', this.props.thisCard.name);
     if (this.props.thisCard.name !== '') {
       this.props.dispatch(addCard(
-        UniqueId(),
         this.props.thisCard.name,
         this.props.thisCard.desc,
         this.props.thisCard.icon,
-        this.props.thisCard.thumb,
+        this.props.thisCard.iconType,
         this.props.thisCard.rating,
         this.props.thisCard.category,
+        this.props.thisCard.imageThumb,
+        this.props.thisCard.mimeType,
+        this.props.thisCard.barcode,
         this.props.thisCard.tags,
-        this.props.thisCard.image
+        this.props.thisCard.notes
       ));
     }
   }
@@ -370,8 +366,14 @@ class BuildCard extends PureComponent {
     return category;
   }
 
-  renderImage(image) {
-    return <Image style={styles.imageStyle} source={image} />;
+  renderImage(image, mimeType) {
+    //return <Image style={styles.imageStyle} source={image} />;
+    return (
+      <Image 
+        style={styles.imageStyle} 
+        source={{ uri: `data:${mimeType};base64,${image}` }} 
+      />
+    );
   }
 
   renderActionIcons = () => (
@@ -467,6 +469,7 @@ class BuildCard extends PureComponent {
   renderPreview() {
     if (this.state.showListPreview === false) return;
     return (
+      <MenuProvider>
       <View style={styles.previewCard}>
         <Text style={styles.cardPreviewText} >Your New Card - List Preview</Text>
         <CardItem 
@@ -474,8 +477,8 @@ class BuildCard extends PureComponent {
           icon={this.props.thisCard.icon}
           name={this.props.thisCard.name}
           desc={this.props.thisCard.desc}
-          image={this.props.thisCard.image}
-          thumb={this.props.thisCard.thumb}
+          image={this.props.thisCard.imageThumb}
+          mimeType={this.props.thisCard.mimeType}
           rating={this.props.thisCard.rating}
           selected={false}
           marked={false}
@@ -488,6 +491,7 @@ class BuildCard extends PureComponent {
           onToggleItem={this.doSomeFunction}  // ... simulate a check box press ...
         />
       </View>
+      </MenuProvider>
     );
   }
 
@@ -517,18 +521,31 @@ class BuildCard extends PureComponent {
     );
   }
 
-  renderItemExtras() {
-    // ... these two constants could be moved into a function ...
-    const renderIcon = this.props.thisCard.icon !== '' ?
-                      (<View style={styles.wrapperIcon}> 
-                         <Text style={styles.emojiThumb}>{this.props.thisCard.icon}</Text>
-                       </View>) : <View />;
+/*
     const renderImage = Object.keys(this.props.thisCard.image).length === 0 && 
                         this.props.thisCard.image.constructor === Object ?  
                       <Text style={styles.previewText}>Preview Here!</Text> :
                       (<View style={styles.wrapperImage}> 
                          <Image style={styles.imageThumb} source={this.props.thisCard.image} />
-                       </View>); 
+                       </View>);
+*/
+
+  renderItemExtras() {
+    // ... these two constants could be moved into a function ...
+    const image = this.props.thisCard.imageThumb;
+    const mimeType = this.props.thisCard.mimeType;
+    const renderIcon = this.props.thisCard.icon !== '' ?
+                      (<View style={styles.wrapperIcon}> 
+                         <Text style={styles.emojiThumb}>{this.props.thisCard.icon}</Text>
+                       </View>) : <View />;
+    const renderImage = image === '' ?  
+                       <Text style={styles.previewText}>Preview Here!</Text> :
+                      (<View style={styles.wrapperImage}> 
+                         <Image 
+                           style={styles.imageThumb} 
+                           source={{ uri: `data:${mimeType};base64,${image}` }} 
+                         />
+                       </View>);
     return (
       <View style={styles.mainPanel}>
         <View style={styles.statusBar}>
@@ -541,7 +558,7 @@ class BuildCard extends PureComponent {
           style={styles.masterButton}
         >
           <View style={styles.innerButton}>
-            <Icon size={42} name='plus' color={'white'} />
+            <Icon size={40} name='plus' color={'white'} />
             <Text style={styles.buttonText}>Save</Text>
           </View>
         </TouchableOpacity>
@@ -549,21 +566,27 @@ class BuildCard extends PureComponent {
     );
   }
 
-  //------------------------------------------------
-  // ... the main render section for this class ...
-  //------------------------------------------------
+  renderIcon() {
+    if (this.state.showIcon === false) return;
+    return (
+      <View style={styles.previewOutline}>
+        {this.props.thisCard.imageThumb === '' ?  
+           <Text style={styles.emojiIcon}>{this.props.thisCard.icon}</Text> :
+         this.renderImage(this.props.thisCard.imageThumb, this.props.thisCard.mimeType)} 
+      </View>
+    );
+  }
+
+  //----------------------------------------------------
+  // ... the main JSX render section for this class ...
+  //----------------------------------------------------
   render() {
     return (
       <ScrollView style={{ flex: 1 }} keyboardShouldPersistTaps='always'>
         <View style={styles.cardContainer}>
           <View style={styles.textContainer}>
             <View style={styles.topRowStyle}>
-              <View style={styles.previewOutline}>
-                {Object.keys(this.props.thisCard.image).length === 0 && 
-                 this.props.thisCard.image.constructor === Object ?  
-                   <Text style={styles.emojiIcon}>{this.props.thisCard.icon}</Text> :
-                 this.renderImage(this.props.thisCard.image)} 
-              </View>
+              { this.renderIcon() }
               { this.renderNameInput() }
             </View>
             { this.renderCategory() }
@@ -632,6 +655,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around'
   },
   innerButton: {
+    paddingTop: 3,
     alignItems: 'center'
   },
   masterButton: {
@@ -648,7 +672,7 @@ const styles = StyleSheet.create({
     color: AppColors.hiliteColor,
     fontWeight: 'bold',
     fontSize: 10,
-    marginTop: -7,
+    marginTop: -6,
   },
   statusBar: {
     width: '100%',

@@ -27,10 +27,11 @@ import PaintSplash from '../images/Color-Splash.png';
 import CardItem from '../components/CardItem';
 import {
   deleteCard,
-  loadMyCards,
+  //loadMyCards,
   highlightCard,        // ... NEW ...
   setCardSelected
 } from '../store/actions';
+import store from '../store';
 
 /*
 const AppColors = {
@@ -42,15 +43,17 @@ const AppColors = {
   darkerColor: '#325a66'      // ... dark cyan ....
 */
 
+const cardsLiveResults = store.getAllCards();     // ... Realm updates this in real time ...
+
 const whatDoYouNeed = state => {
   return {
     saveMode: state.login.saveMode,
     emojiCode: state.emojis.emojiCode,
     emojiName: state.emojis.emojiName,
     catList: state.categories.itemList,
-    itemList: state.cards.itemList,
+    itemList: cardsLiveResults,
     highlighted: state.cards.highlighted, 
-    listUpdated: state.cards.cardsDirty
+    listUpdated: state.cards.lastUpdated
   };
 };
 
@@ -85,7 +88,7 @@ class ShowCard extends React.PureComponent {
 
   componentWillMount() {
     console.log('inside show cards ...');
-    this.props.dispatch(loadMyCards());
+    //this.props.dispatch(loadMyCards());
   }
 
 /*
@@ -209,8 +212,8 @@ class ShowCard extends React.PureComponent {
         icon={item.icon}
         name={item.name}
         desc={item.desc}
-        image={item.image}
-        thumb={item.thumb}
+        image={item.imageThumb}
+        mimeType={item.mimeType}
         rating={item.rating}
         selected={item.selected}
         marked={item.key === this.props.highlighted}
@@ -310,7 +313,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     width: '12%',
     alignSelf: 'flex-end',
-    height: 1.25
+    height: 1.1
   },
   listContainer: {
     //elevation: 2,

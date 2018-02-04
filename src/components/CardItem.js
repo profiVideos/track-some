@@ -5,6 +5,7 @@ import {
   //Alert,
   Image,
   StyleSheet, 
+  Dimensions,
   TouchableOpacity,
   TouchableNativeFeedback 
 } from 'react-native';
@@ -29,10 +30,28 @@ const IconMenuOption = (props) => (
 class CardItem extends React.PureComponent {
   constructor(props) {
     super(props);
+    Dimensions.addEventListener('change', this.onDeviceChange);
     this.state = {
-      didSave: false
+      didSave: false,
+      infoWidth: Dimensions.get('window').width - 112
     };
   }
+
+  componentWillMount() {
+    console.log('inside card item ...');
+    //console.log('Screen Width: ', this.state.scrWidth);
+    //console.log('State Info Width: ', this.state.infoWidth);
+  }
+
+  componentWillUnmount() {
+    Dimensions.removeEventListener('change', this.onDeviceChange);
+  }
+
+  onDeviceChange = (dims) => {
+    this.setState({
+      infoWidth: dims.window.width - 112
+    });
+  };
 
   onTouchablePress = () => { 
     this.props.onPressItem(this.props.id);
@@ -78,8 +97,18 @@ class CardItem extends React.PureComponent {
     </Menu>
   )
 
+/*
+            <TouchableOpacity onPress={this.onIconChange}>
+              <Image 
+                style={styles.imageStyle} 
+                source={{ uri: `data:${this.props.mimeType};base64,${this.props.image}` }} 
+              /> 
+            </TouchableOpacity>
+*/
+
   render() {
-    console.log(this.props);
+    const infoWidth = this.state.infoWidth;
+    //console.log(infoWidth);
     const backColor = this.props.hilite;   // ... AppsColor.hiliteColor, otherwise white ...
     const renderFull = this.props.marked ? <Text>Show Everything!</Text> : <View />;
     const tagsBadge = (this.props.numTags === 0) ? <View /> :
@@ -100,14 +129,16 @@ class CardItem extends React.PureComponent {
         <View style={[styles.outerWrapper, { backgroundColor: backColor }]}>
           <View style={styles.imageWrapper}>
             <TouchableOpacity onPress={this.onIconChange}>
-              {Object.keys(this.props.image).length === 0 && 
-               this.props.image.constructor === Object ?  
+              {this.props.image === '' ?  
                  <Text style={styles.itemIcon}>{this.props.icon}</Text> :
-               <Image style={styles.imageStyle} source={this.props.image} />} 
+               <Image 
+                 style={styles.imageStyle} 
+                 source={{ uri: `data:${this.props.mimeType};base64,${this.props.image}` }} 
+               />} 
             </TouchableOpacity>
           </View>
           <TouchableNativeFeedback onPress={this.onTouchablePress}>
-              <View style={styles.infoWrapper}>
+              <View style={[styles.infoWrapper, { width: infoWidth }]}>
                 <Text 
                   ellipsizeMode='tail' 
                   numberOfLines={1} 
@@ -168,7 +199,7 @@ const styles = StyleSheet.create({
   subHeading: {
     fontSize: 13,
     //height: 15
-    marginTop: -4,
+    marginTop: -3,
   },
   extraInfo: {
     fontSize: 11,
@@ -207,6 +238,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between'
   },
   imageWrapper: {
+    width: 80,
     borderTopRightRadius: 3,
     borderBottomRightRadius: 3,
     //borderLeftWidth: 1,
@@ -218,7 +250,7 @@ const styles = StyleSheet.create({
   },
   infoWrapper: {
     paddingLeft: 7,
-    width: '70%',
+    //width: {state.infoWidth},  //'82%', //'70%',
   },
   checkWrapper: {
     //width: '12%',

@@ -54,7 +54,6 @@ export const categoriesLoadSuccess = (catData) => {
 export const loadCategories = () => {
   return dispatch => {
     const catData = store.getAllCategories();
-    //console.log('Category Data: ', catData);
     dispatch(categoriesLoadSuccess(catData));
   };
 };
@@ -63,7 +62,7 @@ export const loadCategories = () => {
 // ... the following functions need to be adjusted for Realm ...
 //---------------------------------------------------------------
 
-export const removeCategory = (catKey) => {
+export const deleteCategory = (catKey) => {
   return {
     type: REMOVE_CATEGORY,
     payload: { catKey }
