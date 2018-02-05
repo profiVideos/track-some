@@ -5,10 +5,10 @@ import {
   Text,
   Alert,
   Image,
+  Modal,
   FlatList,
   StyleSheet,
   ToastAndroid,
-  //ScrollView,
   //TouchableOpacity,
   TouchableHighlight,
   //TouchableWithoutFeedback,
@@ -25,11 +25,20 @@ import {
 import AppColors from '../templates/appColors';
 import PaintSplash from '../images/Color-Splash.png';
 import CardItem from '../components/CardItem';
+import TagEdit from '../components/TagEdit';
+//import RenderTags from '../components/RenderTags';
 import {
+  //addCard,
+  clearCard,
+  addCardTag,
+  //addCardImage, 
   deleteCard,
-  //loadMyCards,
-  highlightCard,        // ... NEW ...
-  setCardSelected
+  currentCard,
+  highlightCard,
+  openTagsModal,
+  closeTagsModal,
+  setCardSelected,
+  itemCardChanged,
 } from '../store/actions';
 import store from '../store';
 
@@ -49,11 +58,12 @@ const whatDoYouNeed = state => {
   return {
     saveMode: state.login.saveMode,
     emojiCode: state.emojis.emojiCode,
-    emojiName: state.emojis.emojiName,
     catList: state.categories.itemList,
     itemList: cardsLiveResults,
+    thisCard: state.cards.thisCard,
     highlighted: state.cards.highlighted, 
-    listUpdated: state.cards.lastUpdated
+    listUpdated: state.cards.lastUpdated,
+    editTagsScreen: state.cards.showTagsScreen
   };
 };
 
@@ -78,11 +88,11 @@ class ShowCard extends React.PureComponent {
 
   constructor(props) {
     super(props);
-    this.onCardToggle = this.onCardToggle.bind(this);
     this.onCardItemPress = this.onCardItemPress.bind(this);
-    this.onMenuOptionSelection = this.onMenuOptionSelection.bind(this);
+    this.onCardItemToggle = this.onCardItemToggle.bind(this);
+    this.onCardItemMenuPress = this.onCardItemMenuPress.bind(this);
     this.state = {
-      Touchable: false
+      //tagsModalVisible: false,
     };
   }
 
@@ -105,11 +115,6 @@ class ShowCard extends React.PureComponent {
   }
 */
 
-/*
-        <ScrollView style={{ color: '#999' }} keyboardShouldPersistTaps='always'>
-        </ScrollView>
-*/
-
   onCardItemPress(key) {
     console.log('The main item was pressed with this key: ', key);
     // ... if item was already selected - and user presses again - deselect ...
@@ -118,24 +123,26 @@ class ShowCard extends React.PureComponent {
     } else this.props.dispatch(highlightCard(key));
   }
 
-  onCardToggle(key, selected) {
+  onCardItemToggle(key, selected) {
     this.props.dispatch(setCardSelected(key, selected));
   }
 
-  onMenuOptionSelection(value, key) {
-    switch (value) {
+  onCardItemMenuPress(option, item) {
+    switch (option) {
       case 'edit': {
-        console.log('Edit was selected for item key ', key);
+        console.log('Edit was selected for item key ', item.key);
         ToastAndroid.show('Edit that Info', ToastAndroid.LONG);
         break;
       }
       case 'tags': {
-        console.log('Tags was selected for item key ', key);
-        ToastAndroid.show('Coming Soon!', ToastAndroid.LONG);
+        console.log('Tags was selected for item key ', item.key);
+        // ... store the current item tags into our input record for editing ...
+        this.props.dispatch(currentCard(item));
+        this.props.dispatch(openTagsModal(item.key));
         break;
       }
       case 'notes': {
-        console.log('Notes was selected for item key ', key);
+        console.log('Notes was selected for item key ', item.key);
         ToastAndroid.show('Coming Soon!', ToastAndroid.SHORT);
         break;
       }
@@ -143,7 +150,7 @@ class ShowCard extends React.PureComponent {
         Alert.alert('Delete Card', 
           'You are about to remove this item.\nIs this what you really wish to do?',
           [{ text: 'Cancel', style: 'cancel' },
-           { text: 'OK', onPress: () => this.props.dispatch(deleteCard(key)) }]);
+           { text: 'OK', onPress: () => this.props.dispatch(deleteCard(item.key)) }]);
         break;
       }
       default: break;
@@ -156,6 +163,44 @@ class ShowCard extends React.PureComponent {
 
   countTags(tags) {
     return tags.length;
+  }
+
+  closeTagsEditModal() {
+    //ToastAndroid.show(`Going to close that Modal: ${this.props.item.key}`, ToastAndroid.SHORT);
+    if (this.props.thisCard.tag !== '') {
+      this.addTag2Card();   // ... user closed without hitting the plus '+' button ...
+    }
+    // ... update these tag(s) to the database ...
+    //this.props.dispatch(updateCardTags(this.props.thisCard.tags));
+    this.props.dispatch(clearCard());          // ... clear the current input record ...
+    this.props.dispatch(closeTagsModal(''));
+  }
+
+  itemTagChanged(text) {
+    //console.log('New Tag Value: ', text);
+    this.props.dispatch(itemCardChanged('tag', text));
+  }
+
+  itemTagRemove(tag) {
+    console.log('MASTER: About to remove tag: ', tag);
+    ToastAndroid.show('Need to remove that Tag', ToastAndroid.LONG);
+  }
+
+  processTag(tag) {
+    console.log('This tag is = ', tag);
+    // ... don't add empty tags please ...
+    // ... if not already in the list for this card - add it ...
+    this.props.dispatch(addCardTag(tag));
+    // ... also consider adding this tag to the master tags list ...
+    // ... naturally after checking for duplicates ...
+  }
+
+  addTag2Card() {
+    //console.log('Inside Add Tag 2 Card: ', this.props.thisCard.tag);
+    if (this.props.thisCard.tag !== '') {
+      const tagParts = this.props.thisCard.tag.split(',');  // ... in case commas entered ...
+      tagParts.map(tag => this.processTag(tag.trim()));
+    }
   }
 
   showWelcome() {
@@ -173,10 +218,6 @@ class ShowCard extends React.PureComponent {
       </View>
     );
   }
-/*
-      <View style={styles.listContainer}>
-      </View>
-*/
 
   itemSeparator = () => {
     return (<View style={styles.separatorStyle} />);
@@ -185,11 +226,42 @@ class ShowCard extends React.PureComponent {
   showMainList() {
     return (
       <FlatList
+        keyboardShouldPersistTaps='always'
         data={this.props.itemList}
         extraData={this.props}
         renderItem={this.renderCardItem}
         ItemSeparatorComponent={this.itemSeparator}
       />
+    );
+  }
+
+  renderTagEditScreen() {
+    if (this.props.editTagsScreen === '') return;
+    //ToastAndroid.show(`Need to get that key: ${this.props.item.key}`, ToastAndroid.SHORT);
+    return (
+      <View style={styles.popupContainer}>
+        <Modal
+            visible={this.props.editTagsScreen !== ''}
+            transparent
+            animationType={'fade'}
+            onRequestClose={() => this.closeTagsEditModal()}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalInnerContainer}>
+              <TagEdit
+                tagsList={this.props.thisCard.tags}
+                tagName={this.props.thisCard.tag}
+                photo={this.props.thisCard.imageThumb}
+                mimeType={this.props.thisCard.mimeType}
+                onTagAdd={() => this.addTag2Card()} 
+                onTagChange={text => this.itemTagChanged(text)}
+                onTagRemove={tag => this.itemTagRemove(tag)}
+                onClosePress={() => this.closeTagsEditModal()} 
+              />
+            </View>
+          </View>
+        </Modal>
+      </View>
     );
   }
 
@@ -208,31 +280,29 @@ class ShowCard extends React.PureComponent {
   renderCardItem = ({ item }) => {
     return (
       <CardItem
-        id={item.key}
-        icon={item.icon}
-        name={item.name}
-        desc={item.desc}
-        image={item.imageThumb}
-        mimeType={item.mimeType}
-        rating={item.rating}
-        selected={item.selected}
+        item={item}
         marked={item.key === this.props.highlighted}
+        //editTags={item.key === this.props.editTagsScreen}
         numTags={this.countTags(item.tags)}
         catDesc={this.renderCatDescription(item.category)}
         checkIcon={item.selected ? 'check-square-o' : 'square-o'}
         hilite={item.key === this.props.highlighted ? AppColors.hiliteColor : 'white'}
-        onDoMenuItem={this.onMenuOptionSelection}
-        onPressItem={this.onCardItemPress}   // ... used to highlight an item (radio control)...
-        onToggleItem={this.onCardToggle}
+        onPressItem={this.onCardItemPress}      // ... used to highlight an item ...
+        onToggleItem={this.onCardItemToggle}    // ... turns the checked status on/off ...
+        onMenuPress={this.onCardItemMenuPress}
       />
     );
   }
+
+/*
+*/
 
   render() {
     return (
       <MenuProvider>
         <View style={styles.outerContainer}>
           { this.renderMainScreen() }
+          { this.renderTagEditScreen() }
         </View>
         <TouchableHighlight 
           style={styles.addButton}
@@ -270,10 +340,26 @@ export default connect(whatDoYouNeed)(ShowCard);
           />
           </TouchableOpacity>
 
+Pfeffenhausen Rathaus          
+Dienstag 13:30 – 16:00 Uhr
+Donnerstag 13:30 – 18:00 Uhr
 
 */
 
 const styles = StyleSheet.create({
+  popupContainer: {
+    //flex: 1,
+    justifyContent: 'center',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.65)',
+  },
+  modalInnerContainer: {
+    width: '90%',
+  },
   FloatingButtonStyle: {
     resizeMode: 'contain',
     width: 50,

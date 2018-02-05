@@ -213,11 +213,6 @@ class BuildCard extends PureComponent {
     this.props.dispatch(itemCardChanged('desc', text));
   }
 
-  itemTagChanged(text) {
-    //console.log('New Tag Value: ', text);
-    this.props.dispatch(itemCardChanged('tag', text));
-  }
-
   itemImageChanged(image) {
     //console.log('New Image: ', image);
     this.props.dispatch(addCardImage(image));
@@ -288,6 +283,11 @@ class BuildCard extends PureComponent {
       console.log(e);
       //Alert.alert(e.message ? e.message : e);
     });
+  }
+
+  itemTagChanged(text) {
+    //console.log('New Tag Value: ', text);
+    this.props.dispatch(itemCardChanged('tag', text));
   }
 
   processTag(tag) {
@@ -497,7 +497,7 @@ class BuildCard extends PureComponent {
 
   renderTagEditScreen() {
     return (
-    <View style={styles.container}>
+    <View style={styles.popupContainer}>
       <Modal
           visible={this.state.tagsModalVisible}
           transparent
@@ -505,10 +505,12 @@ class BuildCard extends PureComponent {
           onRequestClose={() => this.closeTagsEditModal()}
       >
         <View style={styles.modalContainer}>
-          <View style={styles.innerContainer}>
+          <View style={styles.modalInnerContainer}>
             <TagEdit
               tagsList={this.props.thisCard.tags}
               tagName={this.props.thisCard.tag}
+              photo={this.props.thisCard.imageThumb}
+              mimeType={this.props.thisCard.mimeType}
               onTagAdd={() => this.addTag2Card()} 
               onTagChange={text => this.itemTagChanged(text)}
               onTagRemove={tag => this.itemTagRemove(tag)}
@@ -782,7 +784,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.75,
     paddingBottom: 5
   },
-  container: {
+  popupContainer: {
     //flex: 1,
     justifyContent: 'center',
   },
@@ -792,7 +794,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(0,0,0,0.65)',
   },
-  innerContainer: {
+  modalInnerContainer: {
     width: '90%',
   },
   outerContainer: {

@@ -45,6 +45,9 @@ export const LOAD_CATEGORIES_FAILURE = 'LOAD_CATEGORIES_FAILURE';
 export const DELETE_SELECTED_CATS = 'DELETE_SELECTED_CATS';
 
 // ... everything dealing with cards ...
+export const OPEN_TAGS_MODAL = 'OPEN_TAGS_MODAL';
+export const CLOSE_TAGS_MODAL = 'CLOSE_TAGS_MODAL';
+
 export const CARDS_STORAGE_KEY = '@track!some:my_cards';
 export const CARD_EDIT_CHANGE = 'CARD_EDIT_CHANGE';
 export const ADD_CARD = 'ADD_CARD';

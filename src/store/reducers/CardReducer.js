@@ -10,20 +10,23 @@ import {
   ADD_CARD_IMAGE,            // ... NEW ...
   HIGHLIGHT_CARD,            // ... NEW ...
   CARD_EDIT_CHANGE,
+  OPEN_TAGS_MODAL,
+  CLOSE_TAGS_MODAL,
   //SAVE_CARDS_SUCCESS,
   //SAVE_CARDS_FAILURE,
-  LOAD_CARDS_SUCCESS,
+  //LOAD_CARDS_SUCCESS,
   //LOAD_CARDS_FAILURE
   UPDATE_CARD_SELECTED,
   DELETE_SELECTED_CARDS
 } from '../actions/actionTypes';
 
 const initialState = {
-  itemList: [],   // ... array of cards + selected flag ...
+  itemList: [],   // ... array of cards + selected flag (not used anymore) ...
   loading: false,
   lastUpdated: false,
   detailView: false,
-  highlighted: '',      // ... the unique key of the currently highlighted item ...
+  highlighted: '',        // ... the unique key of the currently highlighted item ...
+  showTagsScreen: '',     // ... the unique key of the item to be edited ...
   thisCard: {
     key: '',
     tag: '',
@@ -57,6 +60,14 @@ const CardReducer = (state = initialState, action) => {
   //console.log('Card Reducer State: ', state, '  Action: ', action);
   switch (action.type) {
 
+    case OPEN_TAGS_MODAL:
+    case CLOSE_TAGS_MODAL:
+      return {
+        ...state,
+        showTagsScreen: action.payload.key,
+        lastUpdated: Date.now()
+      };
+
     case CARD_EDIT_CHANGE:
       return {
         ...state,
@@ -71,6 +82,13 @@ const CardReducer = (state = initialState, action) => {
       return {
         ...state,
         lastUpdated: Date.now()
+      };
+
+    case HIGHLIGHT_CARD:
+      // ... make one item in the list stand out or be selected ...
+      return { 
+        ...state,
+        highlighted: action.payload.key
       };
 
     case UPDATE_CARD:
@@ -93,16 +111,6 @@ const CardReducer = (state = initialState, action) => {
         lastUpdated: Date.now()
       };
 
-    case DELETE_SELECTED_CARDS:
-      return {
-        ...state,
-        itemList: state.itemList.filter(item => {
-          return item.selected !== true;
-        }),
-        detailView: false,
-        lastUpdated: Date.now()
-      };
-
     case ADD_CARD_IMAGE:
       // ... add this image to the card ...
       return { 
@@ -112,7 +120,6 @@ const CardReducer = (state = initialState, action) => {
           mimeType: action.payload.image.mime
           //image: '',  // ... store this in separate Realm (do this later) ...
         },
-        //lastUpdated: Date.now() - don't set this yet as card is not saved (like adding a field)
       };
 
 /*
@@ -136,12 +143,11 @@ const CardReducer = (state = initialState, action) => {
             action.payload.tag
           ]
         },
-        //lastUpdated: Date.now() - don't set this as card is not saved (like adding a field)
       };
 
     case ADD_CARD:
       // ... added in Realm DB - just clear the card input record ...
-      ToastAndroid.show('Card Successfully Added', ToastAndroid.SHORT);
+      ToastAndroid.show('Card Added', ToastAndroid.SHORT);
       return { 
         ...state,
         thisCard: {
@@ -164,11 +170,27 @@ const CardReducer = (state = initialState, action) => {
         lastUpdated: Date.now()
       };
 
-    case HIGHLIGHT_CARD:
-      // ... make one item in the list stand out or be selected ...
-      return { 
+    case CURRENT_CARD:
+      return {
         ...state,
-        highlighted: action.payload.key
+        thisCard: {
+          key: action.payload.item.key,
+          tag: '',
+          note: '',
+          name: action.payload.item.name,
+          desc: action.payload.item.desc,
+          icon: action.payload.item.icon,
+          iconType: action.payload.item.iconType,
+          rating: action.payload.item.rating,
+          category: action.payload.item.category,
+          image: action.payload.item.image,
+          mimeType: action.payload.item.mimeType,
+          imageThumb: action.payload.item.imageThumb,
+          barcode: action.payload.item.barcode,
+          tags: action.payload.item.tags,
+          notes: action.payload.item.notes
+        },
+        detailView: true
       };
 
     case CLEAR_CARD:
@@ -181,37 +203,30 @@ const CardReducer = (state = initialState, action) => {
           name: '',
           desc: '',
           icon: '',
-          thumb: '',
+          iconType: '',
           rating: 0,
           category: '',
-          image: {},
-          barcode: {},
+          image: '',          // ... image will be stored in it's own realm ...
+          mimeType: '',       // ... the mimeType for image & thumbnail will be the same ...
+          imageThumb: '',     // ... small image stored for the list ...
+          barcode: '',
           tags: [],
           notes: []
         },
         detailView: false
       };
 
-    case CURRENT_CARD:
+//----------------------------------------------------
+// ... these functions need to be fixed for Realm ...
+//----------------------------------------------------
+    case DELETE_SELECTED_CARDS:
       return {
         ...state,
-        cardFound: state.itemList.find(card => {
-          return card.key === action.payload.key;
+        itemList: state.itemList.filter(item => {
+          return item.selected !== true;
         }),
-        thisCard: {
-          key: this.cardFound.key,
-          name: this.cardFound.name,
-          desc: this.cardFound.desc,
-          icon: this.cardFound.icon,
-          thumb: this.cardFound.thumb,
-          rating: this.cardFound.rating,
-          category: this.cardFound.category,
-          image: this.cardFound.image,
-          barcode: this.cardFound.barcode,
-          tags: this.cardFound.tags,
-          notes: this.cardFound.notes
-        },
-        detailView: true
+        detailView: false,
+        lastUpdated: Date.now()
       };
 
     default: return state;

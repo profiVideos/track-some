@@ -2,7 +2,6 @@ import React from 'react';
 import { 
   View, 
   Text, 
-  //Alert,
   Image,
   StyleSheet, 
   Dimensions,
@@ -13,13 +12,11 @@ import {
   Menu,
   MenuOptions,
   MenuOption,
-  MenuTrigger,
-  //renderers
+  MenuTrigger
 } from 'react-native-popup-menu';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import AppColors from '../templates/appColors';
 
-//const { Poopover } = renderers;
 const IconMenuOption = (props) => (
   <MenuOption 
     value={props.value} 
@@ -33,14 +30,13 @@ class CardItem extends React.PureComponent {
     Dimensions.addEventListener('change', this.onDeviceChange);
     this.state = {
       didSave: false,
+      isVisible: false,
       infoWidth: Dimensions.get('window').width - 112
     };
   }
 
   componentWillMount() {
     console.log('inside card item ...');
-    //console.log('Screen Width: ', this.state.scrWidth);
-    //console.log('State Info Width: ', this.state.infoWidth);
   }
 
   componentWillUnmount() {
@@ -54,39 +50,21 @@ class CardItem extends React.PureComponent {
   };
 
   onTouchablePress = () => { 
-    this.props.onPressItem(this.props.id);
+    this.props.onPressItem(this.props.item.key);
   }
 
   onToggleCheck = () => { 
-    this.props.onToggleItem(this.props.id, !this.props.selected);
+    this.props.onToggleItem(this.props.item.key, !this.props.item.selected);
   }
 
-  onMenuPress = (value, key) => { 
-    this.props.onDoMenuItem(value, key);
+  onMenuSelect = (value, item) => { 
+    this.props.onMenuPress(value, item);
   }
-
-  //menuReference = (menuId) => {
-  //  this.optionsMenu = menuId;
-  //}
-  /*
-        <MenuOption value={0} disabled>
-          <Text style={styles.menuTitle}>Select Option</Text>
-        </MenuOption>
-  */
 
   renderOptionMenu = () => (
-    <Menu 
-      onSelect={(value) => this.onMenuPress(value, this.props.id)} 
-      //ref={this.menuReference}
-      //renderer={Poopover}
-    >
+    <Menu onSelect={(value) => this.onMenuSelect(value, this.props.item)}>
       <MenuTrigger>
-        <Icon 
-          size={18}
-          name={'ellipsis-v'} 
-          style={styles.menuWrapper} 
-          color={'#212191'} 
-        />            
+        <Icon size={18} name={'ellipsis-v'} style={styles.menuWrapper} color={'#212191'} />
       </MenuTrigger>
       <MenuOptions customStyles={menuOptionsStyles}>
         <IconMenuOption value={'edit'} icon='✏️' text='Edit' />
@@ -97,18 +75,8 @@ class CardItem extends React.PureComponent {
     </Menu>
   )
 
-/*
-            <TouchableOpacity onPress={this.onIconChange}>
-              <Image 
-                style={styles.imageStyle} 
-                source={{ uri: `data:${this.props.mimeType};base64,${this.props.image}` }} 
-              /> 
-            </TouchableOpacity>
-*/
-
   render() {
     const infoWidth = this.state.infoWidth;
-    //console.log(infoWidth);
     const backColor = this.props.hilite;   // ... AppsColor.hiliteColor, otherwise white ...
     const renderFull = this.props.marked ? <Text>Show Everything!</Text> : <View />;
     const tagsBadge = (this.props.numTags === 0) ? <View /> :
@@ -118,43 +86,45 @@ class CardItem extends React.PureComponent {
            <Text style={styles.badgeTextStyle}>{this.props.numTags}</Text>
          </View>
        </View>);
-    const itemDesc = (this.props.desc === '') ? <View /> :
+    const itemDesc = (this.props.item.desc === '') ? <View /> :
       (<Text ellipsizeMode='tail' numberOfLines={1} style={styles.subHeading}>
-         {this.props.desc}
+         {this.props.item.desc}
        </Text>);
     const categoryDesc = (this.props.catDesc === '') ? <View /> :
       <Text style={styles.extraInfo} >{`${this.props.catDesc}  `}</Text>;
+
     return (
       <View>
         <View style={[styles.outerWrapper, { backgroundColor: backColor }]}>
           <View style={styles.imageWrapper}>
             <TouchableOpacity onPress={this.onIconChange}>
-              {this.props.image === '' ?  
-                 <Text style={styles.itemIcon}>{this.props.icon}</Text> :
+              {this.props.item.imageThumb === '' ?  
+                 <Text style={styles.itemIcon}>{this.props.item.icon}</Text> :
                <Image 
                  style={styles.imageStyle} 
-                 source={{ uri: `data:${this.props.mimeType};base64,${this.props.image}` }} 
+                 source={{ uri: 
+                  `data:${this.props.item.mimeType};base64,${this.props.item.imageThumb}` }} 
                />} 
             </TouchableOpacity>
           </View>
           <TouchableNativeFeedback onPress={this.onTouchablePress}>
-              <View style={[styles.infoWrapper, { width: infoWidth }]}>
-                <Text 
-                  ellipsizeMode='tail' 
-                  numberOfLines={1} 
-                  style={styles.itemName}
-                >
-                  {this.props.name}
-                </Text>
-                {itemDesc}
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  {categoryDesc}
-                  {tagsBadge}
-                </View>
+            <View style={[styles.infoWrapper, { width: infoWidth }]}>
+              <Text 
+                ellipsizeMode='tail' 
+                numberOfLines={1} 
+                style={styles.itemName}
+              >
+                {this.props.item.name}
+              </Text>
+              {itemDesc}
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                {categoryDesc}
+                {tagsBadge}
               </View>
+            </View>
           </TouchableNativeFeedback>
           <View style={styles.checkWrapper}>
-            <TouchableNativeFeedback /*onPress={this.onMenuPress}*/>
+            <TouchableNativeFeedback>
               { this.renderOptionMenu() }
             </TouchableNativeFeedback>
             <TouchableOpacity onPress={this.onToggleCheck}>
@@ -204,14 +174,12 @@ const styles = StyleSheet.create({
   extraInfo: {
     fontSize: 11,
     paddingBottom: 3,
-    //backgroundColor: 'grey'
   },
   imageStyle: {
     height: 60,
     width: 80,
     borderTopRightRadius: 3,
     borderBottomRightRadius: 3,
-    //borderRadius: 3,
     resizeMode: 'cover'
   },
   badgeTextStyle: {
@@ -253,7 +221,6 @@ const styles = StyleSheet.create({
     //width: {state.infoWidth},  //'82%', //'70%',
   },
   checkWrapper: {
-    //width: '12%',
     width: 32,
     alignItems: 'center',
     justifyContent: 'center'

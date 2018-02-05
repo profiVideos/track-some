@@ -3,6 +3,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import {
   View,
   Text,
+  //Alert,
   Image,
   TextInput,
   StyleSheet,
@@ -35,6 +36,14 @@ class TagEdit extends PureComponent {
   } 
 
 /*
+  onClosePressed = () => {
+    Alert.alert('Tag inside TagEdit and requested the close: ');
+    this.props.onClosePress();
+    //this.props.onTapItem(this.props.emojiName, this.props.emojiString);
+  } 
+*/
+
+/*
   addThisTag() {
     console.log('Add this tag ...');
   }
@@ -50,11 +59,22 @@ class TagEdit extends PureComponent {
 
 */
 
+  renderPhoto() {
+    if (this.props.photo === '') return;
+    return (
+      <View style={styles.photoContainer}>
+        <Image 
+         style={styles.photoStyle} 
+         source={{ uri: `data:${this.props.mimeType};base64,${this.props.photo}` }} 
+        /> 
+      </View>
+    );
+  }
+
   renderItemTags() {
     const renderThis = (this.props.tagsList.length === 0 ? ( 
       <View style={styles.tagsEmpty}>
-        <Text style={styles.sadFace}>😢</Text>
-        <Text style={styles.bigMessage}>You haven't any tags for this item!</Text>
+        <Text style={styles.bigMessage}>You have no tags for this item.</Text>
         <Text style={styles.bigMessage}>Go ahead and enter your first one below.</Text>
         <Text style={styles.bigMessage}>
         You can enter multiple tags on the same line by separating each one with a comma.</Text>
@@ -69,13 +89,6 @@ class TagEdit extends PureComponent {
   }
 
   render() {
-    //console.log(this.state.tags);
-    //console.log(this.renderTags(this.state.tags));
-    //const renderBadge = this.props.canEdit && this.props.isChecked ?
-    //  (<View style={[styles.extraInfo, { backgroundColor: 'blue' }]}>
-    //     <Icon name='check' style={styles.badgeStyle} />
-    //   </View>) : null;
-    //const backColor = this.state.selected ? '#fff8b2' : 'white';
     return (
       <View style={styles.outerContainer}>
 
@@ -91,6 +104,7 @@ class TagEdit extends PureComponent {
           </TouchableOpacity>
         </View>
 
+        { this.renderPhoto() }
         { this.renderItemTags() }
 
         <View style={styles.statusBar}>
@@ -99,7 +113,7 @@ class TagEdit extends PureComponent {
               style={styles.textInputStyle}
               autoFocus
               //autoCorrect={false}
-              //blurOnSubmit={true}
+              blurOnSubmit={false}
               disableFullscreenUI
               underlineColorAndroid={'transparent'}
               placeholder={'A new tag ... '}
@@ -179,6 +193,18 @@ export default TagEdit;
 */
 
 const styles = StyleSheet.create({
+  photoStyle: {
+    width: '80%',
+    height: 150,
+    borderRadius: 7,
+    resizeMode: 'contain'
+  },
+  photoContainer: {
+    padding: 7,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#333'
+  },
   buttonFinish: {
     padding: 5,
     paddingLeft: 7,
@@ -189,18 +215,14 @@ const styles = StyleSheet.create({
     //height: 200,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: 2,
-    paddingBottom: 10,
+    //paddingTop: 2,
+    padding: 8,
     backgroundColor: AppColors.paperColor
   },
   bigMessage: {
     fontSize: 13,
     fontStyle: 'italic',
     textAlign: 'center',
-    color: 'rgba(0,0,0,0.40)'
-  },
-  sadFace: {
-    fontSize: 44,
     color: 'rgba(0,0,0,0.40)'
   },
   tagsContainer: {
@@ -291,34 +313,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between'
-  },
-  usageStyle: {
-    position: 'absolute',
-    marginTop: 0,
-    marginLeft: 55
-  },
-  usageText: {
-    fontSize: 11,
-    fontWeight: '700'
-  },
-  badgeStyle: {
-    color: 'white',
-    textAlign: 'center',
-    fontSize: 16,
-    //fontWeight: 'bold'
-  },
-  extraInfo: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 3,
-    marginTop: -20,
-    width: 22,
-    height: 22,
-    borderRadius: 22
-  },
-  iconValue: {
-    color: 'black',
-    fontSize: 32,
-    textAlign: 'center'
   },
 });

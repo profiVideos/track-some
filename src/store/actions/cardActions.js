@@ -6,9 +6,11 @@ import {
   UPDATE_CARD,
   REMOVE_CARD,
   CURRENT_CARD,
-  ADD_CARD_TAG,              // ... NEW ...
-  ADD_CARD_IMAGE,            // ... NEW ...
-  HIGHLIGHT_CARD,            // ... NEW ...
+  ADD_CARD_TAG,               // ... NEW ...
+  ADD_CARD_IMAGE,             // ... NEW ...
+  HIGHLIGHT_CARD,             // ... NEW ...
+  OPEN_TAGS_MODAL,            // ... NEW ...
+  CLOSE_TAGS_MODAL,           // ... NEW ...
   CARD_EDIT_CHANGE,
   //SAVE_CARDS_SUCCESS,
   //SAVE_CARDS_FAILURE,
@@ -63,6 +65,33 @@ export const updateCard = (key, name, desc, icon, category) => {
   };
 };
 
+export const currentCard = (item) => {
+  return {
+    type: CURRENT_CARD,
+    payload: { item }
+  };
+};
+
+export const clearCard = () => {
+  return {
+    type: CLEAR_CARD
+  };
+};
+
+export const openTagsModal = (key) => {
+  return {
+    type: OPEN_TAGS_MODAL,
+    payload: { key }
+  };
+};
+
+export const closeTagsModal = (key) => {
+  return {
+    type: CLOSE_TAGS_MODAL,
+    payload: { key }
+  };
+};
+
 export const deleteCard = (key) => {
   //-----------------------------------------------------------------------------
   // ... we should really do this within a transaction so we could roll back ...
@@ -93,16 +122,3 @@ export const deleteCards = () => {
 //---------------------------------------------------------------
 // ... the following functions need to be adjusted for Realm ...
 //---------------------------------------------------------------
-
-export const clearCard = () => {
-  return {
-    type: CLEAR_CARD
-  };
-};
-
-export const currentCard = (key) => {
-  return {
-    type: CURRENT_CARD,
-    payload: { key }
-  };
-};
