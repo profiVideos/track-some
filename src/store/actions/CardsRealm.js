@@ -55,6 +55,13 @@ export const updateCardSelected = (key, isSelected) => {
   });
 };
 
+export const updateCardTags = (key, newTags) => {
+  tsRealm.write(() => {
+    // ... update this card based on the key ...
+    tsRealm.create('Card', { key, tags: newTags }, true);
+  });
+};
+
 export const updateCard = (key, name, desc, icon, category) => {
   tsRealm.write(() => {
     // ... update this card based on the key ...

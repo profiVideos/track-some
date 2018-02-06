@@ -8,7 +8,7 @@ import {
   Picker,
   StyleSheet, 
   ScrollView,
-  ToastAndroid,
+  //ToastAndroid,
   TouchableOpacity,
   TouchableNativeFeedback 
 } from 'react-native';
@@ -33,7 +33,10 @@ import PhotoAdd from '../images/PhotoAdd.png';
 import { 
   addCard,
   addCardTag,
-  addCardImage, 
+  addCardImage,
+  openTagsModal,
+  deleteCardTag,
+  closeTagsModal, 
   loadCategories,
   itemCardChanged,
 } from '../store/actions';
@@ -52,7 +55,8 @@ const whatDoYouNeed = state => {
   return {
     catList: state.categories.itemList,
     emojiCode: state.emojis.emojiCode,     // ... current emoji selected in PickEmojis ...
-    thisCard: state.cards.thisCard
+    thisCard: state.cards.thisCard,
+    tagsModalOpen: state.cards.tagsWindowOpen
   };
 };
 
@@ -77,7 +81,7 @@ class BuildCard extends PureComponent {
       catList: [],
       pickerItems: [],
       getIcon4Card: false,
-      tagsModalVisible: false,
+      //tagsModalOpen: false,
       // ... these should go in redux / options panel & config file ...
       compress: 0.25,   // ... could cause huge files if above 50% ...
       showIcon: true,
@@ -219,8 +223,7 @@ class BuildCard extends PureComponent {
   }
 
   itemTagRemove(tag) {
-    console.log('MASTER: About to remove tag: ', tag);
-    ToastAndroid.show('Need to remove that Tag', ToastAndroid.LONG);
+    this.props.dispatch(deleteCardTag(tag));
   }
 
   displaySnackBarMsg(msg, action) {
@@ -236,13 +239,14 @@ class BuildCard extends PureComponent {
   }
 
   openTagsEditModal() {
-    //console.log('About to open the Modal window ...');
-    this.setState({ tagsModalVisible: true });
+    this.props.dispatch(openTagsModal(this.props.thisCard.key));
   }
 
   closeTagsEditModal() {
-    this.setState({ tagsModalVisible: false });
-    if (this.props.thisCard.tag !== '') this.addTag2Card();
+    if (this.props.thisCard.tag !== '') {
+      this.addTag2Card();   // ... user closed without hitting the plus '+' button ...
+    }
+    this.props.dispatch(closeTagsModal(''));
   }
 
   cleanTempSpace() {
@@ -495,11 +499,12 @@ class BuildCard extends PureComponent {
     );
   }
 
+/*
   renderTagEditScreen() {
     return (
     <View style={styles.popupContainer}>
       <Modal
-          visible={this.state.tagsModalVisible}
+          visible={this.props.tagsModalOpen}
           transparent
           animationType={'fade'}
           onRequestClose={() => this.closeTagsEditModal()}
@@ -522,6 +527,7 @@ class BuildCard extends PureComponent {
     </View>
     );
   }
+*/
 
 /*
     const renderImage = Object.keys(this.props.thisCard.image).length === 0 && 
@@ -596,7 +602,6 @@ class BuildCard extends PureComponent {
           </View>
           { this.renderTags() }
         </View>
-        { this.renderTagEditScreen() }
         { this.renderItemExtras() }
         { this.renderActionIcons() }
         { this.renderPreview() }
@@ -608,6 +613,11 @@ class BuildCard extends PureComponent {
 export default connect(whatDoYouNeed)(BuildCard);
 
 /*
+
+WE NEED TO COMBINE THESE TWO FUNCTIONS INTO AN IMPORT MODULE
+IN BUILD CARD AND SHOW CARDS
+
+        { this.renderTagEditScreen() }
 
 dropbox upload method
 

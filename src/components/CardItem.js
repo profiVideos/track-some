@@ -15,6 +15,8 @@ import {
   MenuTrigger
 } from 'react-native-popup-menu';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import ScrollableTabView from 'react-native-scrollable-tab-view';
+import ImageTabBar from './ImageTabBar';
 import AppColors from '../templates/appColors';
 
 const IconMenuOption = (props) => (
@@ -60,6 +62,37 @@ class CardItem extends React.PureComponent {
   onMenuSelect = (value, item) => { 
     this.props.onMenuPress(value, item);
   }
+/*
+      <View style={styles.fullCard}>
+*/
+
+  renderFullCard() {
+    return (
+      <ScrollableTabView
+        style={{ backgroundColor: 'black', height: 400 }}
+        initialPage={0}
+        //tabBarPosition='overlayTop'
+        renderTabBar={() => <ImageTabBar optionMenu={this.renderOptionMenu} />}
+      >
+        <View tabLabel="paw" style={styles.tabView}>
+          <View style={styles.responsiveContainer}>
+            <Image 
+             style={styles.fullWidthImage}
+             //style={styles.responsiveImg} 
+             source={{ uri: 
+              `data:${this.props.item.mimeType};base64,${this.props.item.imageThumb}` }} 
+            />
+          </View>
+        </View>
+        <View tabLabel="pizza" style={styles.tabView}>
+          <Text>This is the info panel</Text>
+        </View>
+        <View tabLabel="tennisball" style={styles.tabView}>
+          <Text>And the notes go here</Text>
+        </View>
+      </ScrollableTabView>
+    );
+  }
 
   renderOptionMenu = () => (
     <Menu onSelect={(value) => this.onMenuSelect(value, this.props.item)}>
@@ -78,7 +111,7 @@ class CardItem extends React.PureComponent {
   render() {
     const infoWidth = this.state.infoWidth;
     const backColor = this.props.hilite;   // ... AppsColor.hiliteColor, otherwise white ...
-    const renderFull = this.props.marked ? <Text>Show Everything!</Text> : <View />;
+    const renderFull = this.props.marked ? this.renderFullCard() : <View />;
     const tagsBadge = (this.props.numTags === 0) ? <View /> :
       (<View style={{ flexDirection: 'row', alignItems: 'center' }}>
          <Text style={styles.extraInfo}>Tags:</Text>
@@ -159,6 +192,30 @@ const menuOptionsStyles = {
 };
 
 const styles = StyleSheet.create({
+  fullView: {
+    //backgroundColor: '#000'
+  },
+  responsiveContainer: {
+    width: '100%',
+    aspectRatio: (1056 / 768),
+    //backgroundColor: '#00f',
+  },
+  fullWidthImage: {
+    height: '100%',
+    width: '100%',
+    //maxWidth: 1056,
+    //maxHeight: 768,
+    //marginLeft: 'auto',
+    //marginRight: 'auto',
+    resizeMode: 'contain',    
+  },
+  tabView: {
+    //height: 200,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#727272', 
+    //backgroundColor: AppColors.paperColor
+  },
   menuTitle: {
     fontWeight: '500', 
     color: AppColors.darkerColor,
@@ -168,7 +225,6 @@ const styles = StyleSheet.create({
   },
   subHeading: {
     fontSize: 13,
-    //height: 15
     marginTop: -3,
   },
   extraInfo: {
@@ -247,3 +303,65 @@ const styles = StyleSheet.create({
     color: 'black'
   }
 });
+
+/*
+    componentWillMount() {
+      Image.getSize(this.props.uri, (width, height) => {
+        if (this.props.width && !this.props.height) {
+            this.setState({width: this.props.width, height: height * (this.props.width / width)});
+        } else if (!this.props.width && this.props.height) {
+            this.setState({width: width * (this.props.height / height), height: this.props.height});
+        } else {
+            this.setState({width: width, height: height});
+        }
+      });
+    }
+
+    render() {
+      return (
+        <Image 
+          source={this.state.source} 
+          style={{height: this.state.height, width: this.state.width}}
+        />
+      );
+    }
+
+OR
+
+… // inside render()
+<View style={styles.responsiveContainer}>
+  <Image source={require('../assets/img/logo.png')} style={styles.responsiveImg} />
+</View>
+
+… // styles
+const styles = StyleSheet.create {
+  responsiveContainer: {
+    flex: 1,
+    // arbitrary width that shall not be exceeded
+    width: '60%',
+    // demonstrate the dimensions of the container
+    backgroundColor: '#00f',
+  },
+  responsiveImg: {
+    // Image dimensions are known: 600, 330
+    aspectRatio: (600 / 330),
+    // Make sure the image stretches and shrinks
+    width: '100%',
+    height: '100%',
+    // Make sure the image doesn't exceed it's original size
+    // If you want it to exceed it's original size, then
+    // don't use maxWidth / maxHeight or set their 
+    // value to null
+    maxWidth: 600,
+    maxHeight: 330,
+    // center horizontally
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    // make sure, the image is resized properly:
+    resizeMode: 'contain',
+    // demonstrate the dimensions of the image
+    backgroundColor: '#ff0',
+  },
+}
+
+*/

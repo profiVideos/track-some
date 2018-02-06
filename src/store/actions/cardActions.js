@@ -9,9 +9,11 @@ import {
   ADD_CARD_TAG,               // ... NEW ...
   ADD_CARD_IMAGE,             // ... NEW ...
   HIGHLIGHT_CARD,             // ... NEW ...
+  DELETE_CARD_TAG,
   OPEN_TAGS_MODAL,            // ... NEW ...
   CLOSE_TAGS_MODAL,           // ... NEW ...
   CARD_EDIT_CHANGE,
+  UPDATE_CARD_TAGS,
   //SAVE_CARDS_SUCCESS,
   //SAVE_CARDS_FAILURE,
   //LOAD_CARDS_SUCCESS,
@@ -51,6 +53,13 @@ export const addCardImage = (image) => {
   };
 };
 
+export const deleteCardTag = (tag) => {
+  return {
+    type: DELETE_CARD_TAG,
+    payload: { tag }
+  };
+};
+
 export const setCardSelected = (key, isSelected) => {
   store.updateCardSelected(key, isSelected);
   return {
@@ -62,6 +71,13 @@ export const updateCard = (key, name, desc, icon, category) => {
   store.updateCard(key, name, desc, icon, category);
   return {
     type: UPDATE_CARD
+  };
+};
+
+export const updateCardTags = (key, tags) => {
+  store.updateCardTags(key, tags);
+  return {
+    type: UPDATE_CARD_TAGS
   };
 };
 

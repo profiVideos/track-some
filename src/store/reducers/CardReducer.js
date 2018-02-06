@@ -12,6 +12,8 @@ import {
   CARD_EDIT_CHANGE,
   OPEN_TAGS_MODAL,
   CLOSE_TAGS_MODAL,
+  UPDATE_CARD_TAGS,
+  DELETE_CARD_TAG,
   //SAVE_CARDS_SUCCESS,
   //SAVE_CARDS_FAILURE,
   //LOAD_CARDS_SUCCESS,
@@ -26,7 +28,9 @@ const initialState = {
   lastUpdated: false,
   detailView: false,
   highlighted: '',        // ... the unique key of the currently highlighted item ...
-  showTagsScreen: '',     // ... the unique key of the item to be edited ...
+  tagsChanged: false,
+  tagsWindowOpen: false,
+  editCardTags: '',      // ... the unique key of the item to be edited ...
   thisCard: {
     key: '',
     tag: '',
@@ -61,11 +65,18 @@ const CardReducer = (state = initialState, action) => {
   switch (action.type) {
 
     case OPEN_TAGS_MODAL:
+      return {
+        ...state,
+        editCardTags: action.payload.key,
+        tagsChanged: false,
+        tagsWindowOpen: true
+      };
+
     case CLOSE_TAGS_MODAL:
       return {
         ...state,
-        showTagsScreen: action.payload.key,
-        lastUpdated: Date.now()
+        editCardTags: '',
+        tagsWindowOpen: false
       };
 
     case CARD_EDIT_CHANGE:
@@ -92,10 +103,14 @@ const CardReducer = (state = initialState, action) => {
       };
 
     case UPDATE_CARD:
+    case UPDATE_CARD_TAGS:
       // ... added in Realm DB - just show something happened ...
       ToastAndroid.show('Card Updated', ToastAndroid.SHORT);
       return {
         ...state,
+        tag: '',
+        tags: [],
+        tagsChanged: false,
         lastUpdated: Date.now()
       };
 
@@ -132,6 +147,19 @@ const CardReducer = (state = initialState, action) => {
   base64: action.payload.image.data
 */
 
+    case DELETE_CARD_TAG:
+      // ... add this item to this card's tag list ...
+      return { 
+        ...state,
+        thisCard: { ...state.thisCard, 
+        tags: state.thisCard.tags.filter(tag => {
+          return tag !== action.payload.tag; 
+          })
+        },
+        tagsChanged: true,
+        lastUpdated: Date.now()
+      };
+
     case ADD_CARD_TAG:
       // ... add this item to this card's tag list ...
       return { 
@@ -143,6 +171,8 @@ const CardReducer = (state = initialState, action) => {
             action.payload.tag
           ]
         },
+        tagsChanged: true,
+        lastUpdated: Date.now()
       };
 
     case ADD_CARD:

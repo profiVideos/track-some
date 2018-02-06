@@ -7,6 +7,7 @@ import {
   Image,
   TextInput,
   StyleSheet,
+  //ScrollView,
   TouchableOpacity,
   //TouchableHighlight,
   TouchableNativeFeedback
@@ -131,7 +132,11 @@ class TagEdit extends PureComponent {
           </TouchableOpacity>
           <TouchableNativeFeedback onPress={this.props.onClosePress}>
             <View style={styles.buttonFinish}> 
-              <IonIcon name='md-checkmark-circle-outline' size={34} color={AppColors.paperColor} />
+              <IonIcon 
+                name='md-checkmark-circle-outline' 
+                size={34} 
+                color={AppColors.paperColor} 
+              />
             </View>
           </TouchableNativeFeedback>
         </View>
@@ -270,6 +275,7 @@ const styles = StyleSheet.create({
   statusBar: {
     elevation: 3,
     height: 38,
+    width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
     borderBottomLeftRadius: 8,
@@ -283,6 +289,7 @@ const styles = StyleSheet.create({
   },
   outerContainer: {
     borderRadius: 8,
+    //width: '100%'
     //backgroundColor: 'blue'
   },
   inputContainer: {
