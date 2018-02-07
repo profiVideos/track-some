@@ -31,10 +31,9 @@ export const itemCardChanged = (prop, value) => {
 };
 
 export const addCard =
-  (cList, cName, cDesc, cIcon, cType, cRating, cCategory, 
-   cThumb, cMime, cBarcode, cTags, cNotes) => {
+  (cName, cDesc, cIcon, cType, cRating, cCategory, cThumb, cMime, cBarcode, cTags, cNotes) => {
   store.createCard(
-    cList, cName, cDesc, cIcon, cType, cRating, cCategory, cThumb, cMime, cBarcode, cTags, cNotes);
+    cName, cDesc, cIcon, cType, cRating, cCategory, cThumb, cMime, cBarcode, cTags, cNotes);
   return {
     type: ADD_CARD   // ... just need to inform Redux that something was added ...
   };

@@ -33,7 +33,6 @@ const initialState = {
   editCardTags: '',      // ... the unique key of the item to be edited ...
   thisCard: {
     key: '',
-    list: '',
     tag: '',
     note: '',
     name: '',
@@ -183,7 +182,6 @@ const CardReducer = (state = initialState, action) => {
         ...state,
         thisCard: {
           key: '',
-          list: '',
           tag: '',
           note: '',
           name: '',
@@ -207,7 +205,6 @@ const CardReducer = (state = initialState, action) => {
         ...state,
         thisCard: {
           key: action.payload.item.key,
-          list: action.payload.item.list,
           tag: '',
           note: '',
           name: action.payload.item.name,
@@ -231,7 +228,6 @@ const CardReducer = (state = initialState, action) => {
         ...state,
         thisCard: {
           key: '',
-          list: '',
           tag: '',
           note: '',
           name: '',

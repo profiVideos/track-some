@@ -321,6 +321,37 @@ art, books, stamps, coins, photos, children,
 - Record Keeping (w/Photo) of Anything
 - 
 
+My Ideal User:
+- anyone :-)
+- but seriously - is male / female / other who loves to catalog things.
+- they take notes on everything are well organized (or try want to be ) and are
+  excited about new technologies.
+- they love to socialize and are on many social network sites
+- they love to share photos and stuff they are working on
+- ideally belong in the younger crowd (20-32) but could also be a senior who has much
+  time on his/her hands to pursue their hobbies - stamp / coin collecting
+- maybe a gardener who would like to catalogue his flowers and make some notes
+- ideally with a wish to share this with others via QRCode, NFC, Social Networks, Email, etc.
+- share on Instagram and other photo sharing sites.
+- could also be a fish lover who has never thought of cataloguing his / her fish
+- anyone who thinks things should be catalogued;
+  (synonyms: classify, categorize, systematize, index, list, archive, 
+   make an inventory of, inventory, record, itemize, etc.)
+
+Questions:
+Is: An office employee who
+Tends to be: A 30-40 year old male
+Values: Simplicity, being thorough
+Needs my app because it will: Help them catalogue things and organize belongings & wants
+Might ask these questions about my app:  Do I need an App for that?  
+Will it drain my battery quickly?  Will this complicate my workflow?
+ (just a sample set of questions)
+---------------------------------------------------------------------------------------
+
+Example Languages supported by ColorNote;
+Languages Supported: Arabic, Chinese, English, French, German, Hebrew, Italian, 
+                     Japanese, Korean, Portuguese, Russian, Spanish
+
 ---------------------------------------------------------------------------------------
 
     componentWillMount() {

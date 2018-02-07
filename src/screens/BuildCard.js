@@ -4,7 +4,7 @@ import {
   Text, 
   Image, 
   Alert,
-  Modal,
+  //Modal,
   Picker,
   StyleSheet, 
   ScrollView,
@@ -21,7 +21,7 @@ import { MenuProvider } from 'react-native-popup-menu';
 import MDInput from '../components/common/mdInput';
 import AppColors from '../templates/appColors';
 import CardItem from '../components/CardItem';
-import TagEdit from '../components/TagEdit';
+//import TagEdit from '../components/TagEdit';
 import RenderTags from '../components/RenderTags';
 
 import PictureFrame from '../images/PictureFrame.png';
@@ -32,6 +32,7 @@ import PhotoAdd from '../images/PhotoAdd.png';
 
 import { 
   addCard,
+  //clearCard,
   addCardTag,
   addCardImage,
   openTagsModal,
@@ -315,6 +316,7 @@ class BuildCard extends PureComponent {
     //console.log('Inside Add This Card: ', this.props.thisCard.name);
     if (this.props.thisCard.name !== '') {
       this.props.dispatch(addCard(
+        this.props.thisCard.list,
         this.props.thisCard.name,
         this.props.thisCard.desc,
         this.props.thisCard.icon,

@@ -20,12 +20,22 @@ const OpenMainTabs = () => {
         getImageSource('md-paper', 30),         // ... build card ...
         getImageSource('ios-desktop', 30),     // ... show card ...
         getImageSource('md-menu', 30),        // ... the menu button ...
-        getImageSource('md-more', 30)        // ... the options button ...
+        getImageSource('md-more', 30),       // ... the options button ...
+        getImageSource('md-bulb', 30)       // ... light bulb = notes ...
+
     ]).then(sources => {
         Navigation.startTabBasedApp({
           tabs: [
             {
-              screen: 'tracksome.ShowCard',
+              screen: 'tracksome.ShowNotes',
+              label: 'Notes',
+              title: 'List Notes',
+              icon: sources[6],
+              leftButtons: [{ icon: sources[4], id: 'menu' }],
+              //rightButtons: [{ icon: sources[5], id: 'options', disabled: true }]
+            },
+            {
+              screen: 'tracksome.ShowCards',
               label: 'Show Cards',
               title: 'Show Cards',
               icon: sources[3],
