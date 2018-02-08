@@ -68,6 +68,19 @@ export const LOAD_CARDS_FAILURE = 'LOAD_CARDS_FAILURE';
 export const DELETE_CARD_TAG = 'DELETE_CARD_TAG';
 export const DELETE_SELECTED_CARDS = 'DELETE_SELECTED_CARDS';
 
+export const ADD_NOTE = 'ADD_NOTE';
+export const SORT_NOTES = 'SORT_NOTES'; 
+export const CLEAR_NOTE = 'CLEAR_NOTE';
+export const UPDATE_NOTE = 'UPDATE_NOTE';
+export const REMOVE_NOTE = 'REMOVE_NOTE';
+export const CURRENT_NOTE = 'CURRENT_NOTE';
+export const HIGHLIGHT_NOTE = 'HIGHLIGHT_NOTE';
+export const NOTE_EDIT_CHANGE = 'NOTE_EDIT_CHANGE';
+export const OPEN_NOTES_MODAL = 'OPEN_NOTES_MODAL';
+export const CLOSE_NOTES_MODAL = 'CLOSE_NOTES_MODAL';
+export const UPDATE_NOTE_SELECTED = 'UPDATE_NOTE_SELECTED';
+export const DELETE_SELECTED_NOTES = 'DELETE_SELECTED_NOTES';
+
 //export const ADD_TAG = 'add_tag';
 //export const UPDATE_TAG = 'update_tag';
 //export const REMOVE_TAG = 'remove_tag';

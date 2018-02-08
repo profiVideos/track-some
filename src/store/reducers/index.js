@@ -5,15 +5,17 @@ import { root } from './RootReducer';
 import EmojiReducer from './EmojiReducer';
 import LoginInfo from './LoginReducer';
 import CardReducer from './CardReducer';
+import NoteReducer from './NoteReducer';
 import CategoryReducer from './CategoryReducer';
 
 const MainReducer = combineReducers({
   root,  
+  //tags: TagReducer,
   login: LoginInfo,
   cards: CardReducer,
+  notes: NoteReducer,
   emojis: EmojiReducer,
   categories: CategoryReducer
-  //tag: TagReducer,
 });
 
 export default MainReducer;

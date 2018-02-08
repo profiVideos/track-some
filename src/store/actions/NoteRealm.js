@@ -5,9 +5,20 @@ import { UniqueId } from '../../components/common/UniqueId';
 // ... Each property has a name and is described by either a string containing the property’s type, 
 // ... or an object with name, type, objectType, optional, default, and indexed fields.
 
-export const getAllCards = () => {
-  const cardList = tsRealm.objects('Card').sorted('name');  // + ,true for reverse sorting ...
-  return cardList;
+/*
+
+NEW:***********************************************************************
+
+My First Realm Cloud Instance;
+https://tracksome-live.us1.cloud.realm.io/
+
+NEW:***********************************************************************
+
+*/
+
+export const getAllNotes = () => {
+  const noteList = tsRealm.objects('Note').sorted('updatedTimestamp', true);  
+  return noteList;
 };
 
 /*
@@ -21,69 +32,75 @@ try {
 }
 */
 
-export const getCard = (key) => {
-  const thisItem = tsRealm.objectForPrimaryKey('Card', key);
+export const getNote = (key) => {
+  const thisItem = tsRealm.objectForPrimaryKey('Note', key);
   return thisItem;
 };
 
-export const createCard = 
-  (cName, cDesc, cIcon, cType, cRating, cCategory, cThumb, cMime, cBarcode, cTags, cNotes) => {
+export const createNote = (cIcon, cTitle, cNote, cColor, cPriority, cReminder) => {
   tsRealm.write(() => {
-    tsRealm.create('Card', {
+    tsRealm.create('Note', {
       key: UniqueId(),
-      name: cName,
-      desc: cDesc,
       icon: cIcon,
-      iconType: cType,
-      rating: cRating,
-      category: cCategory,
-      imageThumb: cThumb,
-      mimeType: cMime,
-      barcode: cBarcode,
-      tags: cTags,
-      notes: cNotes,
+      title: cTitle,
+      note: cNote,
+      color: cColor,
+      priority: cPriority,
+      reminder: cReminder,
       selected: false,
-      createdTimestamp: new Date()
+      createdTimestamp: new Date(),
+      updatedTimestamp: new Date()
     });
   });
 };
 
-export const updateCardSelected = (key, isSelected) => {
+export const updateNoteSelected = (key, isSelected) => {
   tsRealm.write(() => {
-    // ... update this card based on the key ...
-    tsRealm.create('Card', { key, selected: isSelected }, true);
+    // ... update this note based on the key ...
+    tsRealm.create('Note', { key, selected: isSelected }, true);
   });
 };
 
-export const updateCardTags = (key, newTags) => {
+export const updateNote = (key, icon, title, note, color, priority, reminder) => {
   tsRealm.write(() => {
     // ... update this card based on the key ...
-    tsRealm.create('Card', { key, tags: newTags }, true);
-  });
-};
-
-export const updateCard = (key, name, desc, icon, category) => {
-  tsRealm.write(() => {
-    // ... update this card based on the key ...
-    tsRealm.create('Card', { key, name, desc, icon, category }, true);
+    tsRealm.create('Note', { 
+      key, 
+      icon, 
+      title, 
+      color, 
+      priority, 
+      reminder,
+      updatedTimestamp: new Date()
+    }, true);
   });
 };
 
 //-----------------------------------------------------------------------------
 // ... we should really do this within a transaction so we could roll back ...
 //-----------------------------------------------------------------------------
-export const deleteCard = (key) => {
+export const deleteNote = (key) => {
   tsRealm.write(() => {
-    const queryResult = tsRealm.objectForPrimaryKey('Card', key);
+    const queryResult = tsRealm.objectForPrimaryKey('Note', key);
     if (queryResult !== undefined) {
       tsRealm.delete(queryResult);
     }
   });
 };
 
-export const deleteSelectedCards = () => {
+export const deleteSelectedNotes = () => {
   tsRealm.write(() => {
-    const allSelected = tsRealm.objects('Card').filtered('selected = true');
+    const allSelected = tsRealm.objects('Note').filtered('selected = true');
     tsRealm.delete(allSelected);
   });
 };
+
+// ... not really needed as the update function could handle this ...
+/*
+export const updateNoteColor = (key, newColor) => {
+  tsRealm.write(() => {
+    // ... update this note based on the key ...
+    tsRealm.create('Note', { key, color: newColor }, true);
+  });
+};
+*/

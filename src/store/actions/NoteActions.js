@@ -1,137 +1,105 @@
-// ... later (uses Async & thunk - import firebase from 'firebase';
-//import { AsyncStorage } from 'react-native';
 import {
-  ADD_CARD,
-  CLEAR_CARD,
-  UPDATE_CARD,
-  REMOVE_CARD,
-  CURRENT_CARD,
-  ADD_CARD_TAG,               // ... NEW ...
-  ADD_CARD_IMAGE,             // ... NEW ...
-  HIGHLIGHT_CARD,             // ... NEW ...
-  DELETE_CARD_TAG,
-  OPEN_TAGS_MODAL,            // ... NEW ...
-  CLOSE_TAGS_MODAL,           // ... NEW ...
-  CARD_EDIT_CHANGE,
-  UPDATE_CARD_TAGS,
-  //SAVE_CARDS_SUCCESS,
-  //SAVE_CARDS_FAILURE,
-  //LOAD_CARDS_SUCCESS,
-  //LOAD_CARDS_FAILURE
-  UPDATE_CARD_SELECTED,      // ... NEW ...
-  DELETE_SELECTED_CARDS
+  ADD_NOTE,
+  //SORT_NOTES, 
+  CLEAR_NOTE,
+  UPDATE_NOTE,
+  REMOVE_NOTE,
+  CURRENT_NOTE,
+  HIGHLIGHT_NOTE,             // ... NEW ...
+  OPEN_NOTES_MODAL,           // ... NEW ...
+  CLOSE_NOTES_MODAL,          // ... NEW ...
+  NOTE_EDIT_CHANGE,
+  UPDATE_NOTE_SELECTED,       // ... NEW ...
+  DELETE_SELECTED_NOTES
 } from './actionTypes';
 import store from '../../store';   // ... Realm DB Routines ...
 
-export const itemCardChanged = (prop, value) => {
+/*
+
+NEW:***********************************************************************
+
+My First Realm Cloud Instance;
+https://tracksome-live.us1.cloud.realm.io/
+
+NEW:***********************************************************************
+
+*/
+
+export const propertyNoteChanged = (prop, value) => {
   return {
-    type: CARD_EDIT_CHANGE,
+    type: NOTE_EDIT_CHANGE,
     payload: { prop, value }
   };
 };
 
-export const addCard =
-  (cName, cDesc, cIcon, cType, cRating, cCategory, cThumb, cMime, cBarcode, cTags, cNotes) => {
-  store.createCard(
-    cName, cDesc, cIcon, cType, cRating, cCategory, cThumb, cMime, cBarcode, cTags, cNotes);
+export const addNote = (cIcon, cTitle, cNote, cColor, cPriority, cReminder) => {
+  store.createNote(cIcon, cTitle, cNote, cColor, cPriority, cReminder);
   return {
-    type: ADD_CARD   // ... just need to inform Redux that something was added ...
+    type: ADD_NOTE   // ... just need to inform Redux that something was added ...
   };
 };
 
-export const addCardTag = (tag) => {
+export const setNoteSelected = (key, isSelected) => {
+  store.updateNoteSelected(key, isSelected);
   return {
-    type: ADD_CARD_TAG,
-    payload: { tag }
+    type: UPDATE_NOTE_SELECTED
   };
 };
 
-export const addCardImage = (image) => {
+export const updateNote = (key, icon, title, note, color, priority, reminder) => {
+  store.updateNote(key, icon, title, note, color, priority, reminder);
   return {
-    type: ADD_CARD_IMAGE,
-    payload: { image }
+    type: UPDATE_NOTE
   };
 };
 
-export const deleteCardTag = (tag) => {
+export const highlightNote = (key) => {
   return {
-    type: DELETE_CARD_TAG,
-    payload: { tag }
+    type: HIGHLIGHT_NOTE,
+    payload: { key }
   };
 };
 
-export const setCardSelected = (key, isSelected) => {
-  store.updateCardSelected(key, isSelected);
+export const currentNote = (item) => {
   return {
-    type: UPDATE_CARD_SELECTED
-  };
-};
-
-export const updateCard = (key, name, desc, icon, category) => {
-  store.updateCard(key, name, desc, icon, category);
-  return {
-    type: UPDATE_CARD
-  };
-};
-
-export const updateCardTags = (key, tags) => {
-  store.updateCardTags(key, tags);
-  return {
-    type: UPDATE_CARD_TAGS
-  };
-};
-
-export const currentCard = (item) => {
-  return {
-    type: CURRENT_CARD,
+    type: CURRENT_NOTE,
     payload: { item }
   };
 };
 
-export const clearCard = () => {
+export const clearNote = () => {
   return {
-    type: CLEAR_CARD
+    type: CLEAR_NOTE
   };
 };
 
-export const openTagsModal = (key) => {
+export const openNotesModal = (key) => {
   return {
-    type: OPEN_TAGS_MODAL,
+    type: OPEN_NOTES_MODAL,
     payload: { key }
   };
 };
 
-export const closeTagsModal = (key) => {
+export const closeNotesModal = (key) => {
   return {
-    type: CLOSE_TAGS_MODAL,
+    type: CLOSE_NOTES_MODAL,
     payload: { key }
   };
 };
 
-export const deleteCard = (key) => {
+export const deleteNote = (key) => {
   //-----------------------------------------------------------------------------
   // ... we should really do this within a transaction so we could roll back ...
   //-----------------------------------------------------------------------------
-  store.deleteCard(key);
+  store.deleteNote(key);
   return {
-    type: REMOVE_CARD
+    type: REMOVE_NOTE
   };
 };
 
-export const highlightCard = (key) => {
+export const deleteNotes = () => {
   return {
-    type: HIGHLIGHT_CARD,
-    payload: { key }
-  };
-};
-
-//----------------------------------------------------
-// ... these functions need to be fixed for Realm ...
-//----------------------------------------------------
-
-export const deleteCards = () => {
-  return {
-    type: DELETE_SELECTED_CARDS
+    type: DELETE_SELECTED_NOTES
   };
 };
 

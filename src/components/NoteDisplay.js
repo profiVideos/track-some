@@ -2,7 +2,7 @@ import React from 'react';
 import { 
   View, 
   Text, 
-  Image,
+  //Image,
   StyleSheet, 
   Dimensions,
   TouchableOpacity,
@@ -15,8 +15,8 @@ import {
   MenuTrigger
 } from 'react-native-popup-menu';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import ScrollableTabView from 'react-native-scrollable-tab-view';
-import ImageTabBar from './ImageTabBar';
+//import ScrollableTabView from 'react-native-scrollable-tab-view';
+//import ImageTabBar from './ImageTabBar';
 import AppColors from '../templates/appColors';
 
 const IconMenuOption = (props) => (
@@ -26,19 +26,30 @@ const IconMenuOption = (props) => (
   />
 );
 
-class CardItem extends React.PureComponent {
+/*
+
+NEW:***********************************************************************
+
+My First Realm Cloud Instance;
+https://tracksome-live.us1.cloud.realm.io/
+
+NEW:***********************************************************************
+
+*/
+
+class NoteDisplay extends React.PureComponent {
   constructor(props) {
     super(props);
     Dimensions.addEventListener('change', this.onDeviceChange);
     this.state = {
       didSave: false,
       isVisible: false,
-      infoWidth: Dimensions.get('window').width - 112
+      infoWidth: Dimensions.get('window').width - 32
     };
   }
 
   componentWillMount() {
-    console.log('inside card item ...');
+    console.log('inside note item ...');
   }
 
   componentWillUnmount() {
@@ -47,7 +58,7 @@ class CardItem extends React.PureComponent {
 
   onDeviceChange = (dims) => {
     this.setState({
-      infoWidth: dims.window.width - 112
+      infoWidth: dims.window.width - 32
     });
   };
 
@@ -62,37 +73,6 @@ class CardItem extends React.PureComponent {
   onMenuSelect = (value, item) => { 
     this.props.onMenuPress(value, item);
   }
-/*
-      <View style={styles.fullCard}>
-*/
-
-  renderFullCard() {
-    return (
-      <ScrollableTabView
-        style={{ backgroundColor: 'black', height: 400 }}
-        initialPage={0}
-        //tabBarPosition='overlayTop'
-        renderTabBar={() => <ImageTabBar optionMenu={this.renderOptionMenu} />}
-      >
-        <View tabLabel="paw" style={styles.tabView}>
-          <View style={styles.responsiveContainer}>
-            <Image 
-             style={styles.fullWidthImage}
-             //style={styles.responsiveImg} 
-             source={{ uri: 
-              `data:${this.props.item.mimeType};base64,${this.props.item.imageThumb}` }} 
-            />
-          </View>
-        </View>
-        <View tabLabel="pizza" style={styles.tabView}>
-          <Text>This is the info panel</Text>
-        </View>
-        <View tabLabel="tennisball" style={styles.tabView}>
-          <Text>And the notes go here</Text>
-        </View>
-      </ScrollableTabView>
-    );
-  }
 
   renderOptionMenu = () => (
     <Menu onSelect={(value) => this.onMenuSelect(value, this.props.item)}>
@@ -101,59 +81,38 @@ class CardItem extends React.PureComponent {
       </MenuTrigger>
       <MenuOptions customStyles={menuOptionsStyles}>
         <IconMenuOption value={'edit'} icon='✏️' text='Edit' />
-        <IconMenuOption value={'tags'} icon='🏷️' text='Tags' />
-        <IconMenuOption value={'notes'} icon='🗒️' text='Notes' />
+        <IconMenuOption value={'color'} icon='🏷️' text='Color' />
+        <IconMenuOption value={'priority'} icon='🗒️' text='Priority' />
+        <IconMenuOption value={'reminder'} icon='🗒️' text='Reminder' />
         <IconMenuOption value={'delete'} icon='🗑️' text='Delete' />
       </MenuOptions>
     </Menu>
   )
 
+/*
+  <View style={styles.imageWrapper}>
+    <TouchableOpacity onPress={this.onColorChange}>
+      {this.props.item.imageThumb === '' ?  
+         <Text style={styles.itemIcon}>{this.props.item.icon}</Text> :
+         <Text style={styles.itemIcon}>Color Swatches</Text>} 
+    </TouchableOpacity>
+  </View>
+*/
+
   render() {
     const infoWidth = this.state.infoWidth;
     const backColor = this.props.hilite;   // ... AppsColor.hiliteColor, otherwise white ...
-    const renderFull = this.props.marked ? this.renderFullCard() : <View />;
-    const tagsBadge = (this.props.numTags === 0) ? <View /> :
-      (<View style={{ flexDirection: 'row', alignItems: 'center' }}>
-         <Text style={styles.extraInfo}>Tags:</Text>
-         <View style={styles.tagsBadge}>
-           <Text style={styles.badgeTextStyle}>{this.props.numTags}</Text>
-         </View>
-       </View>);
-    const itemDesc = (this.props.item.desc === '') ? <View /> :
-      (<Text ellipsizeMode='tail' numberOfLines={1} style={styles.subHeading}>
-         {this.props.item.desc}
-       </Text>);
-    const categoryDesc = (this.props.catDesc === '') ? <View /> :
-      <Text style={styles.extraInfo} >{`${this.props.catDesc}  `}</Text>;
-
     return (
       <View>
         <View style={[styles.outerWrapper, { backgroundColor: backColor }]}>
-          <View style={styles.imageWrapper}>
-            <TouchableOpacity onPress={this.onIconChange}>
-              {this.props.item.imageThumb === '' ?  
-                 <Text style={styles.itemIcon}>{this.props.item.icon}</Text> :
-               <Image 
-                 style={styles.imageStyle} 
-                 source={{ uri: 
-                  `data:${this.props.item.mimeType};base64,${this.props.item.imageThumb}` }} 
-               />} 
-            </TouchableOpacity>
-          </View>
           <TouchableNativeFeedback onPress={this.onTouchablePress}>
             <View style={[styles.infoWrapper, { width: infoWidth }]}>
-              <Text 
-                ellipsizeMode='tail' 
-                numberOfLines={1} 
-                style={styles.itemName}
-              >
-                {this.props.item.name}
+              <Text ellipsizeMode='tail' numberOfLines={1} style={styles.itemTitle}>
+                {this.props.item.title}
               </Text>
-              {itemDesc}
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                {categoryDesc}
-                {tagsBadge}
-              </View>
+              <Text ellipsizeMode='tail' numberOfLines={2} style={styles.itemNote}>
+               {this.props.item.note}
+              </Text>
             </View>
           </TouchableNativeFeedback>
           <View style={styles.checkWrapper}>
@@ -170,16 +129,13 @@ class CardItem extends React.PureComponent {
             </TouchableOpacity>
           </View>
         </View>
-        <View style={styles.fullView}>
-          { renderFull }
-        </View>
       </View>
     );
   }
 
 }
 
-export default CardItem;
+export default NoteDisplay;
 
 const menuOptionsStyles = {
   optionsContainer: {
@@ -192,30 +148,6 @@ const menuOptionsStyles = {
 };
 
 const styles = StyleSheet.create({
-  fullView: {
-    //backgroundColor: '#000'
-  },
-  responsiveContainer: {
-    width: '100%',
-    aspectRatio: (1056 / 768),
-    //backgroundColor: '#00f',
-  },
-  fullWidthImage: {
-    height: '100%',
-    width: '100%',
-    //maxWidth: 1056,
-    //maxHeight: 768,
-    //marginLeft: 'auto',
-    //marginRight: 'auto',
-    resizeMode: 'contain',    
-  },
-  tabView: {
-    //height: 200,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#727272', 
-    //backgroundColor: AppColors.paperColor
-  },
   menuTitle: {
     fontWeight: '500', 
     color: AppColors.darkerColor,
@@ -223,20 +155,13 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
     borderBottomWidth: 1
   },
-  subHeading: {
+  itemNote: {
     fontSize: 13,
     marginTop: -3,
   },
   extraInfo: {
     fontSize: 11,
     paddingBottom: 3,
-  },
-  imageStyle: {
-    height: 60,
-    width: 80,
-    borderTopRightRadius: 3,
-    borderBottomRightRadius: 3,
-    resizeMode: 'cover'
   },
   badgeTextStyle: {
     color: 'white',
@@ -255,26 +180,12 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 60,
     paddingRight: 16,
-    //elevation: 2,
     flexDirection: 'row',
     alignItems: 'center',
-    //backgroundColor: 'blue',
     justifyContent: 'space-between'
-  },
-  imageWrapper: {
-    width: 80,
-    borderTopRightRadius: 3,
-    borderBottomRightRadius: 3,
-    //borderLeftWidth: 1,
-    borderRightWidth: 1,
-    borderColor: '#b9b9b9',
-    backgroundColor: '#f5f5f5',
-    justifyContent: 'center',
-    alignItems: 'center'
   },
   infoWrapper: {
     paddingLeft: 7,
-    //width: {state.infoWidth},  //'82%', //'70%',
   },
   checkWrapper: {
     width: 32,
@@ -290,7 +201,7 @@ const styles = StyleSheet.create({
   checkStyle: {
     //paddingTop: 3
   },
-  itemName: {
+  itemTitle: {
     fontSize: 16,
     fontWeight: '500',
     color: '#333'
@@ -353,64 +264,5 @@ Languages Supported: Arabic, Chinese, English, French, German, Hebrew, Italian,
                      Japanese, Korean, Portuguese, Russian, Spanish
 
 ---------------------------------------------------------------------------------------
-
-    componentWillMount() {
-      Image.getSize(this.props.uri, (width, height) => {
-        if (this.props.width && !this.props.height) {
-            this.setState({width: this.props.width, height: height * (this.props.width / width)});
-        } else if (!this.props.width && this.props.height) {
-            this.setState({width: width * (this.props.height / height), height: this.props.height});
-        } else {
-            this.setState({width: width, height: height});
-        }
-      });
-    }
-
-    render() {
-      return (
-        <Image 
-          source={this.state.source} 
-          style={{height: this.state.height, width: this.state.width}}
-        />
-      );
-    }
-
-OR
-
-… // inside render()
-<View style={styles.responsiveContainer}>
-  <Image source={require('../assets/img/logo.png')} style={styles.responsiveImg} />
-</View>
-
-… // styles
-const styles = StyleSheet.create {
-  responsiveContainer: {
-    flex: 1,
-    // arbitrary width that shall not be exceeded
-    width: '60%',
-    // demonstrate the dimensions of the container
-    backgroundColor: '#00f',
-  },
-  responsiveImg: {
-    // Image dimensions are known: 600, 330
-    aspectRatio: (600 / 330),
-    // Make sure the image stretches and shrinks
-    width: '100%',
-    height: '100%',
-    // Make sure the image doesn't exceed it's original size
-    // If you want it to exceed it's original size, then
-    // don't use maxWidth / maxHeight or set their 
-    // value to null
-    maxWidth: 600,
-    maxHeight: 330,
-    // center horizontally
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    // make sure, the image is resized properly:
-    resizeMode: 'contain',
-    // demonstrate the dimensions of the image
-    backgroundColor: '#ff0',
-  },
-}
 
 */
