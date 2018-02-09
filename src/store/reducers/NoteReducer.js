@@ -10,6 +10,7 @@ import {
   NOTE_EDIT_CHANGE,
   OPEN_NOTES_MODAL,
   CLOSE_NOTES_MODAL,
+  TOGGLE_COLOR_PICKER,
   UPDATE_NOTE_SELECTED,
   DELETE_SELECTED_NOTES
 } from '../actions/actionTypes';
@@ -19,6 +20,7 @@ const initialState = {
   lastUpdated: false,
   detailView: false,
   highlighted: '',          // ... the unique key of the currently highlighted item ...
+  colorPicker: false,
   notesChanged: false,
   notesWindowOpen: false,
   editNote: '',             // ... the unique key of the item to be edited ...
@@ -29,7 +31,7 @@ const initialState = {
     note: '',
     color: '',
     priority: 0,
-    reminder: {},
+    reminder: null,
     selected: false,
     createdTimestamp: {},
     updatedTimestamp: {}
@@ -81,6 +83,13 @@ const NoteReducer = (state = initialState, action) => {
         lastUpdated: Date.now()
       };
 
+    case TOGGLE_COLOR_PICKER:
+      // ... open / close the color picker control ...
+      return { 
+        ...state,
+        colorPicker: !action.payload.isActive
+      };
+
     case HIGHLIGHT_NOTE:
       // ... make one item in the list stand out or be selected ...
       return { 
@@ -121,7 +130,7 @@ const NoteReducer = (state = initialState, action) => {
           note: '',
           color: '',
           priority: 0,
-          reminder: {},
+          reminder: null,
           selected: false,
           createdTimestamp: {},
           updatedTimestamp: {}
@@ -157,7 +166,7 @@ const NoteReducer = (state = initialState, action) => {
           note: '',
           color: '',
           priority: 0,
-          reminder: {},
+          reminder: null,
           selected: false,
           createdTimestamp: {},
           updatedTimestamp: {}

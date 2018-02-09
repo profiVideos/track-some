@@ -9,6 +9,7 @@ import {
   OPEN_NOTES_MODAL,           // ... NEW ...
   CLOSE_NOTES_MODAL,          // ... NEW ...
   NOTE_EDIT_CHANGE,
+  TOGGLE_COLOR_PICKER,        // ... NEW ...
   UPDATE_NOTE_SELECTED,       // ... NEW ...
   DELETE_SELECTED_NOTES
 } from './actionTypes';
@@ -70,6 +71,13 @@ export const currentNote = (item) => {
 export const clearNote = () => {
   return {
     type: CLEAR_NOTE
+  };
+};
+
+export const toggleColorPicker = (isActive) => {
+  return {
+    type: TOGGLE_COLOR_PICKER,
+    payload: { isActive }
   };
 };
 

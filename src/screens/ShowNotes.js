@@ -7,7 +7,7 @@ import {
   Image,
   Modal,
   FlatList,
-  TextInput,
+  //TextInput,
   StyleSheet,
   ScrollView,
   ToastAndroid,
@@ -22,7 +22,7 @@ import NoteSplash from '../images/Note-Splash.png';
 import NoteDisplay from '../components/NoteDisplay';
 import NoteEdit from '../components/NoteEdit';
 import {
-  //addNote,
+  addNote,
   //updateNote,
   deleteNote,
   //currentNote,
@@ -30,7 +30,8 @@ import {
   openNotesModal,
   closeNotesModal,
   setNoteSelected,
-  //propertyNoteChanged,
+  toggleColorPicker,
+  propertyNoteChanged
 } from '../store/actions';
 import store from '../store';
 
@@ -63,6 +64,7 @@ const whatDoYouNeed = state => {
     editNote: state.notes.editNote,
     itemList: notesLiveResults,
     thisNote: state.notes.thisNote,
+    colorPicker: state.notes.colorPicker,
     highlighted: state.notes.highlighted, 
     listUpdated: state.notes.lastUpdated,
     notesChanged: state.notes.notesChanged,
@@ -136,7 +138,8 @@ class ShowNotes extends React.PureComponent {
       }
       case 'color': {
         //console.log('Notes was selected for item key ', item.key);
-        ToastAndroid.show('Coming Soon!', ToastAndroid.SHORT);
+        ToastAndroid.show('Setting Item Who requested Color Picker!', ToastAndroid.SHORT);
+        //this.props.dispatch(setEditMode(item.key));
         break;
       }
       case 'priority': {
@@ -151,7 +154,7 @@ class ShowNotes extends React.PureComponent {
       }
       case 'delete': {
         Alert.alert('Delete Note', 
-          'You are about to remove this item.\nDo you really what to do this?',
+          'You are about to remove this item.\nDo you really want to do this?',
           [{ text: 'Cancel', style: 'cancel' },
            { text: 'OK', onPress: () => this.props.dispatch(deleteNote(item.key)) }]);
         break;
@@ -162,6 +165,59 @@ class ShowNotes extends React.PureComponent {
 
   closeNoteEditModal() {
     this.props.dispatch(closeNotesModal(''));
+  }
+
+  noteTitleChanged(text) {
+    this.props.dispatch(propertyNoteChanged('title', text));
+  }
+
+  noteBodyChanged(text) {
+    this.props.dispatch(propertyNoteChanged('note', text));
+  }
+
+  noteColorChanged(color) {
+    this.props.dispatch(propertyNoteChanged('color', color));
+  }
+
+  buttonPressed() {
+    this.props.dispatch(toggleColorPicker(this.props.colorPicker));
+    //ToastAndroid.show(`Button was Pressed: ${which}`, ToastAndroid.LONG);
+  }
+
+  addOrUpdateNote(card) {
+    if (this.props.thisNote.key === '') {
+      this.props.dispatch(addNote(
+        this.props.thisNote.icon, 
+        this.props.thisNote.title, 
+        this.props.thisNote.note, 
+        this.props.thisNote.color, 
+        this.props.thisNote.priority, 
+        this.props.thisNote.reminder
+      ));
+    } else {
+      // ... update this note ...
+    }
+    ToastAndroid.show(`Saving Note with Card: ${card}`, ToastAndroid.SHORT);
+  }
+
+  addNote2Card(card) {
+    if (this.props.thisNote.note !== '') {
+      if (this.props.thisNote.title === '') {
+        Alert.alert('Adding Note', 
+          `You are about to add a note without a title.
+Do you really want to do this?\n
+If you DO NOT wish to use note titles, please turn them off in the options panel.`,
+          [{ text: 'Cancel', style: 'cancel' },
+           { text: 'OK', onPress: () => this.addOrUpdateNote(card) }]);
+      } else {
+        // ... just save the note ...
+        this.addOrUpdateNote('With Title');
+      }
+    }
+  }
+
+  changeColor(color) {
+    ToastAndroid.show(`Changing Color to ${color}`, ToastAndroid.LONG);
   }
 
   showWelcome() {
@@ -188,7 +244,7 @@ class ShowNotes extends React.PureComponent {
     return (
       <FlatList
         keyboardShouldPersistTaps='always'
-        style={{ width: '100%' }}
+        //style={{ width: '100%', paddingBottom: 5, marginBottom: 5 }}
         data={this.props.itemList}
         extraData={this.props}
         renderItem={this.renderNoteDisplay}
@@ -198,11 +254,6 @@ class ShowNotes extends React.PureComponent {
   }
 
 /*
-            <ScrollView
-              contentContainerStyle={styles.scrollStyle}
-              keyboardShouldPersistTaps='always'
-            >
-            </ScrollView>
 */
 
   renderNoteEditScreen() {
@@ -216,16 +267,26 @@ class ShowNotes extends React.PureComponent {
             onRequestClose={() => this.closeNoteEditModal()}
         >
           <View style={styles.modalContainer}>
-            <View style={styles.modalInnerContainer}>
-              <NoteEdit
-                //tagsList={this.props.thisNote.tags}
-                //tagName={this.props.thisNote.tag}
-                onTagAdd={() => this.addTag2Note()} 
-                onTagChange={text => this.itemTagChanged(text)}
-                onTagRemove={tag => this.itemTagRemove(tag)}
-                onClosePress={() => this.closeNoteEditModal()} 
-              />
-            </View>
+            <ScrollView
+              contentContainerStyle={styles.scrollStyle}
+              keyboardShouldPersistTaps='always'
+            >
+              <View style={styles.modalInnerContainer}>
+                <NoteEdit
+                  note={this.props.thisNote.note}
+                  noteTitle={this.props.thisNote.title}
+                  noteColor={this.props.thisNote.color !== '' ? 
+                    this.props.thisNote.color : '#f8f8f8'}
+                  pickerActive={this.props.colorPicker}
+                  onNoteAdd={() => this.addNote2Card()}
+                  onButtonPress={() => this.buttonPressed()}
+                  onNoteChange={text => this.noteBodyChanged(text)}
+                  onColorChange={color => this.noteColorChanged(color)}
+                  onTitleChange={title => this.noteTitleChanged(title)}
+                  onClosePress={() => this.closeNoteEditModal()} 
+                />
+              </View>
+            </ScrollView>
           </View>
         </Modal>
       </View>
@@ -240,13 +301,41 @@ class ShowNotes extends React.PureComponent {
     }
     return category;
   }
+          (item.color !== '' ? 'white' : 'grey')}
+
+const elapsedTime = () => {
+  'use strict';
+  const since   = 1491685200000, // Saturday, 08-Apr-17 21:00:00 UTC
+        elapsed = (new Date().getTime() - since) / 1000;
+
+  if (elapsed >= 0) {
+    const diff = {};
+
+    diff.days    = Math.floor(elapsed / 86400);
+    diff.hours   = Math.floor(elapsed / 3600 % 24);
+    diff.minutes = Math.floor(elapsed / 60 % 60);
+    diff.seconds = Math.floor(elapsed % 60);
+
+    let message = `Over ${diff.days}d ${diff.hours}h ${diff.minutes}m ${diff.seconds}s.`;
+    message = message.replace(/(?:0. )+/, '');
+    alert(message);
+  }
+  else {
+    alert('Elapsed time lesser than 0, i.e. specified datetime is still in the future.');
+  }
+};
+
+document.getElementById('counter').addEventListener('click', elapsedTime, false);
+
 */
 
   renderMainScreen() {
     return (this.props.itemList.length === 0 ? this.showWelcome() : this.showMainList());
+    //return (this.showWelcome());
   }
 
   renderNoteDisplay = ({ item }) => {
+    const noteColor = (item.color !== '' ? item.color : '#f8f8f8');
     return (
       <NoteDisplay
         item={item}
@@ -254,7 +343,7 @@ class ShowNotes extends React.PureComponent {
         //numTags={this.countTags(item.tags)}
         //catDesc={this.renderCatDescription(item.category)}
         checkIcon={item.selected ? 'check-square-o' : 'square-o'}
-        hilite={item.key === this.props.highlighted ? AppColors.hiliteColor : 'white'}
+        hilite={item.key === this.props.highlighted ? AppColors.hiliteColor : noteColor} 
         onPressItem={this.onNoteItemPress}      // ... used to highlight an item ...
         onToggleItem={this.onNoteItemToggle}    // ... turns the checked status on/off ...
         onMenuPress={this.onNoteItemMenuPress}
@@ -370,10 +459,12 @@ const styles = StyleSheet.create({
     }
   },  
   separatorStyle: {
-    backgroundColor: 'white',
-    width: '12%',
-    alignSelf: 'flex-end',
-    height: 1.1
+    //backgroundColor: 'rgba(0,0,0,0.85)',
+    //backgroundColor: 'white',
+    margin: 2,
+    //width: '85%',
+    //alignSelf: 'center',
+    //height: 1
   },
   listContainer: {
     //elevation: 2,
@@ -411,7 +502,9 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 2,
+    elevation: 3,
+    //marginBottom: 5,
+    //paddingBottom: 5,
     shadowColor: '#121212',
     shadowOffset: { width: 1, height: 3 },
     shadowOpacity: 0.85,

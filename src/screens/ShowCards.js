@@ -141,11 +141,6 @@ class ShowCard extends React.PureComponent {
         this.props.dispatch(openTagsModal(item.key));
         break;
       }
-      case 'notes': {
-        //console.log('Notes was selected for item key ', item.key);
-        ToastAndroid.show('Coming Soon!', ToastAndroid.SHORT);
-        break;
-      }
       case 'delete': {
         Alert.alert('Delete Card', 
           'You are about to remove this item.\nDo you really what to do this?',

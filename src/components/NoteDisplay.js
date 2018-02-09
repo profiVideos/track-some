@@ -2,7 +2,6 @@ import React from 'react';
 import { 
   View, 
   Text, 
-  //Image,
   StyleSheet, 
   Dimensions,
   TouchableOpacity,
@@ -15,8 +14,6 @@ import {
   MenuTrigger
 } from 'react-native-popup-menu';
 import Icon from 'react-native-vector-icons/FontAwesome';
-//import ScrollableTabView from 'react-native-scrollable-tab-view';
-//import ImageTabBar from './ImageTabBar';
 import AppColors from '../templates/appColors';
 
 const IconMenuOption = (props) => (
@@ -44,7 +41,7 @@ class NoteDisplay extends React.PureComponent {
     this.state = {
       didSave: false,
       isVisible: false,
-      infoWidth: Dimensions.get('window').width - 32
+      infoWidth: Dimensions.get('window').width - 45,
     };
   }
 
@@ -58,7 +55,7 @@ class NoteDisplay extends React.PureComponent {
 
   onDeviceChange = (dims) => {
     this.setState({
-      infoWidth: dims.window.width - 32
+      infoWidth: dims.window.width - 45
     });
   };
 
@@ -81,15 +78,18 @@ class NoteDisplay extends React.PureComponent {
       </MenuTrigger>
       <MenuOptions customStyles={menuOptionsStyles}>
         <IconMenuOption value={'edit'} icon='✏️' text='Edit' />
-        <IconMenuOption value={'color'} icon='🏷️' text='Color' />
-        <IconMenuOption value={'priority'} icon='🗒️' text='Priority' />
-        <IconMenuOption value={'reminder'} icon='🗒️' text='Reminder' />
         <IconMenuOption value={'delete'} icon='🗑️' text='Delete' />
       </MenuOptions>
     </Menu>
   )
 
 /*
+    const lastUpdateDate = new Date(Number(this.props.item.updatedTimestamp))
+      .toLocaleString('de-DE', { hour12: false });
+        <View style={styles.priorityWrapper}>
+          <Text style={styles.noteDate}>{lastUpdateDate}</Text>
+        </View>
+
   <View style={styles.imageWrapper}>
     <TouchableOpacity onPress={this.onColorChange}>
       {this.props.item.imageThumb === '' ?  
@@ -97,9 +97,19 @@ class NoteDisplay extends React.PureComponent {
          <Text style={styles.itemIcon}>Color Swatches</Text>} 
     </TouchableOpacity>
   </View>
+
 */
+  renderNoteTitle() {
+    if (this.props.item.title === '') return;
+    return (
+      <Text ellipsizeMode='tail' numberOfLines={1} style={styles.itemTitle}>
+        {this.props.item.title}
+      </Text>
+    );
+  }
 
   render() {
+    const descLines = this.props.item.title === '' ? 3 : 2;
     const infoWidth = this.state.infoWidth;
     const backColor = this.props.hilite;   // ... AppsColor.hiliteColor, otherwise white ...
     return (
@@ -107,10 +117,8 @@ class NoteDisplay extends React.PureComponent {
         <View style={[styles.outerWrapper, { backgroundColor: backColor }]}>
           <TouchableNativeFeedback onPress={this.onTouchablePress}>
             <View style={[styles.infoWrapper, { width: infoWidth }]}>
-              <Text ellipsizeMode='tail' numberOfLines={1} style={styles.itemTitle}>
-                {this.props.item.title}
-              </Text>
-              <Text ellipsizeMode='tail' numberOfLines={2} style={styles.itemNote}>
+              { this.renderNoteTitle() }
+              <Text ellipsizeMode='tail' numberOfLines={descLines} style={styles.itemNote}>
                {this.props.item.note}
               </Text>
             </View>
@@ -148,6 +156,16 @@ const menuOptionsStyles = {
 };
 
 const styles = StyleSheet.create({
+  priorityWrapper: {
+    height: 14,
+    backgroundColor: '#999'
+  },
+  noteDate: {
+    fontSize: 11,
+    height: 12,
+    textAlign: 'center',
+    color: 'white'
+  },
   menuTitle: {
     fontWeight: '500', 
     color: AppColors.darkerColor,
@@ -168,18 +186,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 10,
   },
-  tagsBadge: {
-    backgroundColor: 'rgba(30,30,200,0.45)',
-    marginLeft: 3,
-    width: 14,
-    height: 14,
-    borderRadius: 14,
-    marginBottom: 3,
-  },
   outerWrapper: {
-    width: '100%',
-    height: 60,
+    elevation: 3,
+    height: 64,
+    paddingLeft: 3,
     paddingRight: 16,
+    marginLeft: 6,
+    borderRadius: 3,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between'
@@ -202,9 +215,12 @@ const styles = StyleSheet.create({
     //paddingTop: 3
   },
   itemTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '500',
-    color: '#333'
+    color: '#333',
+    //paddingBottom: 2,
+    //borderBottomWidth: 0.75,
+    //borderBottomColor: '#888'
   },
   itemIcon: {
     height: 60,
@@ -264,5 +280,9 @@ Languages Supported: Arabic, Chinese, English, French, German, Hebrew, Italian,
                      Japanese, Korean, Portuguese, Russian, Spanish
 
 ---------------------------------------------------------------------------------------
+
+        <IconMenuOption value={'color'} icon='🏷️' text='Color' />
+        <IconMenuOption value={'priority'} icon='🗒️' text='Priority' />
+        <IconMenuOption value={'reminder'} icon='🗒️' text='Reminder' />
 
 */

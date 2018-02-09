@@ -102,7 +102,6 @@ class CardItem extends React.PureComponent {
       <MenuOptions customStyles={menuOptionsStyles}>
         <IconMenuOption value={'edit'} icon='✏️' text='Edit' />
         <IconMenuOption value={'tags'} icon='🏷️' text='Tags' />
-        <IconMenuOption value={'notes'} icon='🗒️' text='Notes' />
         <IconMenuOption value={'delete'} icon='🗑️' text='Delete' />
       </MenuOptions>
     </Menu>

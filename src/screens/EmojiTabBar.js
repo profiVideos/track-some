@@ -26,7 +26,8 @@ class EmojiTabBar extends React.Component {
   componentDidUpdate() {
     //console.log(`Switch is: ${this.state.checked}`);
     //console.log(this.props);
-    this.props.canEdit(this.props.activeTab === 0 ? true : false);
+    //this.props.canEdit(this.props.activeTab === 0 ? true : false);
+    this.props.canEdit(this.props.activeTab === 0);
   }
 
 /*

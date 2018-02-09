@@ -12,17 +12,24 @@ import {
   //TouchableHighlight,
   TouchableNativeFeedback
 } from 'react-native';
-//import { TextField } from 'react-native-material-textfield';
 import IonIcon from 'react-native-vector-icons/Ionicons';
 import AppColors from '../templates/appColors';
 import ItemTags from '../images/ItemTags.png';
-//import RenderTags from './RenderTags';
+import RenderColors from './RenderColors';
 
 //const itemHeight = 65;  // ... used to calculate faster scrolls ...
 
 /*
 To Restart the currently running App;
 adb shell am broadcast -a react.native.RELOAD
+*/
+/*
+const optionStyles = (color) => {
+  optionWrapper: {
+    backgroundColor: 'pink',
+    margin: 5,
+  }
+};
 */
 
 class NoteEdit extends PureComponent {
@@ -31,14 +38,23 @@ class NoteEdit extends PureComponent {
     super(props);
     this.state = { 
       didSave: false,
-      textValue: '' 
+      textValue: '',
+      colors: [
+        '#f8f8f8',
+        '#feff9c',
+        '#c2fec1',
+        '#f6d2b4',
+        '#7afcff',
+        '#c4e5f2',
+        '#ff7eb9',
+        '#e4f555',
+        '#a5f448',
+        '#f8b042',
+        '#8dd0f0',
+        '#fb49af'
+      ]
     };
   }
-
-  onPressTag = (tag) => {
-    console.log('Tag inside TagEdit was clicked: ', tag); 
-    //this.props.onTapItem(this.props.emojiName, this.props.emojiString);
-  } 
 
 /*
   onClosePressed = () => {
@@ -47,6 +63,32 @@ class NoteEdit extends PureComponent {
     //this.props.onTapItem(this.props.emojiName, this.props.emojiString);
   } 
 */
+
+  pressedButton(whichOne) {
+    //Alert.alert('pressed the button - ' + which);
+    this.props.onButtonPress(whichOne);
+  }
+
+  renderColorSwatches() {
+    if (this.props.pickerActive === false) return;
+    return (
+      <View style={styles.colorBar}>
+        <RenderColors 
+          myColors={this.state.colors}
+          activeColor={this.props.noteColor}
+          onPressColor={color => this.props.onColorChange(color)} 
+        />
+      </View>
+    );
+  }
+
+  renderOptionButtons() {
+    return (
+      <TouchableNativeFeedback onPress={() => this.pressedButton('color')}>
+        <Text style={styles.colorChooser}>🎨</Text>
+      </TouchableNativeFeedback>
+    );
+  }
 
 /*
   addThisTag() {
@@ -85,18 +127,18 @@ class NoteEdit extends PureComponent {
             <TextInput
               style={styles.textInputStyle}
               autoFocus
-              //autoCorrect={false}
+              returnKeyType='next'
               blurOnSubmit={false}
               disableFullscreenUI
               underlineColorAndroid={'transparent'}
               placeholder={'Note Title ... '}
-              value={this.props.tagName}
-              onChangeText={this.props.onTagChange}
+              value={this.props.noteTitle}
+              onChangeText={this.props.onTitleChange}
             />
           </View>
           <TouchableOpacity 
-            //disabled={this.props.thisTag.name === ''} 
-            onPress={this.props.onTagAdd} 
+            //disabled={this.props.thisNote.title === ''} 
+            onPress={this.props.onNoteAdd} 
           >
             <View style={{ alignItems: 'center' }}>
               <Icon size={28} name='plus' color={AppColors.darkerColor} />
@@ -113,25 +155,25 @@ class NoteEdit extends PureComponent {
           </TouchableNativeFeedback>
         </View>
 
-        <View style={styles.noteContainer}>
+        <View style={styles.optionsBar}>
+          { this.renderOptionButtons() }
+        </View>
+        { this.renderColorSwatches() }
+
+        <View style={[styles.noteContainer, { backgroundColor: `${this.props.noteColor}` }]}>
           <TextInput
             style={styles.noteInputStyle}
-            //autoGrow
             multiline
-            //numberOfLines={4}
-            //placeholder='Note Description ...'
-            placeholderTextColor='#aaa'
-            //returnKeyType='done'
+            numberOfLines={10}
+            //placeholderTextColor='#aaa'
+            returnKeyType='done'
             underlineColorAndroid={'transparent'}
             blurOnSubmit={false}
-            textBreakStrategy={'highQuality'} //: enum('simple', 'highQuality', 'balanced')
-            //selectionColor={getColor('paperTeal')}
-            //maxHeight={250}
+            textBreakStrategy={'highQuality'}
             disableFullscreenUI
-            placeholder={'Enter something amazing ... '}
-            value={this.state.textValue}
-            onChangeText={(textValue) => this.setState({ textValue })}
-            //onChangeText={() => this.props.onTagChange}
+            placeholder={'Write something amazing ... '}
+            value={this.props.note}
+            onChangeText={(text) => this.props.onNoteChange(text)}
           />
         </View>
 
@@ -144,37 +186,6 @@ class NoteEdit extends PureComponent {
 export default NoteEdit;
 
 /*
-          <View style={styles.tagItem}>
-            <Text style={styles.textValue}>
-              Jumping Jacks
-            </Text>
-          </View>
-          <View style={styles.tagItem}>
-            <Text style={styles.textValue}>
-              Elephants
-            </Text>
-          </View>
-          <View style={styles.tagItem}>
-            <Text style={styles.textValue}>
-              Nursing Moms
-            </Text>
-          </View>
-
-      <TouchableNativeFeedback onPress={this.onTouchablePress}>
-        <View style={[styles.container, { backgroundColor: backColor }]}>
-          <View style={styles.headingRow}>
-            <Image 
-              style={styles.imageThumb} 
-              source={{ uri: this.props.thumbNail }}
-            />
-            <View style={styles.textMargins} >
-              <Text style={styles.heading}>{this.props.Name}</Text>
-              <Text style={styles.tagLine}>{this.props.Teaser}</Text>
-            </View>
-          </View>
-        </View>
-      </TouchableNativeFeedback>
-
   renderConversations() {
     let conversationContent = this.state.conversationArray.map((convObj, i) => {
       return <View key={i} 
@@ -188,33 +199,42 @@ export default NoteEdit;
     })
     return conversationContent;
   }
-
 */
 
 const styles = StyleSheet.create({
+  colorBar: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',    
+    alignItems: 'center',
+    padding: 5,
+    justifyContent: 'center',
+    borderBottomWidth: 0.75,
+    borderBottomColor: 'rgba(0,0,0,0.45)',
+    backgroundColor: AppColors.paperColor
+  },
+  colorChooser: {
+    color: 'black',
+    fontSize: 24,
+  },
+  optionsBar: {
+    height: 34,
+    paddingBottom: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderBottomWidth: 0.75,
+    borderBottomColor: 'rgba(0,0,0,0.25)',
+    backgroundColor: '#525252'  //AppColors.paperColor
+  },
   noteContainer: {
-    //flex: 1,
-    //maxWidth: '100%',
-    //padding: 10,
-    //paddingTop: 12,
-    //paddingBottom: 12,
-    //flexWrap: 'wrap',
-    //alignItems: 'flex-start',
-    //justifyContent: 'flex-start',
     backgroundColor: '#f8f8f8',
   },
   noteInputStyle: {
-    //flex: 1,
-    //width: '100%',
-    paddingLeft: 20,
-    paddingRight: 20,
-    marginBottom: 60,
-    //fontFamily: 'Lato-Regular',
-    //flexWrap: 'wrap',
-    //height: 'auto',
+    paddingLeft: 12,
+    paddingRight: 12,
+    marginBottom: 30,
+    color: 'black',
     fontSize: 15,
     textAlignVertical: 'top'    
-    //width: '100%',
   },
   buttonFinish: {
     padding: 5,
@@ -222,24 +242,10 @@ const styles = StyleSheet.create({
     paddingRight: 7,
     backgroundColor: AppColors.darkerColor
   },
-  tagsEmpty: {
-    //height: 200,
-    alignItems: 'center',
-    justifyContent: 'center',
-    //paddingTop: 2,
-    padding: 8,
-    backgroundColor: AppColors.paperColor
-  },
-  bigMessage: {
-    fontSize: 13,
-    fontStyle: 'italic',
-    textAlign: 'center',
-    color: 'rgba(0,0,0,0.40)'
-  },
   textInputStyle: {
     color: '#121212',
     padding: 3,
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '600'
   },
   imageIconStyle: {
@@ -248,10 +254,9 @@ const styles = StyleSheet.create({
     resizeMode: 'contain'
   },
   statusBar: {
-    //flex: 1,
-    //width: '100%',
     elevation: 3,
-    height: 38,
+    height: 43,
+    paddingTop: 1,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: AppColors.accentColor,  // ... medium orange ...
@@ -262,8 +267,6 @@ const styles = StyleSheet.create({
     shadowRadius: 3
   },
   outerContainer: {
-    //flex: 1,
-    //width: '100%',
     borderRadius: 8,
   },
   inputContainer: {
@@ -276,7 +279,7 @@ const styles = StyleSheet.create({
     //marginRight: 7,
     backgroundColor: 'white',
     justifyContent: 'center',
-    height: 30
+    height: 32
   },
   headline: {
     color: AppColors.accentColor,
@@ -285,8 +288,6 @@ const styles = StyleSheet.create({
     fontWeight: '500'
   },
   headerContainer: {
-    //flex: 1,
-    //width: '100%',
     backgroundColor: AppColors.mainDarkColor,
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
@@ -298,3 +299,70 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between'
   },
 });
+
+/*
+
+const menuOptionsStyles = {
+  optionsContainer: {
+    width: 85,
+    backgroundColor: AppColors.darkerColor,  // ... dark cyan ...
+  },
+  optionText: {
+    color: 'white',
+  },
+};
+
+const ColorMenuOption = (props) => (
+  <MenuOption 
+    value={props.value} 
+    text={props.text}
+    customStyles={{ 
+      optionWrapper: { 
+        backgroundColor: `${props.fillColor}`, 
+        margin: 1, 
+        height: 20 
+      } 
+    }}
+  />
+);
+
+  selectNoteColor() {
+    return (
+      <Menu onSelect={(value) => this.props.onColorChange(value)}>
+        <MenuTrigger>
+          <Text style={styles.colorChooser}>🎨</Text>
+        </MenuTrigger>
+        <MenuOptions customStyles={menuOptionsStyles}>
+          <ColorMenuOption value={'#f8f8f8'} text=' ' fillColor={'#f8f8f8'} />
+          <ColorMenuOption value={'#feff9c'} text=' ' fillColor={'#feff9c'} />
+          <ColorMenuOption value={'#c2fec1'} text=' ' fillColor={'#c2fec1'} />
+          <ColorMenuOption value={'#f6d2b4'} text=' ' fillColor={'#f6d2b4'} />
+          <ColorMenuOption value={'#7afcff'} text=' ' fillColor={'#7afcff'} />
+          <ColorMenuOption value={'#c4e5f2'} text=' ' fillColor={'#c4e5f2'} />
+          <ColorMenuOption value={'#ff7eb9'} text=' ' fillColor={'#ff7eb9'} />
+          <ColorMenuOption value={'#e4f555'} text=' ' fillColor={'#e4f555'} />
+          <ColorMenuOption value={'#a5f448'} text=' ' fillColor={'#a5f448'} />
+          <ColorMenuOption value={'#f8b042'} text=' ' fillColor={'#f8b042'} />
+          <ColorMenuOption value={'#8dd0f0'} text=' ' fillColor={'#8dd0f0'} />
+          <ColorMenuOption value={'#fb49af'} text=' ' fillColor={'#fb49af'} />
+        </MenuOptions>
+      </Menu>
+    );
+  }
+
+const paper = '#f5f5f5';
+
+const liteYellow = '#feff9c'; //#feffd7
+const liteGreen = '#c2fec1';
+const liteOrange = '#f6d2b4';  // ... alt: #f6a12e
+const liteCyan = '#7afcff';
+const liteBlue = '#c4e5f2';
+const litePink = '#ff7eb9';
+
+const yellow = '#fff740';   // #e4f555 (postit color)
+const green = '#a5f448';
+const orange = 'f8b042';  // ... postit color ...
+const blue = '#98c8ff'; //#8dd0f0  #34a6e2 (postit color)
+const darkPink = '#fb49af'; // ... postit color ...
+
+*/
