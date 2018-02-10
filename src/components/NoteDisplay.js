@@ -1,7 +1,8 @@
 import React from 'react';
 import { 
   View, 
-  Text, 
+  Text,
+  Image, 
   StyleSheet, 
   Dimensions,
   TouchableOpacity,
@@ -15,6 +16,7 @@ import {
 } from 'react-native-popup-menu';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import AppColors from '../templates/appColors';
+import VerticalLink from '../images/verticalLink.png';
 
 const IconMenuOption = (props) => (
   <MenuOption 
@@ -41,12 +43,13 @@ class NoteDisplay extends React.PureComponent {
     this.state = {
       didSave: false,
       isVisible: false,
-      infoWidth: Dimensions.get('window').width - 45,
+      infoWidth: Dimensions.get('window').width - 50
     };
   }
 
   componentWillMount() {
-    console.log('inside note item ...');
+    //console.log('inside note item ...');
+    //console.log('This Note Details are: ', JSON.stringify(this.props.item));
   }
 
   componentWillUnmount() {
@@ -55,7 +58,7 @@ class NoteDisplay extends React.PureComponent {
 
   onDeviceChange = (dims) => {
     this.setState({
-      infoWidth: dims.window.width - 45
+      infoWidth: dims.window.width - 50
     });
   };
 
@@ -86,7 +89,7 @@ class NoteDisplay extends React.PureComponent {
 /*
     const lastUpdateDate = new Date(Number(this.props.item.updatedTimestamp))
       .toLocaleString('de-DE', { hour12: false });
-        <View style={styles.priorityWrapper}>
+        <View style={styles.dateWrapper}>
           <Text style={styles.noteDate}>{lastUpdateDate}</Text>
         </View>
 
@@ -113,8 +116,11 @@ class NoteDisplay extends React.PureComponent {
     const infoWidth = this.state.infoWidth;
     const backColor = this.props.hilite;   // ... AppsColor.hiliteColor, otherwise white ...
     return (
-      <View>
-        <View style={[styles.outerWrapper, { backgroundColor: backColor }]}>
+      <View style={styles.outerWrapper}>
+        <View style={styles.priorityView}>
+          <View />
+        </View>
+        <View style={[styles.noteWrapper, { backgroundColor: backColor }]}>
           <TouchableNativeFeedback onPress={this.onTouchablePress}>
             <View style={[styles.infoWrapper, { width: infoWidth }]}>
               { this.renderNoteTitle() }
@@ -156,9 +162,19 @@ const menuOptionsStyles = {
 };
 
 const styles = StyleSheet.create({
-  priorityWrapper: {
-    height: 14,
-    backgroundColor: '#999'
+  outerWrapper: {
+    marginLeft: 2,
+    marginRight: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  priorityView: {
+    width: 4,
+    height: 50,
+    marginTop: 3,
+    borderTopLeftRadius: 2,
+    borderBottomLeftRadius: 2,
   },
   noteDate: {
     fontSize: 11,
@@ -186,12 +202,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 10,
   },
-  outerWrapper: {
+  noteWrapper: {
     elevation: 3,
     height: 64,
     paddingLeft: 3,
-    paddingRight: 16,
-    marginLeft: 6,
+    paddingRight: 5,
+    marginRight: 3,
+    marginLeft: 2,
     borderRadius: 3,
     flexDirection: 'row',
     alignItems: 'center',
@@ -218,9 +235,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '500',
     color: '#333',
-    //paddingBottom: 2,
-    //borderBottomWidth: 0.75,
-    //borderBottomColor: '#888'
   },
   itemIcon: {
     height: 60,

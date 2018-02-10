@@ -33,8 +33,12 @@ import {
   openTagsModal,
   updateCardTags,
   closeTagsModal,
+  openNotesModal,
+  //closeNotesModal,
   setCardSelected,
   itemCardChanged,
+  updateCardNotes,
+  propertyNoteChanged
 } from '../store/actions';
 import store from '../store';
 
@@ -57,8 +61,12 @@ const whatDoYouNeed = state => {
     catList: state.categories.itemList,
     itemList: cardsLiveResults,
     thisCard: state.cards.thisCard,
+    thisNote: state.notes.thisNote,
+    colorPicker: state.notes.colorPicker,
     highlighted: state.cards.highlighted, 
     listUpdated: state.cards.lastUpdated,
+    notesChanged: state.cards.notesChanged,
+    notesModalOpen: state.notes.notesWindowOpen,
     tagsChanged: state.cards.tagsChanged,
     tagsModalOpen: state.cards.tagsWindowOpen,
     editTagsForItem: state.cards.editCardTags
@@ -113,7 +121,17 @@ class ShowCard extends React.PureComponent {
         this.props.dispatch(updateCardTags(this.props.thisCard.key, nextProps.thisCard.tags));
       }
       this.props.dispatch(clearCard());
-    } 
+    }
+    //-------------------------------------------------------------------------------------
+    // ... due to the async processing we can only save when everything has been added ...
+    // ... if main if is true - the tags Modal window has now closed - save & clean up ...
+    //-------------------------------------------------------------------------------------
+    if (this.props.notesModalOpen && nextProps.notesModalOpen === false) {
+      if (nextProps.notesChanged === true && this.props.thisCard.key !== '') {   
+        this.props.dispatch(updateCardNotes(this.props.thisCard.key, nextProps.thisCard.notes));
+      }
+      this.props.dispatch(clearCard());
+    }
   }
 
   onCardItemPress(key) {
@@ -136,9 +154,14 @@ class ShowCard extends React.PureComponent {
         break;
       }
       case 'tags': {
-        //console.log('Tags was selected for item key ', item.key);
         this.props.dispatch(currentCard(item));
         this.props.dispatch(openTagsModal(item.key));
+        break;
+      }
+      case 'note': {
+        this.props.dispatch(currentCard(item));
+        this.props.dispatch(openNotesModal(item.key));
+        this.props.dispatch(propertyNoteChanged('card', item.key));  // ... link note with card ...
         break;
       }
       case 'delete': {
@@ -156,8 +179,8 @@ class ShowCard extends React.PureComponent {
     return this.props.catList.findIndex((item) => { return item.key === key; });
   }
 
-  countTags(tags) {
-    return tags.length;
+  countItems(items) {
+    return items.length;
   }
 
   closeTagsEditModal() {
@@ -166,6 +189,12 @@ class ShowCard extends React.PureComponent {
     }
     this.props.dispatch(closeTagsModal(''));
   }
+
+/*
+  closeNoteEditModal() {
+    this.props.dispatch(closeNotesModal(''));
+  }
+*/
 
   itemTagChanged(text) {
     this.props.dispatch(itemCardChanged('tag', text));
@@ -204,7 +233,7 @@ class ShowCard extends React.PureComponent {
         <Image style={styles.imageStyle} source={PaintSplash} />
         <Text style={styles.bannerText}>
           Press the <Text style={styles.boldText}>{plusSymbol}</Text>
-          symbol or you can choose Build Card below to get started!
+          icon or you can choose Build Card to get started!
         </Text>
       </View>
     );
@@ -281,7 +310,8 @@ class ShowCard extends React.PureComponent {
       <CardItem
         item={item}
         marked={item.key === this.props.highlighted}
-        numTags={this.countTags(item.tags)}
+        numTags={this.countItems(item.tags)}
+        numNotes={this.countItems(item.notes)}
         catDesc={this.renderCatDescription(item.category)}
         checkIcon={item.selected ? 'check-square-o' : 'square-o'}
         hilite={item.key === this.props.highlighted ? AppColors.hiliteColor : 'white'}

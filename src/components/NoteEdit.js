@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import IonIcon from 'react-native-vector-icons/Ionicons';
 import AppColors from '../templates/appColors';
-import ItemTags from '../images/ItemTags.png';
+import ItemNotes from '../images/ItemNotes.png';
 import RenderColors from './RenderColors';
 
 //const itemHeight = 65;  // ... used to calculate faster scrolls ...
@@ -112,7 +112,7 @@ class NoteEdit extends PureComponent {
 
         <View style={styles.headerContainer}>
           <View style={{ flexDirection: 'row' }}>
-            <Image style={styles.imageIconStyle} source={ItemTags} />
+            <Image style={styles.imageIconStyle} source={ItemNotes} />
             <Text style={styles.headline}>Add a New Note</Text>
           </View>
           <TouchableOpacity onPress={this.props.onClosePress}>
@@ -154,12 +154,10 @@ class NoteEdit extends PureComponent {
             </View>
           </TouchableNativeFeedback>
         </View>
-
         <View style={styles.optionsBar}>
           { this.renderOptionButtons() }
         </View>
         { this.renderColorSwatches() }
-
         <View style={[styles.noteContainer, { backgroundColor: `${this.props.noteColor}` }]}>
           <TextInput
             style={styles.noteInputStyle}
@@ -173,7 +171,7 @@ class NoteEdit extends PureComponent {
             disableFullscreenUI
             placeholder={'Write something amazing ... '}
             value={this.props.note}
-            onChangeText={(text) => this.props.onNoteChange(text)}
+            onChangeText={this.props.onNoteChange}
           />
         </View>
 
@@ -283,6 +281,7 @@ const styles = StyleSheet.create({
   },
   headline: {
     color: AppColors.accentColor,
+    paddingTop: 2,
     paddingLeft: 12,
     fontSize: 18,
     fontWeight: '500'

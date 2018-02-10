@@ -7,6 +7,7 @@ import {
   REMOVE_CARD,
   CURRENT_CARD,
   ADD_CARD_TAG,              // ... NEW ...
+  ADD_CARD_NOTE,             // ... REALLY NEW ...
   ADD_CARD_IMAGE,            // ... NEW ...
   HIGHLIGHT_CARD,            // ... NEW ...
   CARD_EDIT_CHANGE,
@@ -14,6 +15,8 @@ import {
   CLOSE_TAGS_MODAL,
   UPDATE_CARD_TAGS,
   DELETE_CARD_TAG,
+  DELETE_CARD_NOTE,
+  UPDATE_CARD_NOTES,
   //SAVE_CARDS_SUCCESS,
   //SAVE_CARDS_FAILURE,
   //LOAD_CARDS_SUCCESS,
@@ -29,6 +32,7 @@ const initialState = {
   detailView: false,
   highlighted: '',        // ... the unique key of the currently highlighted item ...
   tagsChanged: false,
+  notesChanged: false,
   tagsWindowOpen: false,
   editCardTags: '',      // ... the unique key of the item to be edited ...
   thisCard: {
@@ -105,6 +109,7 @@ const CardReducer = (state = initialState, action) => {
 
     case UPDATE_CARD:
     case UPDATE_CARD_TAGS:
+    case UPDATE_CARD_NOTES:
       // ... added in Realm DB - just show something happened ...
       ToastAndroid.show('Card Updated', ToastAndroid.SHORT);
       return {
@@ -112,15 +117,19 @@ const CardReducer = (state = initialState, action) => {
         tag: '',
         tags: [],
         tagsChanged: false,
+        note: '',
+        notes: [],
+        notesChanged: false,
         lastUpdated: Date.now()
       };
 
     case REMOVE_CARD:
       // ... deleted in Realm DB - just show something happened ...
       ToastAndroid.show('Card Deleted', ToastAndroid.LONG);
-      //-----------------------------------------------------------------------------
+      //--------------------------------------------------------------------------------
       // ... we should really do this within a transaction so we could roll back ...
-      //-----------------------------------------------------------------------------
+      // ... just be aware we may be leaving some notes as orphans - look into this ...
+      //--------------------------------------------------------------------------------
       return {
         ...state,
         detailView: false,
@@ -148,8 +157,21 @@ const CardReducer = (state = initialState, action) => {
   base64: action.payload.image.data
 */
 
-    case DELETE_CARD_TAG:
+    case DELETE_CARD_NOTE:
       // ... add this item to this card's tag list ...
+      return { 
+        ...state,
+        thisCard: { ...state.thisCard, 
+        notes: state.thisCard.notes.filter(key => {
+          return key !== action.payload.key; 
+          })
+        },
+        notesChanged: true,
+        lastUpdated: Date.now()
+      };
+
+    case DELETE_CARD_TAG:
+      // ... remove this tag from this card's tag list ...
       return { 
         ...state,
         thisCard: { ...state.thisCard, 
@@ -158,6 +180,21 @@ const CardReducer = (state = initialState, action) => {
           })
         },
         tagsChanged: true,
+        lastUpdated: Date.now()
+      };
+
+    case ADD_CARD_NOTE:
+      // ... add this item to this card's linked notes (key) ...
+      return { 
+        ...state,
+        thisCard: { ...state.thisCard, 
+          note: '', 
+          notes: [ 
+            ...state.thisCard.notes,
+            action.payload.key
+          ]
+        },
+        notesChanged: true,
         lastUpdated: Date.now()
       };
 

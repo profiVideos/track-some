@@ -27,7 +27,7 @@ export const getCard = (key) => {
 };
 
 export const createCard = 
-  (cList, cName, cDesc, cIcon, cType, cRating, cCategory, cThumb, cMime, cBarcode, cTags, cNotes) => {
+  (cList, cName, cDesc, cIcon, cType, cRating, cCat, cThumb, cMime, cBarcode, cTags, cNotes) => {
   tsRealm.write(() => {
     tsRealm.create('Card', {
       key: UniqueId(),
@@ -37,7 +37,7 @@ export const createCard =
       icon: cIcon,
       iconType: cType,
       rating: cRating,
-      category: cCategory,
+      category: cCat,
       imageThumb: cThumb,
       mimeType: cMime,
       barcode: cBarcode,
@@ -60,6 +60,13 @@ export const updateCardTags = (key, newTags) => {
   tsRealm.write(() => {
     // ... update this card based on the key ...
     tsRealm.create('Card', { key, tags: newTags }, true);
+  });
+};
+
+export const updateCardNotes = (key, newNotes) => {
+  tsRealm.write(() => {
+    // ... update this card based on the key ...
+    tsRealm.create('Card', { key, notes: newNotes }, true);
   });
 };
 

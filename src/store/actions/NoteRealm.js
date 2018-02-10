@@ -1,5 +1,5 @@
 import { tsRealm } from '../data/tsObjects';
-import { UniqueId } from '../../components/common/UniqueId';
+//import { UniqueId } from '../../components/common/UniqueId';
 
 // ... Realm supports the following basic types: bool, int, float, double, string, data, and date.
 // ... Each property has a name and is described by either a string containing the property’s type, 
@@ -37,10 +37,11 @@ export const getNote = (key) => {
   return thisItem;
 };
 
-export const createNote = (cIcon, cTitle, cNote, cColor, cPriority, cReminder) => {
+export const createNote = (cKey, cCard, cIcon, cTitle, cNote, cColor, cPriority, cReminder) => {
   tsRealm.write(() => {
     tsRealm.create('Note', {
-      key: UniqueId(),
+      key: cKey,
+      card: cCard,
       icon: cIcon,
       title: cTitle,
       note: cNote,
@@ -61,11 +62,12 @@ export const updateNoteSelected = (key, isSelected) => {
   });
 };
 
-export const updateNote = (key, icon, title, note, color, priority, reminder) => {
+export const updateNote = (key, card, icon, title, note, color, priority, reminder) => {
   tsRealm.write(() => {
     // ... update this card based on the key ...
     tsRealm.create('Note', { 
       key, 
+      card,
       icon, 
       title, 
       color, 

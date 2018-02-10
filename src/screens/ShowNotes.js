@@ -17,12 +17,14 @@ import {
 import {
   MenuProvider
 } from 'react-native-popup-menu';
+import { UniqueId } from '../components/common/UniqueId';
 import AppColors from '../templates/appColors';
 import NoteSplash from '../images/Note-Splash.png';
 import NoteDisplay from '../components/NoteDisplay';
 import NoteEdit from '../components/NoteEdit';
 import {
   addNote,
+  addCardNote,
   //updateNote,
   deleteNote,
   //currentNote,
@@ -67,7 +69,7 @@ const whatDoYouNeed = state => {
     colorPicker: state.notes.colorPicker,
     highlighted: state.notes.highlighted, 
     listUpdated: state.notes.lastUpdated,
-    notesChanged: state.notes.notesChanged,
+    //notesChanged: state.cards.notesChanged,
     notesModalOpen: state.notes.notesWindowOpen
   };
 };
@@ -102,19 +104,6 @@ class ShowNotes extends React.PureComponent {
     console.log('inside show notes ...');
   }
 
-/*
-  componentWillReceiveProps(nextProps) {
-    //-------------------------------------------------------------------------------------
-    // ... due to the async processing we can only save when everything has been added ...
-    //-------------------------------------------------------------------------------------
-    //if (nextProps.notesModalOpen === false && nextProps.notesChanged === true) {
-    //  if (this.props.thisNote.key !== '') {   // ... we are updating an existing card ...
-    //    this.props.dispatch(updateNoteTags(this.props.thisNote.key, nextProps.thisNote.tags));
-    //  }
-    //} 
-  }
-*/
-
   onNoteItemPress(key) {
     console.log('The main item was pressed with this key: ', key);
     // ... if item was already selected - and user presses again - deselect ...
@@ -134,22 +123,6 @@ class ShowNotes extends React.PureComponent {
         //console.log('Tags was selected for item key ', item.key);
         //this.props.dispatch(currentNote(item));
         //this.props.dispatch(openNotesModal(item.key));
-        break;
-      }
-      case 'color': {
-        //console.log('Notes was selected for item key ', item.key);
-        ToastAndroid.show('Setting Item Who requested Color Picker!', ToastAndroid.SHORT);
-        //this.props.dispatch(setEditMode(item.key));
-        break;
-      }
-      case 'priority': {
-        //console.log('Notes was selected for item key ', item.key);
-        ToastAndroid.show('Coming Soon!', ToastAndroid.SHORT);
-        break;
-      }
-      case 'reminder': {
-        //console.log('Notes was selected for item key ', item.key);
-        ToastAndroid.show('Coming Soon!', ToastAndroid.SHORT);
         break;
       }
       case 'delete': {
@@ -181,12 +154,14 @@ class ShowNotes extends React.PureComponent {
 
   buttonPressed() {
     this.props.dispatch(toggleColorPicker(this.props.colorPicker));
-    //ToastAndroid.show(`Button was Pressed: ${which}`, ToastAndroid.LONG);
   }
 
   addOrUpdateNote(card) {
     if (this.props.thisNote.key === '') {
+      const newNoteKey = UniqueId();
       this.props.dispatch(addNote(
+        newNoteKey,
+        this.props.thisNote.card,
         this.props.thisNote.icon, 
         this.props.thisNote.title, 
         this.props.thisNote.note, 
@@ -194,8 +169,14 @@ class ShowNotes extends React.PureComponent {
         this.props.thisNote.priority, 
         this.props.thisNote.reminder
       ));
+      // ... if we are editing an existing card, we need ...
+      // ... to update the card with this new note link ...
+      if (card !== '') {
+        this.props.dispatch(addCardNote(newNoteKey));
+      }
     } else {
       // ... update this note ...
+      // ... the key is not being added or deleted from the card so all's good ...
     }
     ToastAndroid.show(`Saving Note with Card: ${card}`, ToastAndroid.SHORT);
   }
@@ -211,7 +192,7 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
            { text: 'OK', onPress: () => this.addOrUpdateNote(card) }]);
       } else {
         // ... just save the note ...
-        this.addOrUpdateNote('With Title');
+        this.addOrUpdateNote(card);
       }
     }
   }
@@ -244,7 +225,7 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
     return (
       <FlatList
         keyboardShouldPersistTaps='always'
-        //style={{ width: '100%', paddingBottom: 5, marginBottom: 5 }}
+        //style={{ marginRight: 5 }}
         data={this.props.itemList}
         extraData={this.props}
         renderItem={this.renderNoteDisplay}
@@ -274,11 +255,12 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
               <View style={styles.modalInnerContainer}>
                 <NoteEdit
                   note={this.props.thisNote.note}
+                  card={this.props.thisNote.card}
                   noteTitle={this.props.thisNote.title}
                   noteColor={this.props.thisNote.color !== '' ? 
                     this.props.thisNote.color : '#f8f8f8'}
                   pickerActive={this.props.colorPicker}
-                  onNoteAdd={() => this.addNote2Card()}
+                  onNoteAdd={() => this.addNote2Card(this.props.thisNote.card)}
                   onButtonPress={() => this.buttonPressed()}
                   onNoteChange={text => this.noteBodyChanged(text)}
                   onColorChange={color => this.noteColorChanged(color)}
@@ -503,6 +485,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 3,
+    //marginRight: 10,
     //marginBottom: 5,
     //paddingBottom: 5,
     shadowColor: '#121212',

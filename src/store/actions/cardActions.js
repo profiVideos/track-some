@@ -7,13 +7,16 @@ import {
   REMOVE_CARD,
   CURRENT_CARD,
   ADD_CARD_TAG,               // ... NEW ...
+  ADD_CARD_NOTE,              // ... REALLY NEW ...
   ADD_CARD_IMAGE,             // ... NEW ...
   HIGHLIGHT_CARD,             // ... NEW ...
   DELETE_CARD_TAG,
+  DELETE_CARD_NOTE,           // ... REALLY NEW ...
   OPEN_TAGS_MODAL,            // ... NEW ...
   CLOSE_TAGS_MODAL,           // ... NEW ...
   CARD_EDIT_CHANGE,
   UPDATE_CARD_TAGS,
+  UPDATE_CARD_NOTES,          // ... REALLY NEW ...
   //SAVE_CARDS_SUCCESS,
   //SAVE_CARDS_FAILURE,
   //LOAD_CARDS_SUCCESS,
@@ -31,10 +34,9 @@ export const itemCardChanged = (prop, value) => {
 };
 
 export const addCard =
-  (cList, cName, cDesc, cIcon, cType, cRating, cCategory, 
-   cThumb, cMime, cBarcode, cTags, cNotes) => {
+  (cList, cName, cDesc, cIcon, cType, cRating, cCat, cThumb, cMime, cBarcode, cTags, cNotes) => {
   store.createCard(
-    cList, cName, cDesc, cIcon, cType, cRating, cCategory, cThumb, cMime, cBarcode, cTags, cNotes);
+    cList, cName, cDesc, cIcon, cType, cRating, cCat, cThumb, cMime, cBarcode, cTags, cNotes);
   return {
     type: ADD_CARD   // ... just need to inform Redux that something was added ...
   };
@@ -44,6 +46,13 @@ export const addCardTag = (tag) => {
   return {
     type: ADD_CARD_TAG,
     payload: { tag }
+  };
+};
+
+export const addCardNote = (key) => {
+  return {
+    type: ADD_CARD_NOTE,
+    payload: { key }
   };
 };
 
@@ -58,6 +67,13 @@ export const deleteCardTag = (tag) => {
   return {
     type: DELETE_CARD_TAG,
     payload: { tag }
+  };
+};
+
+export const deleteCardNote = (key) => {
+  return {
+    type: DELETE_CARD_NOTE,
+    payload: { key }
   };
 };
 
@@ -79,6 +95,13 @@ export const updateCardTags = (key, tags) => {
   store.updateCardTags(key, tags);
   return {
     type: UPDATE_CARD_TAGS
+  };
+};
+
+export const updateCardNotes = (key, notes) => {
+  store.updateCardNotes(key, notes);
+  return {
+    type: UPDATE_CARD_NOTES
   };
 };
 
@@ -112,6 +135,7 @@ export const closeTagsModal = (key) => {
 export const deleteCard = (key) => {
   //-----------------------------------------------------------------------------
   // ... we should really do this within a transaction so we could roll back ...
+  // ... we may now be leaving some notes as orphans - just be aware of this ...
   //-----------------------------------------------------------------------------
   store.deleteCard(key);
   return {

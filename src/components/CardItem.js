@@ -38,7 +38,8 @@ class CardItem extends React.PureComponent {
   }
 
   componentWillMount() {
-    console.log('inside card item ...');
+    //console.log('inside card item ...');
+    //console.log('This Card Details are: ', JSON.stringify(this.props.item));
   }
 
   componentWillUnmount() {
@@ -102,12 +103,15 @@ class CardItem extends React.PureComponent {
       <MenuOptions customStyles={menuOptionsStyles}>
         <IconMenuOption value={'edit'} icon='✏️' text='Edit' />
         <IconMenuOption value={'tags'} icon='🏷️' text='Tags' />
+        <IconMenuOption value={'note'} icon='📝' text='Add Note' />
         <IconMenuOption value={'delete'} icon='🗑️' text='Delete' />
       </MenuOptions>
     </Menu>
   )
 
   render() {
+    console.log('number of tags = ', this.props.numTags);
+    console.log('number of notes = ', this.props.numNotes);
     const infoWidth = this.state.infoWidth;
     const backColor = this.props.hilite;   // ... AppsColor.hiliteColor, otherwise white ...
     const renderFull = this.props.marked ? this.renderFullCard() : <View />;

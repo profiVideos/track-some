@@ -21,11 +21,12 @@ const initialState = {
   detailView: false,
   highlighted: '',          // ... the unique key of the currently highlighted item ...
   colorPicker: false,
-  notesChanged: false,
+  //notesChanged: false,
   notesWindowOpen: false,
   editNote: '',             // ... the unique key of the item to be edited ...
   thisNote: {
     key: '',
+    card: '',
     icon: '',
     title: '',
     note: '',
@@ -56,7 +57,7 @@ const NoteReducer = (state = initialState, action) => {
       return {
         ...state,
         editNote: action.payload.key,
-        notesChanged: false,
+        //notesChanged: false,
         notesWindowOpen: true
       };
 
@@ -102,12 +103,13 @@ const NoteReducer = (state = initialState, action) => {
       ToastAndroid.show('Note Updated', ToastAndroid.SHORT);
       return {
         ...state,
-        notesChanged: false,
+        //notesChanged: false,
         lastUpdated: Date.now()
       };
 
     case REMOVE_NOTE:
       // ... deleted in Realm DB - just show something happened ...
+      // ... however we have to remove the link to this note in cards file (if required) ...
       ToastAndroid.show('Note Deleted', ToastAndroid.LONG);
       //-----------------------------------------------------------------------------
       // ... we should really do this within a transaction so we could roll back ...
@@ -125,6 +127,7 @@ const NoteReducer = (state = initialState, action) => {
         ...state,
         thisNote: {
           key: '',
+          card: '',
           icon: '',
           title: '',
           note: '',
@@ -143,6 +146,7 @@ const NoteReducer = (state = initialState, action) => {
         ...state,
         thisNote: {
           key: action.payload.item.key,
+          card: action.payload.item.card,
           icon: action.payload.item.icon,
           title: action.payload.item.title,
           note: action.payload.item.note,
@@ -161,6 +165,7 @@ const NoteReducer = (state = initialState, action) => {
         ...state,
         thisNote: {
           key: '',
+          card: '',
           icon: '',
           title: '',
           note: '',
