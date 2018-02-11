@@ -37,7 +37,10 @@ import {
   addCardImage,
   openTagsModal,
   deleteCardTag,
-  closeTagsModal, 
+  closeTagsModal,
+
+closeNotesModal,
+
   loadCategories,
   itemCardChanged,
 } from '../store/actions';
@@ -75,6 +78,7 @@ class BuildCard extends PureComponent {
   constructor(props) {
     super(props);
     this.onSelectEmoji = this.onSelectEmoji.bind(this);
+    this.doSomeFunction = this.doSomeFunction.bind(this);
     this.openTagsEditModal = this.openTagsEditModal.bind(this);
     this.state = {
       image: null,
@@ -334,6 +338,8 @@ class BuildCard extends PureComponent {
 
   doSomeFunction() {
     console.log('About to do something');
+    //this.props.dispatch(closeNotesModal(''));
+    this.props.navigator.dismissLightBox();
     //Alert.alert('About to do something');
     /*
     this.props.navigator.setSubTitle({

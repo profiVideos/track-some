@@ -38,7 +38,10 @@ class CardItem extends React.PureComponent {
   }
 
   componentWillMount() {
-    //console.log('inside card item ...');
+    console.log('inside card item ...');
+    //console.log('number of tags = ', this.props.numTags);
+    //console.log('number of notes = ', this.props.numNotes);
+    //console.log('This Card Details are: ', this.props.item);
     //console.log('This Card Details are: ', JSON.stringify(this.props.item));
   }
 
@@ -110,8 +113,6 @@ class CardItem extends React.PureComponent {
   )
 
   render() {
-    console.log('number of tags = ', this.props.numTags);
-    console.log('number of notes = ', this.props.numNotes);
     const infoWidth = this.state.infoWidth;
     const backColor = this.props.hilite;   // ... AppsColor.hiliteColor, otherwise white ...
     const renderFull = this.props.marked ? this.renderFullCard() : <View />;
@@ -119,7 +120,14 @@ class CardItem extends React.PureComponent {
       (<View style={{ flexDirection: 'row', alignItems: 'center' }}>
          <Text style={styles.extraInfo}>Tags:</Text>
          <View style={styles.tagsBadge}>
-           <Text style={styles.badgeTextStyle}>{this.props.numTags}</Text>
+           <Text style={styles.tagsTextStyle}>{this.props.numTags}</Text>
+         </View>
+       </View>);
+    const notesBadge = (this.props.numNotes === 0) ? <View /> :
+      (<View style={{ flexDirection: 'row', alignItems: 'center' }}>
+         <Text style={styles.extraInfo}>Notes:</Text>
+         <View style={styles.notesBadge}>
+           <Text style={styles.notesTextStyle}>{this.props.numNotes}</Text>
          </View>
        </View>);
     const itemDesc = (this.props.item.desc === '') ? <View /> :
@@ -156,6 +164,7 @@ class CardItem extends React.PureComponent {
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 {categoryDesc}
                 {tagsBadge}
+                {notesBadge}
               </View>
             </View>
           </TouchableNativeFeedback>
@@ -241,7 +250,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 3,
     resizeMode: 'cover'
   },
-  badgeTextStyle: {
+  tagsTextStyle: {
     color: 'white',
     textAlign: 'center',
     fontSize: 10,
@@ -249,6 +258,21 @@ const styles = StyleSheet.create({
   tagsBadge: {
     backgroundColor: 'rgba(30,30,200,0.45)',
     marginLeft: 3,
+    marginRight: 4,
+    width: 14,
+    height: 14,
+    borderRadius: 14,
+    marginBottom: 3,
+  },
+  notesTextStyle: {
+    color: 'black',
+    textAlign: 'center',
+    fontSize: 10,
+  },
+  notesBadge: {
+    backgroundColor: 'rgba(200,200,30,0.45)',
+    marginLeft: 3,
+    marginRight: 4,
     width: 14,
     height: 14,
     borderRadius: 14,

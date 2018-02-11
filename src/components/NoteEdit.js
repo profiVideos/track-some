@@ -36,6 +36,8 @@ class NoteEdit extends PureComponent {
 
   constructor(props) {
     super(props);
+    this.focusNextField = this.focusNextField.bind(this);
+    this.inputs = {};
     this.state = { 
       didSave: false,
       textValue: '',
@@ -62,6 +64,16 @@ class NoteEdit extends PureComponent {
     this.props.onClosePress();
     //this.props.onTapItem(this.props.emojiName, this.props.emojiString);
   } 
+*/
+
+  focusNextField(id) {
+    this.inputs[id].focus();
+  }
+
+/*
+  textInputDone(text) {
+    console.log('Finished the entry of: ', text);
+  }
 */
 
   pressedButton(whichOne) {
@@ -128,7 +140,10 @@ class NoteEdit extends PureComponent {
               style={styles.textInputStyle}
               autoFocus
               returnKeyType='next'
+              ref={input => { this.inputs.title = input; }}
               blurOnSubmit={false}
+              onSubmitEditing={() => { this.inputs.note.focus(); }}
+              //onBlur={() => { this.textInputDone(this.props.noteTitle); }}
               disableFullscreenUI
               underlineColorAndroid={'transparent'}
               placeholder={'Note Title ... '}
@@ -165,7 +180,9 @@ class NoteEdit extends PureComponent {
             numberOfLines={10}
             //placeholderTextColor='#aaa'
             returnKeyType='done'
+            ref={input => { this.inputs.note = input; }}
             underlineColorAndroid={'transparent'}
+            //onBlur={() => { this.textInputDone(this.props.note); }}
             blurOnSubmit={false}
             textBreakStrategy={'highQuality'}
             disableFullscreenUI

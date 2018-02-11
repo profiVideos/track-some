@@ -38,6 +38,7 @@ export const getNote = (key) => {
 };
 
 export const createNote = (cKey, cCard, cIcon, cTitle, cNote, cColor, cPriority, cReminder) => {
+  console.log('saving note: ', cKey);
   tsRealm.write(() => {
     tsRealm.create('Note', {
       key: cKey,

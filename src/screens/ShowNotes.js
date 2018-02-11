@@ -24,6 +24,8 @@ import NoteDisplay from '../components/NoteDisplay';
 import NoteEdit from '../components/NoteEdit';
 import {
   addNote,
+  clearNote,
+  clearCard,
   addCardNote,
   //updateNote,
   deleteNote,
@@ -32,6 +34,7 @@ import {
   openNotesModal,
   closeNotesModal,
   setNoteSelected,
+  updateCardNotes,
   toggleColorPicker,
   propertyNoteChanged
 } from '../store/actions';
@@ -64,12 +67,13 @@ const whatDoYouNeed = state => {
   return {
     saveMode: state.login.saveMode,
     editNote: state.notes.editNote,
-    itemList: notesLiveResults,
+    noteList: notesLiveResults,
     thisNote: state.notes.thisNote,
+    thisCard: state.cards.thisCard,
     colorPicker: state.notes.colorPicker,
     highlighted: state.notes.highlighted, 
-    listUpdated: state.notes.lastUpdated,
-    //notesChanged: state.cards.notesChanged,
+    notesUpdated: state.notes.lastUpdated,
+    notesChanged: state.cards.notesChanged,
     notesModalOpen: state.notes.notesWindowOpen
   };
 };
@@ -98,10 +102,30 @@ class ShowNotes extends React.PureComponent {
     this.onNoteItemPress = this.onNoteItemPress.bind(this);
     this.onNoteItemToggle = this.onNoteItemToggle.bind(this);
     this.onNoteItemMenuPress = this.onNoteItemMenuPress.bind(this);
+    this.state = {
+      canClose: false
+      //title: '',
+      //note: '',
+      //infoWidth: Dimensions.get('window').width - 112
+    };
   }
 
   componentWillMount() {
     console.log('inside show notes ...');
+  }
+
+  componentWillReceiveProps(nextProps) {
+    //-------------------------------------------------------------------------------------
+    // ... due to the async processing we can only save when everything has been added ...
+    // ... if main if is true - the tags Modal window has now closed - save & clean up ...
+    //-------------------------------------------------------------------------------------
+    if (this.props.notesModalOpen && nextProps.notesModalOpen === false) {
+      if (nextProps.notesChanged === true && this.props.thisCard.key !== '') {   
+        this.props.dispatch(updateCardNotes(this.props.thisCard.key, nextProps.thisCard.notes));
+      }
+      this.props.dispatch(clearNote());  // ... removes the card link from note record ...
+      this.props.dispatch(clearCard());
+    }
   }
 
   onNoteItemPress(key) {
@@ -136,8 +160,33 @@ class ShowNotes extends React.PureComponent {
     }  // ... switch ...
   }
 
-  closeNoteEditModal() {
-    this.props.dispatch(closeNotesModal(''));
+  openNoteEditModal() {
+    this.props.dispatch(openNotesModal(''));
+  }
+
+/*
+      if (this.props.thisNote.title === '') {
+        Alert.alert('Adding Note', 
+          `You are about to add a note without a title.
+Do you really want to do this?\n
+If you DO NOT wish to use note titles, please turn them off in the options panel.`,
+          [{ text: 'Cancel', style: 'cancel' },
+           { text: 'OK', onPress: () => this.addOrUpdateNote(card, true) }]);
+      } else {
+        // ... just save the note ...
+        this.addOrUpdateNote(card, true);
+      }
+
+*/
+
+  closeNoteEditModal(card) {
+    if (this.props.thisNote.note !== '') {
+      // ... user closed without hitting the plus '+' button first (can happen!) ...
+      this.addNote2Card(card, true);  // ... true = we are finished ...
+    } else {
+      // ... nothing entered except maybe an orphan title - just close ...
+      this.props.dispatch(closeNotesModal(''));
+    }
   }
 
   noteTitleChanged(text) {
@@ -156,7 +205,7 @@ class ShowNotes extends React.PureComponent {
     this.props.dispatch(toggleColorPicker(this.props.colorPicker));
   }
 
-  addOrUpdateNote(card) {
+  addOrUpdateNote(card, canClose) {
     if (this.props.thisNote.key === '') {
       const newNoteKey = UniqueId();
       this.props.dispatch(addNote(
@@ -178,10 +227,13 @@ class ShowNotes extends React.PureComponent {
       // ... update this note ...
       // ... the key is not being added or deleted from the card so all's good ...
     }
-    ToastAndroid.show(`Saving Note with Card: ${card}`, ToastAndroid.SHORT);
+    if (canClose) {
+      this.props.dispatch(closeNotesModal(''));
+      ToastAndroid.show(`Saving Note with Card: ${card}`, ToastAndroid.SHORT);
+    }
   }
 
-  addNote2Card(card) {
+  addNote2Card(card, canClose) {
     if (this.props.thisNote.note !== '') {
       if (this.props.thisNote.title === '') {
         Alert.alert('Adding Note', 
@@ -189,10 +241,10 @@ class ShowNotes extends React.PureComponent {
 Do you really want to do this?\n
 If you DO NOT wish to use note titles, please turn them off in the options panel.`,
           [{ text: 'Cancel', style: 'cancel' },
-           { text: 'OK', onPress: () => this.addOrUpdateNote(card) }]);
+           { text: 'OK', onPress: () => this.addOrUpdateNote(card, canClose) }]);
       } else {
         // ... just save the note ...
-        this.addOrUpdateNote(card);
+        this.addOrUpdateNote(card, canClose);
       }
     }
   }
@@ -226,16 +278,30 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
       <FlatList
         keyboardShouldPersistTaps='always'
         //style={{ marginRight: 5 }}
-        data={this.props.itemList}
-        extraData={this.props}
+        data={this.props.noteList}
+        extraData={this.props.notesUpdated}
         renderItem={this.renderNoteDisplay}
         ItemSeparatorComponent={this.itemSeparator}
       />
     );
   }
 
-/*
-*/
+  renderNoteEditScreeeeeeeeeeen() {
+    //if (this.props.notesModalOpen) {
+      this.props.navigator.showLightBox({
+       screen: 'tracksome.BuildCard', // unique ID registered with Navigation.registerScreen
+       passProps: {}, // serializable object that will pass as props to the lightbox (optional)
+       style: {
+         backgroundBlur: 'dark', // 'dark' / 'light' / 'xlight' / 'none' - the type of blur 
+         //on the background
+         backgroundColor: '#ff000080' // tint color for the background, 
+         //you can specify alpha here (optional)
+       },
+       adjustSoftInput: 'resize', // android only, adjust soft input, 
+       //modes: 'nothing', 'pan', 'resize', 'unspecified' (optional, default 'unspecified')
+      });
+    //}
+  }
 
   renderNoteEditScreen() {
     //if (this.props.editNote === '') return;
@@ -245,7 +311,6 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
             visible={this.props.notesModalOpen}
             transparent
             animationType={'fade'}
-            onRequestClose={() => this.closeNoteEditModal()}
         >
           <View style={styles.modalContainer}>
             <ScrollView
@@ -260,12 +325,12 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
                   noteColor={this.props.thisNote.color !== '' ? 
                     this.props.thisNote.color : '#f8f8f8'}
                   pickerActive={this.props.colorPicker}
-                  onNoteAdd={() => this.addNote2Card(this.props.thisNote.card)}
+                  onNoteAdd={() => this.addNote2Card(this.props.thisNote.card, false)}
                   onButtonPress={() => this.buttonPressed()}
                   onNoteChange={text => this.noteBodyChanged(text)}
                   onColorChange={color => this.noteColorChanged(color)}
                   onTitleChange={title => this.noteTitleChanged(title)}
-                  onClosePress={() => this.closeNoteEditModal()} 
+                  onClosePress={() => this.closeNoteEditModal(this.props.thisNote.card)} 
                 />
               </View>
             </ScrollView>
@@ -312,7 +377,7 @@ document.getElementById('counter').addEventListener('click', elapsedTime, false)
 */
 
   renderMainScreen() {
-    return (this.props.itemList.length === 0 ? this.showWelcome() : this.showMainList());
+    return (this.props.noteList.length === 0 ? this.showWelcome() : this.showMainList());
     //return (this.showWelcome());
   }
 
@@ -321,6 +386,7 @@ document.getElementById('counter').addEventListener('click', elapsedTime, false)
     return (
       <NoteDisplay
         item={item}
+        paperColor={noteColor}
         marked={item.key === this.props.highlighted}
         //numTags={this.countTags(item.tags)}
         //catDesc={this.renderCatDescription(item.category)}
@@ -333,6 +399,10 @@ document.getElementById('counter').addEventListener('click', elapsedTime, false)
     );
   }
 
+
+/*        
+*/
+
   render() {
     return (
       <MenuProvider>
@@ -343,7 +413,7 @@ document.getElementById('counter').addEventListener('click', elapsedTime, false)
         <TouchableHighlight 
           style={styles.addButton}
           underlayColor='#999' 
-          onPress={() => { this.props.dispatch(openNotesModal('')); }} 
+          onPress={() => { this.openNoteEditModal(); }} 
         >
           <Text style={{ fontSize: 36, color: 'white', paddingBottom: 3 }}>+</Text>
         </TouchableHighlight>
@@ -418,7 +488,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     right: 25,
     bottom: 10,
-  },  
+  },
   addButton: {
     elevation: 5,
     backgroundColor: AppColors.darkerColor,

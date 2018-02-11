@@ -102,6 +102,34 @@ class NoteDisplay extends React.PureComponent {
   </View>
 
 */
+  renderNoteLink() {
+    if (this.props.item.card === '') return;
+    return (
+      <View style={styles.cardLink}>
+        <Text>{this.props.item.card}</Text>
+      </View>
+    );
+  }
+
+  renderFullNote() {
+    if (!this.props.marked) return;
+    const lastUpdateDate = new Date(Number(this.props.item.updatedTimestamp))
+      .toLocaleString('de-DE', { hour12: false });
+    return (
+      <View style={[styles.fullView, { backgroundColor: this.props.paperColor }]}>
+        <View style={styles.infoBar}>
+          <Text style={styles.dateMessage}>Updated: 
+            <Text style={styles.noteDate}> {lastUpdateDate}</Text>
+          </Text>
+          { this.renderNoteLink() }
+        </View>
+        <View style={styles.fullNote}>
+          <Text style={styles.noteBody}>{this.props.item.note}</Text>
+        </View>
+      </View>
+    );
+  }
+
   renderNoteTitle() {
     if (this.props.item.title === '') return;
     return (
@@ -112,37 +140,40 @@ class NoteDisplay extends React.PureComponent {
   }
 
   render() {
-    const descLines = this.props.item.title === '' ? 3 : 2;
+    const descLines = this.props.item.title === '' ? 2 : 1;
     const infoWidth = this.state.infoWidth;
     const backColor = this.props.hilite;   // ... AppsColor.hiliteColor, otherwise white ...
     return (
-      <View style={styles.outerWrapper}>
-        <View style={styles.priorityView}>
-          <View />
-        </View>
-        <View style={[styles.noteWrapper, { backgroundColor: backColor }]}>
-          <TouchableNativeFeedback onPress={this.onTouchablePress}>
-            <View style={[styles.infoWrapper, { width: infoWidth }]}>
-              { this.renderNoteTitle() }
-              <Text ellipsizeMode='tail' numberOfLines={descLines} style={styles.itemNote}>
-               {this.props.item.note}
-              </Text>
-            </View>
-          </TouchableNativeFeedback>
-          <View style={styles.checkWrapper}>
-            <TouchableNativeFeedback>
-              { this.renderOptionMenu() }
+      <View>
+        <View style={styles.outerWrapper}>
+          <View style={styles.priorityView}>
+            <View />
+          </View>
+          <View style={[styles.noteWrapper, { backgroundColor: backColor }]}>
+            <TouchableNativeFeedback onPress={this.onTouchablePress}>
+              <View style={[styles.infoWrapper, { width: infoWidth }]}>
+                { this.renderNoteTitle() }
+                <Text ellipsizeMode='tail' numberOfLines={descLines} style={styles.itemNote}>
+                 {this.props.item.note}
+                </Text>
+              </View>
             </TouchableNativeFeedback>
-            <TouchableOpacity onPress={this.onToggleCheck}>
-              <Icon 
-                size={20}
-                name={this.props.checkIcon} 
-                style={styles.checkStyle} 
-                color={'#212121'} 
-              />            
-            </TouchableOpacity>
+            <View style={styles.checkWrapper}>
+              <TouchableNativeFeedback>
+                { this.renderOptionMenu() }
+              </TouchableNativeFeedback>
+              <TouchableOpacity onPress={this.onToggleCheck}>
+                <Icon 
+                  size={18}
+                  name={this.props.checkIcon} 
+                  style={styles.checkStyle} 
+                  color={'#212121'} 
+                />            
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
+        { this.renderFullNote() }
       </View>
     );
   }
@@ -162,6 +193,27 @@ const menuOptionsStyles = {
 };
 
 const styles = StyleSheet.create({
+  noteBody: {
+    color: 'black'
+  },
+  infoBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    backgroundColor: AppColors.darkerColor
+  },
+  fullNote: {
+    padding: 12,
+    paddingTop: 6,
+    paddingBottom: 8,
+  },
+  fullView: {
+    marginLeft: 16,
+    marginRight: 28,
+    elevation: 3,
+    borderBottomLeftRadius: 3,
+    borderBottomRightRadius: 3,
+  },
   outerWrapper: {
     marginLeft: 2,
     marginRight: 16,
@@ -171,16 +223,23 @@ const styles = StyleSheet.create({
   },
   priorityView: {
     width: 4,
-    height: 50,
+    height: 36,
     marginTop: 3,
     borderTopLeftRadius: 2,
     borderBottomLeftRadius: 2,
   },
+  dateMessage: {
+    fontSize: 11,
+    padding: 3,
+    //textAlign: 'center',
+    color: '#ccc',
+  },
   noteDate: {
     fontSize: 11,
-    height: 12,
-    textAlign: 'center',
-    color: 'white'
+    padding: 3,
+    marginLeft: 5,
+    //textAlign: 'center',
+    color: 'white',
   },
   menuTitle: {
     fontWeight: '500', 
@@ -204,7 +263,7 @@ const styles = StyleSheet.create({
   },
   noteWrapper: {
     elevation: 3,
-    height: 64,
+    height: 50,
     paddingLeft: 3,
     paddingRight: 5,
     marginRight: 3,
@@ -223,8 +282,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   menuWrapper: {
-    padding: 7,
-    paddingTop: 3,
+    padding: 4,
+    paddingTop: 0,
     alignItems: 'center',
     justifyContent: 'center'
   },

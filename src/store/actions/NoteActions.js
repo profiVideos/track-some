@@ -33,10 +33,11 @@ export const propertyNoteChanged = (prop, value) => {
   };
 };
 
-export const addNote = (cKey, cCard, cIcon, cTitle, cNote, cColor, cPriority, cReminder) => {
-  store.createNote(cKey, cCard, cIcon, cTitle, cNote, cColor, cPriority, cReminder);
+export const addNote = (key, card, icon, title, note, color, priority, reminder) => {
+  store.createNote(key, card, icon, title, note, color, priority, reminder);
   return {
-    type: ADD_NOTE   // ... just need to inform Redux that something was added ...
+    type: ADD_NOTE,     // ... just need to inform Redux that something was added ...
+    payload: { card }   // ... and preserve the card link if it exists ...
   };
 };
 

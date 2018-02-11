@@ -104,7 +104,8 @@ const CardReducer = (state = initialState, action) => {
       // ... make one item in the list stand out or be selected ...
       return { 
         ...state,
-        highlighted: action.payload.key
+        highlighted: action.payload.key,
+        lastUpdated: Date.now()
       };
 
     case UPDATE_CARD:
@@ -114,11 +115,7 @@ const CardReducer = (state = initialState, action) => {
       ToastAndroid.show('Card Updated', ToastAndroid.SHORT);
       return {
         ...state,
-        tag: '',
-        tags: [],
         tagsChanged: false,
-        note: '',
-        notes: [],
         notesChanged: false,
         lastUpdated: Date.now()
       };
@@ -167,7 +164,7 @@ const CardReducer = (state = initialState, action) => {
           })
         },
         notesChanged: true,
-        lastUpdated: Date.now()
+        //lastUpdated: Date.now()   // ... this could cause redux in debugger to fail ...
       };
 
     case DELETE_CARD_TAG:
@@ -180,7 +177,7 @@ const CardReducer = (state = initialState, action) => {
           })
         },
         tagsChanged: true,
-        lastUpdated: Date.now()
+        //lastUpdated: Date.now()
       };
 
     case ADD_CARD_NOTE:
@@ -195,7 +192,7 @@ const CardReducer = (state = initialState, action) => {
           ]
         },
         notesChanged: true,
-        lastUpdated: Date.now()
+        //lastUpdated: Date.now()   // ... this was causing redux in debugger to hiccup ...
       };
 
     case ADD_CARD_TAG:
@@ -210,7 +207,7 @@ const CardReducer = (state = initialState, action) => {
           ]
         },
         tagsChanged: true,
-        lastUpdated: Date.now()
+        //lastUpdated: Date.now()
       };
 
     case ADD_CARD:

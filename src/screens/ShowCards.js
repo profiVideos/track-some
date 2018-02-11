@@ -25,7 +25,6 @@ import {
   //addCard,
   clearCard,
   addCardTag,
-  //addCardImage, 
   deleteCard,
   currentCard,
   deleteCardTag,
@@ -34,10 +33,8 @@ import {
   updateCardTags,
   closeTagsModal,
   openNotesModal,
-  //closeNotesModal,
   setCardSelected,
   itemCardChanged,
-  updateCardNotes,
   propertyNoteChanged
 } from '../store/actions';
 import store from '../store';
@@ -56,17 +53,17 @@ const cardsLiveResults = store.getAllCards();     // ... Realm updates this in r
 
 const whatDoYouNeed = state => {
   return {
-    saveMode: state.login.saveMode,
-    emojiCode: state.emojis.emojiCode,
+    //saveMode: state.login.saveMode,
+    //emojiCode: state.emojis.emojiCode,
     catList: state.categories.itemList,
-    itemList: cardsLiveResults,
+    cardList: cardsLiveResults,
     thisCard: state.cards.thisCard,
-    thisNote: state.notes.thisNote,
-    colorPicker: state.notes.colorPicker,
+    //thisNote: state.notes.thisNote,
+    //colorPicker: state.notes.colorPicker,
     highlighted: state.cards.highlighted, 
-    listUpdated: state.cards.lastUpdated,
-    notesChanged: state.cards.notesChanged,
-    notesModalOpen: state.notes.notesWindowOpen,
+    cardsUpdated: state.cards.lastUpdated,
+    //notesChanged: state.cards.notesChanged,
+    //notesModalOpen: state.notes.notesWindowOpen,
     tagsChanged: state.cards.tagsChanged,
     tagsModalOpen: state.cards.tagsWindowOpen,
     editTagsForItem: state.cards.editCardTags
@@ -119,16 +116,6 @@ class ShowCard extends React.PureComponent {
     if (this.props.tagsModalOpen && nextProps.tagsModalOpen === false) {
       if (nextProps.tagsChanged === true && this.props.thisCard.key !== '') {   
         this.props.dispatch(updateCardTags(this.props.thisCard.key, nextProps.thisCard.tags));
-      }
-      this.props.dispatch(clearCard());
-    }
-    //-------------------------------------------------------------------------------------
-    // ... due to the async processing we can only save when everything has been added ...
-    // ... if main if is true - the tags Modal window has now closed - save & clean up ...
-    //-------------------------------------------------------------------------------------
-    if (this.props.notesModalOpen && nextProps.notesModalOpen === false) {
-      if (nextProps.notesChanged === true && this.props.thisCard.key !== '') {   
-        this.props.dispatch(updateCardNotes(this.props.thisCard.key, nextProps.thisCard.notes));
       }
       this.props.dispatch(clearCard());
     }
@@ -247,9 +234,9 @@ class ShowCard extends React.PureComponent {
     return (
       <FlatList
         keyboardShouldPersistTaps='always'
-        style={{ width: '100%' }}
-        data={this.props.itemList}
-        extraData={this.props}
+        //style={{ width: '100%' }}
+        data={this.props.cardList}
+        extraData={this.props.cardsUpdated}
         renderItem={this.renderCardItem}
         ItemSeparatorComponent={this.itemSeparator}
       />
@@ -302,7 +289,7 @@ class ShowCard extends React.PureComponent {
   }
 
   renderMainScreen() {
-    return (this.props.itemList.length === 0 ? this.showWelcome() : this.showMainList());
+    return (this.props.cardList.length === 0 ? this.showWelcome() : this.showMainList());
   }
 
   renderCardItem = ({ item }) => {
@@ -402,11 +389,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     right: 25,
     bottom: 10,
-  },  
+  },
   addButton: {
     elevation: 5,
     backgroundColor: AppColors.darkerColor,
-    borderColor: AppColors.mainDarkColor,
+    borderColor: '#aaa',
     borderWidth: 1,
     height: 50,
     width: 50,

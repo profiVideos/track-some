@@ -95,7 +95,8 @@ const NoteReducer = (state = initialState, action) => {
       // ... make one item in the list stand out or be selected ...
       return { 
         ...state,
-        highlighted: action.payload.key
+        highlighted: action.payload.key,
+        lastUpdated: Date.now()
       };
 
     case UPDATE_NOTE:
@@ -122,12 +123,13 @@ const NoteReducer = (state = initialState, action) => {
 
     case ADD_NOTE:
       // ... added in Realm DB - just clear the note input record ...
+      // ... preserve the card link in case person is adding multiple notes at once ...
       ToastAndroid.show('Note Added', ToastAndroid.SHORT);
       return { 
         ...state,
         thisNote: {
           key: '',
-          card: '',
+          card: action.payload.card,
           icon: '',
           title: '',
           note: '',
