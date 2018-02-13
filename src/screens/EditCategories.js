@@ -86,8 +86,7 @@ class EditCategories extends PureComponent {
 
   constructor(props) {
     super(props);
-    //this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
-    //this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent);
+    this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     this.onSelectEmoji = this.onSelectEmoji.bind(this);
     this.onCatItemPress = this.onCatItemPress.bind(this);
     this.onCatItemToggle = this.onCatItemToggle.bind(this);
@@ -403,7 +402,12 @@ const styles = StyleSheet.create({
     height: 36
   },
   menuTrigger: {
-    padding: 3
+    //elevation: 100,
+    padding: 3,
+    width: 0,
+    position: 'absolute',
+    top: -2,
+    right: -3,
   },
   menuTitle: {
     fontWeight: '500', 

@@ -7,21 +7,23 @@ import {
   Image,
   Modal,
   FlatList,
-  //TextInput,
   StyleSheet,
   ScrollView,
   ToastAndroid,
+  //TouchableOpacity,
   TouchableHighlight,
 } from 'react-native';
-
 import {
   MenuProvider
 } from 'react-native-popup-menu';
+import { Navigation } from 'react-native-navigation';
 import { UniqueId } from '../components/common/UniqueId';
 import AppColors from '../templates/appColors';
 import NoteSplash from '../images/Note-Splash.png';
 import NoteDisplay from '../components/NoteDisplay';
 import NoteEdit from '../components/NoteEdit';
+import SearchBar from '../components/SearchBar';
+//import OptionMenu from '../components/OptionMenu';
 import {
   addNote,
   clearNote,
@@ -59,8 +61,39 @@ https://tracksome-live.us1.cloud.realm.io/
 
 NEW:***********************************************************************
 
+--------------------------------------------------------------------------------------
+
+Search Bar Implementation; See the example app (actions tab) for a CustomTopBar example
+
+navBarCustomView
+navBarComponentAlignment: 'fill'
+navBarCustomViewInitialProps
+
+I ended up using redux since it's already part of my application, simply connected the 
+CustomTopBar component to redux and changed onChangeText to 
+onChangeText={this.props.updateSearchQuery}, and then also connected the 
+SearchResults component to read the input of the search query via mapStateToProps
+
+md-arrow-dropdown - ascending sort
+md-arrow-dropup - descending sort
+
+--------------------------------------------------------------------------------------
+
+*/
+/*
+const CustomButton = ({ text }) =>
+  <TouchableOpacity
+    style={[styles.buttonContainer]}
+    onPress={() => { return 'options'; }}
+  >
+    <View style={styles.button}>
+      <Text style={{ color: 'white' }}>{text}</Text>
+    </View>
+  </TouchableOpacity>;
+Navigation.registerComponent('tracksome.Menu', () => OptionMenu);
 */
 
+Navigation.registerComponent('tracksome.SearchBar', () => SearchBar);
 const notesLiveResults = store.getAllNotes();     // ... Realm updates this in real time ...
 
 const whatDoYouNeed = state => {
@@ -85,25 +118,38 @@ class ShowNotes extends React.PureComponent {
     navBarBackgroundColor: AppColors.accentColor,
     navBarTranslucent: false
   };
-
-  /*
+/*  
+  static navigatorButtons = {
+    rightButtons: [
+      {
+        id: 'options',
+        component: 'tracksome.Menu',
+        passProps: { text: 'Hi!' }
+      }
+    ],
+    animated: true
+  };
+*/
+/* 
   static navigatorButtons = {
     fab: {
       collapsedId: 'share',
-      collapsedIcon: { ' + ' },   //require('../../img/ic_share.png'),
+      //collapsedIcon: {' + '},   //require('../../img/ic_share.png'),
       collapsedIconColor: 'red', // optional
       backgroundColor: AppColors.darkerColor //'#607D8B'
     }
   };
-  */
+*/
 
   constructor(props) {
     super(props);
     this.onNoteItemPress = this.onNoteItemPress.bind(this);
     this.onNoteItemToggle = this.onNoteItemToggle.bind(this);
     this.onNoteItemMenuPress = this.onNoteItemMenuPress.bind(this);
+    this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     this.state = {
-      canClose: false
+      canClose: false,
+      searchOpen: false,
       //title: '',
       //note: '',
       //infoWidth: Dimensions.get('window').width - 112
@@ -112,6 +158,60 @@ class ShowNotes extends React.PureComponent {
 
   componentWillMount() {
     console.log('inside show notes ...');
+    /*
+    this.props.navigator.setButtons({
+      rightButtons: [{
+        component: 'tracksome.Menu',
+        passProps: { text: 'Hi!' },
+      //  component: 'example.CustomButton', // if you want a custom button
+      //  passProps: {}, // Object that will be passed as props to custom components (optional)
+        //title: 'Edit',      
+        id: 'options',
+      //  icon: require('../../img/navicon_add.png'),
+      //  disabled: true, // used to disable the button (appears faded and doesn't interact)
+      },
+      { 
+        title: 'Edit', 
+        id: 'search' 
+      }
+      ],
+      animated: true
+    });
+
+rightButtons: [
+      {
+        title: 'Edit', // for a textual button, provide the button title (label)
+        id: 'edit', // id for this button, given in onNavigatorEvent(event) to help understand which button was clicked
+        testID: 'e2e_rules', // optional, used to locate this view in end-to-end tests
+        disabled: true, // optional, used to disable the button (appears faded and doesn't interact)
+        disableIconTint: true, // optional, by default the image colors are overridden and tinted to navBarButtonColor, set to true to keep the original image colors
+        showAsAction: 'never', // optional, Android only. Control how the button is 
+        
+        displayed in the Toolbar. 
+        Accepted valued: 
+        'ifRoom' (default) - Show this item as a button in an Action Bar if 
+                  the system decides there is room for it. '
+        always' - Always show this item as a button in an Action Bar. 
+        'withText' - When this item is in the action bar, 
+                     always show it with a text label even if it also has an icon specified. 
+        'never' - Never show this item as a button in an Action Bar.
+
+        buttonColor: 'blue', // Optional, iOS only. Set color for the button (can also be used in setButtons function to set different button style programatically)
+        buttonFontSize: 14, // Set font size for the button (can also be used in setButtons function to set different button style programatically)
+        buttonFontWeight: '600', // Set font weight for the button (can also be used in setButtons function to set different button style programatically)
+      },
+      {
+        icon: require('../../img/navicon_add.png'), // for icon button, provide the local image asset name
+        id: 'add' // id for this button, given in onNavigatorEvent(event) to help understand which button was clicked
+      }
+    ]
+  };
+
+
+
+
+
+    */
   }
 
   componentWillReceiveProps(nextProps) {
@@ -125,6 +225,31 @@ class ShowNotes extends React.PureComponent {
       }
       this.props.dispatch(clearNote());  // ... removes the card link from note record ...
       this.props.dispatch(clearCard());
+    }
+  }
+
+  onNavigatorEvent(event) {
+    if (event.type === 'NavBarButtonPress') { // this is the event type for button presses
+      switch (event.id) {
+        case 'menu': {
+          this.props.navigator.toggleDrawer({ side: 'left', animated: true });
+          break;
+        }
+        case 'search': {
+          if (this.state.searchOpen === false) {
+            this.showSearchBar();
+          } else this.hideSearchBar(); 
+          this.setState({ searchOpen: !this.state.searchOpen });
+          break;
+        }
+        case 'options': {
+          ToastAndroid.show('Menu Options', ToastAndroid.SHORT);
+          break;
+        }
+        default: 
+          ToastAndroid.show('Menu Options', ToastAndroid.SHORT);
+          break;
+      }  // ... switch ...
     }
   }
 
@@ -160,10 +285,6 @@ class ShowNotes extends React.PureComponent {
     }  // ... switch ...
   }
 
-  openNoteEditModal() {
-    this.props.dispatch(openNotesModal(''));
-  }
-
 /*
       if (this.props.thisNote.title === '') {
         Alert.alert('Adding Note', 
@@ -178,6 +299,42 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
       }
 
 */
+
+  setOptionMenu() {
+    this.props.navigator.setStyle({
+      navBarCustomView: 'tracksome.OptionMenu',
+      navBarComponentAlignment: 'right',
+      //navBarCustomViewInitialProps: { menu: this.optionMenu }
+    });
+  }
+
+/*
+    this.props.navigator.dismissContextualMenu();
+
+    static navigatorStyle = {
+      contextualMenuStatusBarColor: '#0092d1',
+      contextualMenuBackgroundColor: '#00adf5',
+      contextualMenuButtonsColor: '#ffffff'
+    };
+
+*/
+
+
+  showSearchBar() {
+    this.props.navigator.setStyle({
+      navBarCustomView: 'tracksome.SearchBar',
+      navBarComponentAlignment: 'fill',
+      //navBarCustomViewInitialProps: { title: 'Hi Markus' }
+    });
+  }
+
+  hideSearchBar() {
+    this.props.navigator.setStyle({ navBarCustomView: '' });
+  }
+
+  openNoteEditModal() {
+    this.props.dispatch(openNotesModal(''));
+  }
 
   closeNoteEditModal(card) {
     if (this.props.thisNote.note !== '') {
@@ -453,6 +610,21 @@ Donnerstag 13:30 – 18:00 Uhr
 */
 
 const styles = StyleSheet.create({
+  buttonContainer: {
+    width: 48,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  button: {
+    backgroundColor: 'red',
+    width: 34,
+    height: 34,
+    borderRadius: 34 / 2,
+    //overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },  
   scrollStyle: {
     //width: '100%'
   },

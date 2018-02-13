@@ -16,7 +16,7 @@ import {
 } from 'react-native-popup-menu';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import AppColors from '../templates/appColors';
-import VerticalLink from '../images/verticalLink.png';
+//import VerticalLink from '../images/verticalLink.png';
 
 const IconMenuOption = (props) => (
   <MenuOption 

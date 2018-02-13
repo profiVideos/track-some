@@ -15,13 +15,14 @@ const AppColors = {
 const OpenMainTabs = () => {
   //console.log('OpenMainTabs: ', props);
     Promise.all([
-        getImageSource('md-thumbs-up', 30),       // ... emojis ...
+        getImageSource('md-thumbs-up', 30),         // ... emojis ...
+        getImageSource('md-albums', 30),           // ... show cards ...
+        getImageSource('md-paper', 30),           // ... lists ...
         getImageSource('logo-buffer', 30),       // ... categories ...
-        getImageSource('md-paper', 30),         // ... build card ...
-        getImageSource('ios-desktop', 30),     // ... show card ...
-        getImageSource('md-menu', 30),        // ... the menu button ...
-        getImageSource('md-more', 30),       // ... the options button ...
-        getImageSource('md-bulb', 30)       // ... light bulb = notes ...
+        getImageSource('md-menu', 30),          // ... the menu button ...
+        getImageSource('md-more', 30),         // ... the options button ...
+        getImageSource('md-bulb', 30),        // ... light bulb = notes ...
+        getImageSource('md-search', 30)      // ... magnifying glass = search ...
 
     ]).then(sources => {
         Navigation.startTabBasedApp({
@@ -30,17 +31,21 @@ const OpenMainTabs = () => {
               screen: 'tracksome.ShowNotes',
               label: 'Notes',
               title: 'List Notes',
-              icon: sources[6],
+              icon: sources[6],  // ... light bulb ...
               leftButtons: [{ icon: sources[4], id: 'menu' }],
-              //rightButtons: [{ icon: sources[5], id: 'options', disabled: true }]
+              rightButtons: [
+                { icon: sources[5], id: 'options' },
+                { icon: sources[7], id: 'search' },
+              ],
+              animated: true
             },
             {
               screen: 'tracksome.ShowCards',
               label: 'Show Cards',
               title: 'Show Cards',
-              icon: sources[3],
+              icon: sources[1],
               leftButtons: [{ icon: sources[4], id: 'menu' }],
-              //rightButtons: [{ icon: sources[5], id: 'options', disabled: true }]
+              rightButtons: [{ icon: sources[5], id: 'options' }]
             },
             {
               screen: 'tracksome.BuildCard',
@@ -54,9 +59,9 @@ const OpenMainTabs = () => {
               screen: 'tracksome.EditCategories',
               label: 'Categories',
               title: 'Maintain Categories',
-              icon: sources[1],
+              icon: sources[3],
               leftButtons: [{ icon: sources[4], id: 'menu' }],
-              //rightButtons: [{ icon: sources[5], id: 'options' }]
+              rightButtons: [{ icon: sources[5], id: 'options' }]
             },
           ],
           drawer: {
