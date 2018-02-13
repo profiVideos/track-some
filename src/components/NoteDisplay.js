@@ -2,7 +2,7 @@ import React from 'react';
 import { 
   View, 
   Text,
-  Image, 
+  //Image, 
   StyleSheet, 
   Dimensions,
   TouchableOpacity,
@@ -43,7 +43,7 @@ class NoteDisplay extends React.PureComponent {
     this.state = {
       didSave: false,
       isVisible: false,
-      infoWidth: Dimensions.get('window').width - 50
+      infoWidth: Dimensions.get('window').width - 46
     };
   }
 
@@ -58,7 +58,7 @@ class NoteDisplay extends React.PureComponent {
 
   onDeviceChange = (dims) => {
     this.setState({
-      infoWidth: dims.window.width - 50
+      infoWidth: dims.window.width - 46
     });
   };
 
@@ -144,7 +144,7 @@ class NoteDisplay extends React.PureComponent {
     const infoWidth = this.state.infoWidth;
     const backColor = this.props.hilite;   // ... AppsColor.hiliteColor, otherwise white ...
     return (
-      <View>
+      <View style={styles.mainWrapper}>
         <View style={styles.outerWrapper}>
           <View style={styles.priorityView}>
             <View />
@@ -193,6 +193,10 @@ const menuOptionsStyles = {
 };
 
 const styles = StyleSheet.create({
+  mainWrapper: {
+    flex: 1,
+    //width: '33.333333333333%'
+  },
   noteBody: {
     color: 'black'
   },
@@ -215,8 +219,25 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 3,
   },
   outerWrapper: {
+    //width: '33.33333333%',
+    //maxWidth: 70,
+    //height: 100,
     marginLeft: 2,
     marginRight: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  noteWrapper: {
+    //width: '33.3333333%',
+    //maxWidth: 70,
+    elevation: 3,
+    height: 50,
+    paddingLeft: 3,
+    paddingRight: 5,
+    marginRight: 3,
+    marginLeft: 2,
+    borderRadius: 3,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between'
@@ -260,18 +281,6 @@ const styles = StyleSheet.create({
     color: 'white',
     textAlign: 'center',
     fontSize: 10,
-  },
-  noteWrapper: {
-    elevation: 3,
-    height: 50,
-    paddingLeft: 3,
-    paddingRight: 5,
-    marginRight: 3,
-    marginLeft: 2,
-    borderRadius: 3,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between'
   },
   infoWrapper: {
     paddingLeft: 7,

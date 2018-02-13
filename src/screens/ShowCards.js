@@ -49,6 +49,11 @@ const AppColors = {
   darkerColor: '#325a66'      // ... dark cyan ....
 */
 
+/*
+To Restart the currently running App;
+adb shell am broadcast -a react.native.RELOAD
+*/
+
 const cardsLiveResults = store.getAllCards();     // ... Realm updates this in real time ...
 
 const whatDoYouNeed = state => {
@@ -402,7 +407,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     position: 'absolute',
     bottom: 18,
-    right: 22,
+    right: 24,
     shadowColor: '#000000',
     shadowOpacity: 0.8,
     shadowRadius: 2,

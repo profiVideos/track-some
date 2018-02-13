@@ -10,6 +10,7 @@ import {
   NOTE_EDIT_CHANGE,
   OPEN_NOTES_MODAL,
   CLOSE_NOTES_MODAL,
+  SEARCH_TEXT_CHANGED,
   TOGGLE_COLOR_PICKER,
   UPDATE_NOTE_SELECTED,
   DELETE_SELECTED_NOTES
@@ -23,7 +24,8 @@ const initialState = {
   colorPicker: false,
   //notesChanged: false,
   notesWindowOpen: false,
-  editNote: '',             // ... the unique key of the item to be edited ...
+  editNote: '',             // ... the unique key of the item being edited ...
+  searchFor: '',
   thisNote: {
     key: '',
     card: '',
@@ -52,6 +54,12 @@ NEW:***********************************************************************
 
 const NoteReducer = (state = initialState, action) => {
   switch (action.type) {
+
+    case SEARCH_TEXT_CHANGED:
+      return {
+        ...state,
+        searchFor: action.payload.text
+      };
 
     case OPEN_NOTES_MODAL:
       return {

@@ -16,8 +16,16 @@ NEW:***********************************************************************
 
 */
 
-export const getAllNotes = () => {
-  const noteList = tsRealm.objects('Note').sorted('updatedTimestamp', true);  
+export const getAllNotes = (searchFor) => {
+  let noteList = '';
+  //searchFor = '';
+  if (searchFor !== null && searchFor !== undefined) {
+    noteList = tsRealm.objects('Note')
+      .filtered('note CONTAINS[c] $0 OR title CONTAINS[c] $0', searchFor)
+      .sorted('updatedTimestamp', true);  
+  } else {
+    noteList = tsRealm.objects('Note').sorted('updatedTimestamp', true);  
+  }
   return noteList;
 };
 
@@ -63,17 +71,20 @@ export const updateNoteSelected = (key, isSelected) => {
   });
 };
 
-export const updateNote = (key, card, icon, title, note, color, priority, reminder) => {
+//export const updateNote = (key, card, icon, title, note, color, priority, reminder) => {
+export const updateNote = (item) => {
   tsRealm.write(() => {
-    // ... update this card based on the key ...
-    tsRealm.create('Note', { 
-      key, 
-      card,
-      icon, 
-      title, 
-      color, 
-      priority, 
-      reminder,
+    // ... update this note based on the key ...
+    tsRealm.create('Note', {
+      key: item.key,
+      list: item.list, 
+      card: item.card,
+      icon: item.icon, 
+      title: item.title,
+      note: item.note, 
+      color: item.color, 
+      priority: item.priority, 
+      reminder: item.reminder,
       updatedTimestamp: new Date()
     }, true);
   });

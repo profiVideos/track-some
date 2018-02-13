@@ -102,23 +102,22 @@ class NoteEdit extends PureComponent {
     );
   }
 
-/*
-  addThisTag() {
-    console.log('Add this tag ...');
+  renderAddButton(noteId) {
+    if (noteId !== '') return;     // ... don't need to show '+' button ...
+    return (
+      <TouchableOpacity 
+        //disabled={this.props.thisNote.title === ''} 
+        onPress={this.props.onNoteAdd} 
+      >
+        <View style={{ alignItems: 'center' }}>
+          <Icon size={28} name='plus' color={AppColors.darkerColor} />
+        </View>
+      </TouchableOpacity>
+    );
   }
-*/
-/*
-  onLongPressItem = () => { 
-    this.props.onLongPress(this.props.emojiKey);
-  } 
-      <TouchableNativeFeedback onPress={this.onPressItem} onLongPress={this.onLongPressItem}>
-      </TouchableNativeFeedback>
-
-              onTagChange={text => this.itemTagChanged(text)} 
-
-*/
 
   render() {
+    console.log('Key = ', this.props.id);
     return (
       <View style={styles.outerContainer}>
 
@@ -151,14 +150,7 @@ class NoteEdit extends PureComponent {
               onChangeText={this.props.onTitleChange}
             />
           </View>
-          <TouchableOpacity 
-            //disabled={this.props.thisNote.title === ''} 
-            onPress={this.props.onNoteAdd} 
-          >
-            <View style={{ alignItems: 'center' }}>
-              <Icon size={28} name='plus' color={AppColors.darkerColor} />
-            </View>
-          </TouchableOpacity>
+          { this.renderAddButton(this.props.id) }
           <TouchableNativeFeedback onPress={this.props.onClosePress}>
             <View style={styles.buttonFinish}> 
               <IonIcon 

@@ -16,27 +16,28 @@ import {
 import {
   MenuProvider
 } from 'react-native-popup-menu';
-import { Navigation } from 'react-native-navigation';
+//import { Navigation } from 'react-native-navigation';
 import { UniqueId } from '../components/common/UniqueId';
 import AppColors from '../templates/appColors';
 import NoteSplash from '../images/Note-Splash.png';
 import NoteDisplay from '../components/NoteDisplay';
 import NoteEdit from '../components/NoteEdit';
-import SearchBar from '../components/SearchBar';
+//import SearchBar from '../components/SearchBar';
 //import OptionMenu from '../components/OptionMenu';
 import {
   addNote,
   clearNote,
   clearCard,
   addCardNote,
-  //updateNote,
+  updateNote,
   deleteNote,
-  //currentNote,
+  currentNote,
   highlightNote,
   openNotesModal,
   closeNotesModal,
   setNoteSelected,
   updateCardNotes,
+  searchTextChanged,        // ... brand, spanking NEW ...
   toggleColorPicker,
   propertyNoteChanged
 } from '../store/actions';
@@ -60,6 +61,9 @@ My First Realm Cloud Instance;
 https://tracksome-live.us1.cloud.realm.io/
 
 NEW:***********************************************************************
+
+To Restart the currently running App;
+adb shell am broadcast -a react.native.RELOAD
 
 --------------------------------------------------------------------------------------
 
@@ -93,14 +97,15 @@ const CustomButton = ({ text }) =>
 Navigation.registerComponent('tracksome.Menu', () => OptionMenu);
 */
 
-Navigation.registerComponent('tracksome.SearchBar', () => SearchBar);
+//Navigation.registerComponent('tracksome.SearchBar', () => SearchBar);
 const notesLiveResults = store.getAllNotes();     // ... Realm updates this in real time ...
 
 const whatDoYouNeed = state => {
   return {
     saveMode: state.login.saveMode,
     editNote: state.notes.editNote,
-    noteList: notesLiveResults,
+    noteList: (state.notes.searchFor === '' ? 
+      notesLiveResults : store.getAllNotes(state.notes.searchFor)),
     thisNote: state.notes.thisNote,
     thisCard: state.cards.thisCard,
     colorPicker: state.notes.colorPicker,
@@ -116,6 +121,9 @@ class ShowNotes extends React.PureComponent {
     drawUnderNavBar: false,
     screenBackgroundColor: AppColors.paperColor,
     navBarBackgroundColor: AppColors.accentColor,
+    contextualMenuStatusBarColor: '#0092d1',
+    contextualMenuBackgroundColor: '#00adf5',
+    contextualMenuButtonsColor: '#ffffff',
     navBarTranslucent: false
   };
 /*  
@@ -146,10 +154,12 @@ class ShowNotes extends React.PureComponent {
     this.onNoteItemPress = this.onNoteItemPress.bind(this);
     this.onNoteItemToggle = this.onNoteItemToggle.bind(this);
     this.onNoteItemMenuPress = this.onNoteItemMenuPress.bind(this);
+    this.onSearchChanged = this.onSearchChanged.bind(this);
     this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     this.state = {
       canClose: false,
       searchOpen: false,
+      localSearchFor: '',
       //title: '',
       //note: '',
       //infoWidth: Dimensions.get('window').width - 112
@@ -158,60 +168,29 @@ class ShowNotes extends React.PureComponent {
 
   componentWillMount() {
     console.log('inside show notes ...');
-    /*
+/*
     this.props.navigator.setButtons({
       rightButtons: [{
-        component: 'tracksome.Menu',
-        passProps: { text: 'Hi!' },
+      //  component: 'tracksome.Menu',
+      //  passProps: { text: 'Hi!' },
       //  component: 'example.CustomButton', // if you want a custom button
       //  passProps: {}, // Object that will be passed as props to custom components (optional)
         //title: 'Edit',      
-        id: 'options',
+        id: 'more',
+        title: 'More Stuff', 
+        showAsAction: 'never', // optional, Android only. Control how the button is 
       //  icon: require('../../img/navicon_add.png'),
       //  disabled: true, // used to disable the button (appears faded and doesn't interact)
       },
       { 
         title: 'Edit', 
-        id: 'search' 
+        id: 'search', 
+        showAsAction: 'never', // optional, Android only. Control how the button is 
       }
       ],
       animated: true
     });
-
-rightButtons: [
-      {
-        title: 'Edit', // for a textual button, provide the button title (label)
-        id: 'edit', // id for this button, given in onNavigatorEvent(event) to help understand which button was clicked
-        testID: 'e2e_rules', // optional, used to locate this view in end-to-end tests
-        disabled: true, // optional, used to disable the button (appears faded and doesn't interact)
-        disableIconTint: true, // optional, by default the image colors are overridden and tinted to navBarButtonColor, set to true to keep the original image colors
-        showAsAction: 'never', // optional, Android only. Control how the button is 
-        
-        displayed in the Toolbar. 
-        Accepted valued: 
-        'ifRoom' (default) - Show this item as a button in an Action Bar if 
-                  the system decides there is room for it. '
-        always' - Always show this item as a button in an Action Bar. 
-        'withText' - When this item is in the action bar, 
-                     always show it with a text label even if it also has an icon specified. 
-        'never' - Never show this item as a button in an Action Bar.
-
-        buttonColor: 'blue', // Optional, iOS only. Set color for the button (can also be used in setButtons function to set different button style programatically)
-        buttonFontSize: 14, // Set font size for the button (can also be used in setButtons function to set different button style programatically)
-        buttonFontWeight: '600', // Set font weight for the button (can also be used in setButtons function to set different button style programatically)
-      },
-      {
-        icon: require('../../img/navicon_add.png'), // for icon button, provide the local image asset name
-        id: 'add' // id for this button, given in onNavigatorEvent(event) to help understand which button was clicked
-      }
-    ]
-  };
-
-
-
-
-
-    */
+*/
   }
 
   componentWillReceiveProps(nextProps) {
@@ -247,7 +226,7 @@ rightButtons: [
           break;
         }
         default: 
-          ToastAndroid.show('Menu Options', ToastAndroid.SHORT);
+          ToastAndroid.show('Default - Not Defined', ToastAndroid.SHORT);
           break;
       }  // ... switch ...
     }
@@ -268,10 +247,10 @@ rightButtons: [
   onNoteItemMenuPress(option, item) {
     switch (option) {
       case 'edit': {
-        ToastAndroid.show('Edit Info', ToastAndroid.LONG);
+        //ToastAndroid.show('Edit Info', ToastAndroid.LONG);
         //console.log('Tags was selected for item key ', item.key);
-        //this.props.dispatch(currentNote(item));
-        //this.props.dispatch(openNotesModal(item.key));
+        this.props.dispatch(currentNote(item));
+        this.props.dispatch(openNotesModal(item.key));
         break;
       }
       case 'delete': {
@@ -299,15 +278,15 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
       }
 
 */
-
+/*
   setOptionMenu() {
     this.props.navigator.setStyle({
       navBarCustomView: 'tracksome.OptionMenu',
       navBarComponentAlignment: 'right',
-      //navBarCustomViewInitialProps: { menu: this.optionMenu }
+      //navBarCustomViewInitialProps: { title: 'Hi Markus' }
     });
   }
-
+*/
 /*
     this.props.navigator.dismissContextualMenu();
 
@@ -319,16 +298,30 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
 
 */
 
+  onSearchChanged(text) {
+    console.log('search changed: ', text);
+    this.props.dispatch(searchTextChanged(text));
+    this.setState({ localSearchFor: text });
+  }
+
+  doNothing() {
+    console.log('Be Lazy ...');
+  }
 
   showSearchBar() {
+    this.props.dispatch(searchTextChanged(this.state.localSearchFor));
     this.props.navigator.setStyle({
       navBarCustomView: 'tracksome.SearchBar',
       navBarComponentAlignment: 'fill',
-      //navBarCustomViewInitialProps: { title: 'Hi Markus' }
+      navBarCustomViewInitialProps: { 
+        thisSearch: this.state.localSearchFor,
+        searchTextChanged: this.onSearchChanged 
+      }
     });
   }
 
   hideSearchBar() {
+    this.props.dispatch(searchTextChanged(''));   // ... se we use the live results again ...
     this.props.navigator.setStyle({ navBarCustomView: '' });
   }
 
@@ -382,6 +375,7 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
       }
     } else {
       // ... update this note ...
+      this.props.dispatch(updateNote(this.props.thisNote));
       // ... the key is not being added or deleted from the card so all's good ...
     }
     if (canClose) {
@@ -433,8 +427,10 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
   showMainList() {
     return (
       <FlatList
-        keyboardShouldPersistTaps='always'
-        //style={{ marginRight: 5 }}
+        //keyboardShouldPersistTaps='always'
+        //numColumns={3}
+        //horizontal={false}
+        //style={{ flex: 1, width: '100%' }}
         data={this.props.noteList}
         extraData={this.props.notesUpdated}
         renderItem={this.renderNoteDisplay}
@@ -468,6 +464,7 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
             visible={this.props.notesModalOpen}
             transparent
             animationType={'fade'}
+            onRequestClose={this.doNothing}
         >
           <View style={styles.modalContainer}>
             <ScrollView
@@ -476,6 +473,7 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
             >
               <View style={styles.modalInnerContainer}>
                 <NoteEdit
+                  id={this.props.thisNote.key}
                   note={this.props.thisNote.note}
                   card={this.props.thisNote.card}
                   noteTitle={this.props.thisNote.title}
@@ -673,7 +671,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     position: 'absolute',
     bottom: 18,
-    right: 22,
+    right: 24,
     shadowColor: '#000000',
     shadowOpacity: 0.8,
     shadowRadius: 2,

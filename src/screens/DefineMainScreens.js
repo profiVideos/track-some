@@ -7,6 +7,7 @@ import EditCategories from './EditCategories';
 import ShowNotes from './ShowNotes';
 import TrackSomeConfig from './drawers/SlideMenu';
 import EmojiPicker from './EmojiPicker';
+import SearchBar from '../components/SearchBar';
 
 // ... register screens ...
 export default (store, Provider) => {
@@ -19,3 +20,5 @@ export default (store, Provider) => {
   Navigation.registerComponent('tracksome.ConfigMenu', () => TrackSomeConfig, store, Provider);
 };
 
+// ... register screens that don't need redux ...
+Navigation.registerComponent('tracksome.SearchBar', () => SearchBar);

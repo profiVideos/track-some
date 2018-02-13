@@ -10,7 +10,15 @@ import {
 export default class SearchBar extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      searchInput: this.props.thisSearch
+    };
+  }
+
+  onChangedInput(value) {
+    //console.log('inside searchbar value = ', value);
+    this.setState({ searchInput: value });
+    this.props.searchTextChanged(value);
   }
 
   render() {
@@ -27,8 +35,8 @@ export default class SearchBar extends Component {
             disableFullscreenUI
             underlineColorAndroid={'transparent'}
             placeholder={'Search'}
-            //value={this.props.searchInput}
-            //onChangeText={this.props.onSearchChange}
+            value={this.state.searchInput}
+            onChangeText={text => this.onChangedInput(text)}
           />
         </View>
       </View>

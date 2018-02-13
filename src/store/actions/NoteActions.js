@@ -9,6 +9,7 @@ import {
   OPEN_NOTES_MODAL,           // ... NEW ...
   CLOSE_NOTES_MODAL,          // ... NEW ...
   NOTE_EDIT_CHANGE,
+  SEARCH_TEXT_CHANGED,        // ... brand, spanking NEW ...
   TOGGLE_COLOR_PICKER,        // ... NEW ...
   UPDATE_NOTE_SELECTED,       // ... NEW ...
   DELETE_SELECTED_NOTES
@@ -25,6 +26,13 @@ https://tracksome-live.us1.cloud.realm.io/
 NEW:***********************************************************************
 
 */
+
+export const searchTextChanged = (text) => {
+  return {
+    type: SEARCH_TEXT_CHANGED,
+    payload: { text }
+  };
+};
 
 export const propertyNoteChanged = (prop, value) => {
   return {
@@ -48,8 +56,9 @@ export const setNoteSelected = (key, isSelected) => {
   };
 };
 
-export const updateNote = (key, card, icon, title, note, color, priority, reminder) => {
-  store.updateNote(key, card, icon, title, note, color, priority, reminder);
+//export const updateNote = (key, card, icon, title, note, color, priority, reminder) => {
+export const updateNote = (item) => {
+  store.updateNote(item);
   return {
     type: UPDATE_NOTE
   };
