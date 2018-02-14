@@ -35,6 +35,7 @@ import {
   openNotesModal,
   setCardSelected,
   itemCardChanged,
+  searchCardsChanged,        // ... brand, spanking NEW ...
   propertyNoteChanged
 } from '../store/actions';
 import store from '../store';
@@ -61,7 +62,8 @@ const whatDoYouNeed = state => {
     //saveMode: state.login.saveMode,
     //emojiCode: state.emojis.emojiCode,
     catList: state.categories.itemList,
-    cardList: cardsLiveResults,
+    cardList: (state.cards.searchFor === '' ? 
+      cardsLiveResults : store.getAllCards(state.cards.searchFor)),
     thisCard: state.cards.thisCard,
     //thisNote: state.notes.thisNote,
     //colorPicker: state.notes.colorPicker,
@@ -99,13 +101,17 @@ class ShowCard extends React.PureComponent {
     this.onCardItemPress = this.onCardItemPress.bind(this);
     this.onCardItemToggle = this.onCardItemToggle.bind(this);
     this.onCardItemMenuPress = this.onCardItemMenuPress.bind(this);
+    this.onNavigatorEvent = this.onNavigatorEvent.bind(this);
+    this.onSearchChanged = this.onSearchChanged.bind(this);
     this.state = {
-      //tagsModalVisible: false,
+      searchOpen: false,
+      localSearchFor: '',
     };
   }
 
   componentWillMount() {
     console.log('inside show cards ...');
+    this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
   }
 
 /*
@@ -114,6 +120,7 @@ class ShowCard extends React.PureComponent {
 */
 
   componentWillReceiveProps(nextProps) {
+    //this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     //-------------------------------------------------------------------------------------
     // ... due to the async processing we can only save when everything has been added ...
     // ... if main if is true - the tags Modal window has now closed - save & clean up ...
@@ -122,7 +129,32 @@ class ShowCard extends React.PureComponent {
       if (nextProps.tagsChanged === true && this.props.thisCard.key !== '') {   
         this.props.dispatch(updateCardTags(this.props.thisCard.key, nextProps.thisCard.tags));
       }
-      this.props.dispatch(clearCard());
+      //this.props.dispatch(clearCard());
+    }
+  }
+
+  onNavigatorEvent(event) {
+    if (event.type === 'NavBarButtonPress') { // this is the event type for button presses
+      switch (event.id) {
+        case 'menu': {
+          this.props.navigator.toggleDrawer({ side: 'left', animated: true });
+          break;
+        }
+        case 'search': {
+          if (this.state.searchOpen === false) {
+            this.showSearchBar();
+          } else this.hideSearchBar(); 
+          this.setState({ searchOpen: !this.state.searchOpen });
+          break;
+        }
+        case 'options': {
+          ToastAndroid.show('Menu Options', ToastAndroid.SHORT);
+          break;
+        }
+        default: 
+          ToastAndroid.show('Default - Not Defined', ToastAndroid.SHORT);
+          break;
+      }  // ... switch ...
     }
   }
 
@@ -165,6 +197,33 @@ class ShowCard extends React.PureComponent {
       }
       default: break;
     }  // ... switch ...
+  }
+
+  onSearchChanged(text) {
+    console.log('search changed: ', text);
+    this.props.dispatch(searchCardsChanged(text));
+    this.setState({ localSearchFor: text });
+  }
+
+  doNothing() {
+    console.log('Be Lazy ...');
+  }
+
+  showSearchBar() {
+    this.props.dispatch(searchCardsChanged(this.state.localSearchFor));
+    this.props.navigator.setStyle({
+      navBarCustomView: 'tracksome.SearchBar',
+      navBarComponentAlignment: 'fill',
+      navBarCustomViewInitialProps: { 
+        thisSearch: this.state.localSearchFor,
+        searchTextChanged: this.onSearchChanged 
+      }
+    });
+  }
+
+  hideSearchBar() {
+    this.props.dispatch(searchCardsChanged(''));   // ... se we use the live results again ...
+    this.props.navigator.setStyle({ navBarCustomView: '' });
   }
 
   findCategoryByKey(key) {
@@ -252,11 +311,11 @@ class ShowCard extends React.PureComponent {
 */
 
   renderTagEditScreen() {
-    if (this.props.editTagsForItem === '') return;
+    if (this.props.tagsModalOpen === false) return;
     return (
       <View style={styles.popupContainer}>
         <Modal
-            visible={this.props.editTagsForItem !== ''}
+            visible={this.props.tagsModalOpen}
             transparent
             animationType={'fade'}
             onRequestClose={() => this.closeTagsEditModal()}
@@ -302,7 +361,7 @@ class ShowCard extends React.PureComponent {
       <CardItem
         item={item}
         marked={item.key === this.props.highlighted}
-        numTags={this.countItems(item.tags)}
+        numTags={this.countItems(JSON.parse(item.tags))}
         numNotes={this.countItems(item.notes)}
         catDesc={this.renderCatDescription(item.category)}
         checkIcon={item.selected ? 'check-square-o' : 'square-o'}

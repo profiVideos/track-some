@@ -28,17 +28,17 @@ import {
   addNote,
   clearNote,
   clearCard,
-  addCardNote,
   updateNote,
   deleteNote,
   currentNote,
+  addCardNote,
   highlightNote,
   openNotesModal,
   closeNotesModal,
   setNoteSelected,
   updateCardNotes,
-  searchTextChanged,        // ... brand, spanking NEW ...
   toggleColorPicker,
+  searchNotesChanged,        // ... brand, spanking NEW ...
   propertyNoteChanged
 } from '../store/actions';
 import store from '../store';
@@ -109,9 +109,10 @@ const whatDoYouNeed = state => {
     thisNote: state.notes.thisNote,
     thisCard: state.cards.thisCard,
     colorPicker: state.notes.colorPicker,
-    highlighted: state.notes.highlighted, 
+    highlighted: state.notes.highlighted,
+    somethingChanged: state.notes.editChange,
     notesUpdated: state.notes.lastUpdated,
-    notesChanged: state.cards.notesChanged,
+    cardNoteLinksChanged: state.cards.notesChanged,
     notesModalOpen: state.notes.notesWindowOpen
   };
 };
@@ -199,7 +200,7 @@ class ShowNotes extends React.PureComponent {
     // ... if main if is true - the tags Modal window has now closed - save & clean up ...
     //-------------------------------------------------------------------------------------
     if (this.props.notesModalOpen && nextProps.notesModalOpen === false) {
-      if (nextProps.notesChanged === true && this.props.thisCard.key !== '') {   
+      if (nextProps.cardNoteLinksChanged === true && this.props.thisCard.key !== '') {   
         this.props.dispatch(updateCardNotes(this.props.thisCard.key, nextProps.thisCard.notes));
       }
       this.props.dispatch(clearNote());  // ... removes the card link from note record ...
@@ -300,7 +301,7 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
 
   onSearchChanged(text) {
     console.log('search changed: ', text);
-    this.props.dispatch(searchTextChanged(text));
+    this.props.dispatch(searchNotesChanged(text));
     this.setState({ localSearchFor: text });
   }
 
@@ -309,7 +310,7 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
   }
 
   showSearchBar() {
-    this.props.dispatch(searchTextChanged(this.state.localSearchFor));
+    this.props.dispatch(searchNotesChanged(this.state.localSearchFor));
     this.props.navigator.setStyle({
       navBarCustomView: 'tracksome.SearchBar',
       navBarComponentAlignment: 'fill',
@@ -321,7 +322,7 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
   }
 
   hideSearchBar() {
-    this.props.dispatch(searchTextChanged(''));   // ... se we use the live results again ...
+    this.props.dispatch(searchNotesChanged(''));   // ... se we use the live results again ...
     this.props.navigator.setStyle({ navBarCustomView: '' });
   }
 
@@ -356,31 +357,34 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
   }
 
   addOrUpdateNote(card, canClose) {
-    if (this.props.thisNote.key === '') {
-      const newNoteKey = UniqueId();
-      this.props.dispatch(addNote(
-        newNoteKey,
-        this.props.thisNote.card,
-        this.props.thisNote.icon, 
-        this.props.thisNote.title, 
-        this.props.thisNote.note, 
-        this.props.thisNote.color, 
-        this.props.thisNote.priority, 
-        this.props.thisNote.reminder
-      ));
-      // ... if we are editing an existing card, we need ...
-      // ... to update the card with this new note link ...
-      if (card !== '') {
-        this.props.dispatch(addCardNote(newNoteKey));
+    if (this.props.somethingChanged) {
+      if (this.props.thisNote.key === '') {
+        const newNoteKey = UniqueId();
+        this.props.dispatch(addNote(
+          newNoteKey,
+          this.props.thisNote.card,
+          this.props.thisNote.icon, 
+          this.props.thisNote.title, 
+          this.props.thisNote.note, 
+          this.props.thisNote.color, 
+          this.props.thisNote.priority, 
+          this.props.thisNote.reminder
+        ));
+        // ... if we are editing an existing card, we need ...
+        // ... to update the card with this new note link ...
+        if (card !== '') {
+          this.props.dispatch(addCardNote(newNoteKey));
+        }
+      } else {
+        // ... update this note ...
+        this.props.dispatch(updateNote(this.props.thisNote));
+        // ... the key is not being added or deleted from the card so all's good ...
       }
-    } else {
-      // ... update this note ...
-      this.props.dispatch(updateNote(this.props.thisNote));
-      // ... the key is not being added or deleted from the card so all's good ...
     }
+    // ... close the window if the user requested it ...
     if (canClose) {
       this.props.dispatch(closeNotesModal(''));
-      ToastAndroid.show(`Saving Note with Card: ${card}`, ToastAndroid.SHORT);
+      //ToastAndroid.show(`Link with Card is: ${card}`, ToastAndroid.SHORT);
     }
   }
 
@@ -476,6 +480,8 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
                   id={this.props.thisNote.key}
                   note={this.props.thisNote.note}
                   card={this.props.thisNote.card}
+                  photo={this.props.thisCard.imageThumb}
+                  mimeType={this.props.thisCard.mimeType}
                   noteTitle={this.props.thisNote.title}
                   noteColor={this.props.thisNote.color !== '' ? 
                     this.props.thisNote.color : '#f8f8f8'}

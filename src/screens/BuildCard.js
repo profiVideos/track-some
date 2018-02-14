@@ -39,7 +39,7 @@ import {
   deleteCardTag,
   closeTagsModal,
 
-closeNotesModal,
+//closeNotesModal,
 
   loadCategories,
   itemCardChanged,

@@ -289,7 +289,7 @@ class EmojiPicker extends PureComponent {
         numColumns={6}
         horizontal={false}
         data={emojiGroup}
-        initialNumToRender={10}  // ... 3 ...
+        initialNumToRender={3}  // ... 3 ...
         extraData={this.props.listUpdated}
         // ... not sure how these work??? refreshing={this.state.refreshing}
         // ...... Set this true while waiting for new data from a refresh.

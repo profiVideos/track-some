@@ -6,6 +6,7 @@ import { UniqueId } from '../../components/common/UniqueId';
 // ... or an object with name, type, objectType, optional, default, and indexed fields.
 
 export const getAllCategories = () => {
+  //return [];
   const catItems = tsRealm.objects('Category').sorted('name');  // + ,true for reverse sorting ...
   return catItems;
 };

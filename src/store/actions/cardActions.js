@@ -21,10 +21,18 @@ import {
   //SAVE_CARDS_FAILURE,
   //LOAD_CARDS_SUCCESS,
   //LOAD_CARDS_FAILURE
-  UPDATE_CARD_SELECTED,      // ... NEW ...
+  SEARCH_CARDS_CHANGED,       // ... brand, spanking NEW ...
+  UPDATE_CARD_SELECTED,       // ... NEW ...
   DELETE_SELECTED_CARDS
 } from './actionTypes';
 import store from '../../store';   // ... Realm DB Routines ...
+
+export const searchCardsChanged = (text) => {
+  return {
+    type: SEARCH_CARDS_CHANGED,
+    payload: { text }
+  };
+};
 
 export const itemCardChanged = (prop, value) => {
   return {

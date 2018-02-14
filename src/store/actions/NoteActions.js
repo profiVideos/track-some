@@ -9,8 +9,8 @@ import {
   OPEN_NOTES_MODAL,           // ... NEW ...
   CLOSE_NOTES_MODAL,          // ... NEW ...
   NOTE_EDIT_CHANGE,
-  SEARCH_TEXT_CHANGED,        // ... brand, spanking NEW ...
   TOGGLE_COLOR_PICKER,        // ... NEW ...
+  SEARCH_NOTES_CHANGED,       // ... brand, spanking NEW ...
   UPDATE_NOTE_SELECTED,       // ... NEW ...
   DELETE_SELECTED_NOTES
 } from './actionTypes';
@@ -27,9 +27,9 @@ NEW:***********************************************************************
 
 */
 
-export const searchTextChanged = (text) => {
+export const searchNotesChanged = (text) => {
   return {
-    type: SEARCH_TEXT_CHANGED,
+    type: SEARCH_NOTES_CHANGED,
     payload: { text }
   };
 };

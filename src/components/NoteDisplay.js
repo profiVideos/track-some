@@ -77,7 +77,7 @@ class NoteDisplay extends React.PureComponent {
   renderOptionMenu = () => (
     <Menu onSelect={(value) => this.onMenuSelect(value, this.props.item)}>
       <MenuTrigger>
-        <Icon size={18} name={'ellipsis-v'} style={styles.menuWrapper} color={'#212191'} />
+        <Icon size={19} name={'ellipsis-v'} style={styles.menuWrapper} color={'#212191'} />
       </MenuTrigger>
       <MenuOptions customStyles={menuOptionsStyles}>
         <IconMenuOption value={'edit'} icon='✏️' text='Edit' />
@@ -140,7 +140,7 @@ class NoteDisplay extends React.PureComponent {
   }
 
   render() {
-    const descLines = this.props.item.title === '' ? 2 : 1;
+    const descLines = this.props.item.title === '' ? 3 : 2;
     const infoWidth = this.state.infoWidth;
     const backColor = this.props.hilite;   // ... AppsColor.hiliteColor, otherwise white ...
     return (
@@ -164,7 +164,7 @@ class NoteDisplay extends React.PureComponent {
               </TouchableNativeFeedback>
               <TouchableOpacity onPress={this.onToggleCheck}>
                 <Icon 
-                  size={18}
+                  size={19}
                   name={this.props.checkIcon} 
                   style={styles.checkStyle} 
                   color={'#212121'} 
@@ -184,7 +184,7 @@ export default NoteDisplay;
 
 const menuOptionsStyles = {
   optionsContainer: {
-    width: 105,
+    width: 120,
     backgroundColor: AppColors.darkerColor,  // ... dark cyan ...
   },
   optionText: {
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
     //width: '33.3333333%',
     //maxWidth: 70,
     elevation: 3,
-    height: 50,
+    height: 65,
     paddingLeft: 3,
     paddingRight: 5,
     marginRight: 3,
@@ -291,13 +291,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   menuWrapper: {
-    padding: 4,
+    padding: 5,
     paddingTop: 0,
     alignItems: 'center',
     justifyContent: 'center'
   },
   checkStyle: {
-    //paddingTop: 3
+    paddingTop: 3
   },
   itemTitle: {
     fontSize: 15,

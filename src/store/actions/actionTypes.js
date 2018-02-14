@@ -13,7 +13,8 @@ export const ROOT_CHANGED = 'TRACKSOME_ROOT_CHANGED';
 
 // ... a global flag used to see if user has logged in and is paid member (members='cloud') ...
 export const SET_SAVE_MODE = 'SET_SAVE_MODE';  // ... 'none', 'local', 'cloud' ...
-export const SEARCH_TEXT_CHANGED = 'SEARCH_TEXT_CHANGED';
+export const SEARCH_CARDS_CHANGED = 'SEARCH_CARDS_CHANGED';
+export const SEARCH_NOTES_CHANGED = 'SEARCH_NOTES_CHANGED';
 
 // ... everything dealing with emojis ...
 //export const EMOJIS_STORAGE_KEY = '@track!some:my_emojis';

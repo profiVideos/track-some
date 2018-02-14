@@ -26,6 +26,11 @@ const IconMenuOption = (props) => (
   />
 );
 
+/*
+Cast: Cathy Heaven, Barbara Bieber, Ashley Woods, Jennifer James
+Genres: All Sex, Big Boobs
+*/
+
 class CardItem extends React.PureComponent {
   constructor(props) {
     super(props);
@@ -33,7 +38,7 @@ class CardItem extends React.PureComponent {
     this.state = {
       didSave: false,
       isVisible: false,
-      infoWidth: Dimensions.get('window').width - 112
+      infoWidth: Dimensions.get('window').width - 115  //112
     };
   }
 
@@ -51,7 +56,7 @@ class CardItem extends React.PureComponent {
 
   onDeviceChange = (dims) => {
     this.setState({
-      infoWidth: dims.window.width - 112
+      infoWidth: dims.window.width - 115  //112
     });
   };
 
@@ -73,7 +78,7 @@ class CardItem extends React.PureComponent {
   renderFullCard() {
     return (
       <ScrollableTabView
-        style={{ backgroundColor: 'black', height: 400 }}
+        style={{ backgroundColor: 'black', height: 345 }}
         initialPage={0}
         //tabBarPosition='overlayTop'
         renderTabBar={() => <ImageTabBar optionMenu={this.renderOptionMenu} />}
@@ -112,6 +117,11 @@ class CardItem extends React.PureComponent {
     </Menu>
   )
 
+/*
+           <Text style={styles.tagsTextStyle}>{this.props.numTags}</Text>
+
+*/
+
   render() {
     const infoWidth = this.state.infoWidth;
     const backColor = this.props.hilite;   // ... AppsColor.hiliteColor, otherwise white ...
@@ -119,8 +129,8 @@ class CardItem extends React.PureComponent {
     const tagsBadge = (this.props.numTags === 0) ? <View /> :
       (<View style={{ flexDirection: 'row', alignItems: 'center' }}>
          <Text style={styles.extraInfo}>Tags:</Text>
-         <View style={styles.tagsBadge}>
-           <Text style={styles.tagsTextStyle}>{this.props.numTags}</Text>
+         <View style={styles.taaaaaaaaaagsBadge}>
+           <Text style={styles.taaaaaaaaaaagsTextStyle}>{this.props.item.tags}</Text>
          </View>
        </View>);
     const notesBadge = (this.props.numNotes === 0) ? <View /> :
@@ -195,7 +205,7 @@ export default CardItem;
 
 const menuOptionsStyles = {
   optionsContainer: {
-    width: 105,
+    width: 120,
     backgroundColor: AppColors.darkerColor,  // ... dark cyan ...
   },
   optionText: {

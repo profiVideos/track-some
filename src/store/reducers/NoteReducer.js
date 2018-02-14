@@ -10,8 +10,8 @@ import {
   NOTE_EDIT_CHANGE,
   OPEN_NOTES_MODAL,
   CLOSE_NOTES_MODAL,
-  SEARCH_TEXT_CHANGED,
   TOGGLE_COLOR_PICKER,
+  SEARCH_NOTES_CHANGED,
   UPDATE_NOTE_SELECTED,
   DELETE_SELECTED_NOTES
 } from '../actions/actionTypes';
@@ -22,7 +22,7 @@ const initialState = {
   detailView: false,
   highlighted: '',          // ... the unique key of the currently highlighted item ...
   colorPicker: false,
-  //notesChanged: false,
+  editChange: false,
   notesWindowOpen: false,
   editNote: '',             // ... the unique key of the item being edited ...
   searchFor: '',
@@ -55,7 +55,7 @@ NEW:***********************************************************************
 const NoteReducer = (state = initialState, action) => {
   switch (action.type) {
 
-    case SEARCH_TEXT_CHANGED:
+    case SEARCH_NOTES_CHANGED:
       return {
         ...state,
         searchFor: action.payload.text
@@ -65,7 +65,7 @@ const NoteReducer = (state = initialState, action) => {
       return {
         ...state,
         editNote: action.payload.key,
-        //notesChanged: false,
+        editChange: false,
         notesWindowOpen: true
       };
 
@@ -82,7 +82,8 @@ const NoteReducer = (state = initialState, action) => {
         thisNote: {
           ...state.thisNote,
           [action.payload.prop]: action.payload.value
-        }
+        },
+        editChange: true
       };
 
     case UPDATE_NOTE_SELECTED:
@@ -112,7 +113,7 @@ const NoteReducer = (state = initialState, action) => {
       ToastAndroid.show('Note Updated', ToastAndroid.SHORT);
       return {
         ...state,
-        //notesChanged: false,
+        //editChange: false,
         lastUpdated: Date.now()
       };
 
@@ -167,7 +168,8 @@ const NoteReducer = (state = initialState, action) => {
           createdTimestamp: action.payload.item.createdTimestamp,
           updatedTimestamp: action.payload.item.updatedTimestamp
         },
-        detailView: true
+        detailView: true,
+        editChange: false
       };
 
     case CLEAR_NOTE:
@@ -186,7 +188,8 @@ const NoteReducer = (state = initialState, action) => {
           createdTimestamp: {},
           updatedTimestamp: {}
         },
-        detailView: false
+        detailView: false,
+        editChange: false
       };
 
 //----------------------------------------------------

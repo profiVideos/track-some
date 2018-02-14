@@ -4,9 +4,20 @@ import { UniqueId } from '../../components/common/UniqueId';
 // ... Realm supports the following basic types: bool, int, float, double, string, data, and date.
 // ... Each property has a name and is described by either a string containing the property’s type, 
 // ... or an object with name, type, objectType, optional, default, and indexed fields.
+//      .filtered('name CONTAINS[c] $0 OR tags CONTAINS[c] $0', searchFor)
+//      .filtered('name CONTAINS[c] $0 OR desc CONTAINS[c] $0', searchFor)
 
-export const getAllCards = () => {
-  const cardList = tsRealm.objects('Card').sorted('name');  // + ,true for reverse sorting ...
+export const getAllCards = (searchFor) => {
+  let cardList = '';
+  //searchFor = '';
+  if (searchFor !== null && searchFor !== undefined) {
+    cardList = tsRealm.objects('Card')
+      //.filtered('name CONTAINS[c] $0 OR desc CONTAINS[c] $0', searchFor)
+      .filtered('name CONTAINS[c] $0 OR tags CONTAINS[c] $0', searchFor)
+      .sorted('name');  // + ,true for reverse sorting ...
+  } else {
+    cardList = tsRealm.objects('Card').sorted('name');  // + ,true for reverse sorting ...
+  }
   return cardList;
 };
 
@@ -41,7 +52,7 @@ export const createCard =
       imageThumb: cThumb,
       mimeType: cMime,
       barcode: cBarcode,
-      tags: cTags,
+      tags: JSON.stringify(cTags),
       notes: cNotes,
       selected: false,
       createdTimestamp: new Date()
@@ -59,7 +70,7 @@ export const updateCardSelected = (key, isSelected) => {
 export const updateCardTags = (key, newTags) => {
   tsRealm.write(() => {
     // ... update this card based on the key ...
-    tsRealm.create('Card', { key, tags: newTags }, true);
+    tsRealm.create('Card', { key, tags: JSON.stringify(newTags) }, true);
   });
 };
 

@@ -28,6 +28,17 @@ const OpenMainTabs = () => {
         Navigation.startTabBasedApp({
           tabs: [
             {
+              screen: 'tracksome.ShowCards',
+              label: 'Show Cards',
+              title: 'Show Cards',
+              icon: sources[1],
+              leftButtons: [{ icon: sources[4], id: 'menu' }],
+              rightButtons: [
+                { icon: sources[5], id: 'options' },
+                { icon: sources[7], id: 'search' },
+              ]
+            },
+            {
               screen: 'tracksome.ShowNotes',
               label: 'Notes',
               title: 'List Notes',
@@ -40,28 +51,38 @@ const OpenMainTabs = () => {
               animated: true
             },
             {
-              screen: 'tracksome.ShowCards',
-              label: 'Show Cards',
-              title: 'Show Cards',
-              icon: sources[1],
-              leftButtons: [{ icon: sources[4], id: 'menu' }],
-              rightButtons: [{ icon: sources[5], id: 'options' }]
-            },
-            {
               screen: 'tracksome.BuildCard',
-              label: 'Build Card',
-              title: 'New Card',
-              icon: sources[2],
+              label: 'Lists',
+              title: 'Choose List',
+              icon: sources[2],  // ... paper ...
               leftButtons: [{ icon: sources[4], id: 'menu' }],
-              rightButtons: [{ icon: sources[5], id: 'options', disabled: true }]
+              rightButtons: [
+                { icon: sources[5], id: 'options' },
+                { icon: sources[7], id: 'search' },
+              ],
+              animated: true
             },
             {
               screen: 'tracksome.EditCategories',
               label: 'Categories',
-              title: 'Maintain Categories',
+              title: 'Update Categories',
               icon: sources[3],
               leftButtons: [{ icon: sources[4], id: 'menu' }],
-              rightButtons: [{ icon: sources[5], id: 'options' }]
+              rightButtons: [
+                { icon: sources[5], id: 'options' },
+                { icon: sources[7], id: 'search' },
+              ]
+            },
+            {
+              screen: 'tracksome.EmojiPicker',
+              label: 'Emojis',
+              title: 'Search Emojis',
+              icon: sources[0],
+              leftButtons: [{ icon: sources[4], id: 'menu' }],
+              rightButtons: [
+                { icon: sources[5], id: 'options' },
+                { icon: sources[7], id: 'search' },
+              ]
             },
           ],
           drawer: {

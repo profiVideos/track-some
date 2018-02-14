@@ -21,6 +21,7 @@ import {
   //SAVE_CARDS_FAILURE,
   //LOAD_CARDS_SUCCESS,
   //LOAD_CARDS_FAILURE
+  SEARCH_CARDS_CHANGED,
   UPDATE_CARD_SELECTED,
   DELETE_SELECTED_CARDS
 } from '../actions/actionTypes';
@@ -35,6 +36,7 @@ const initialState = {
   notesChanged: false,
   tagsWindowOpen: false,
   editCardTags: '',      // ... the unique key of the item to be edited ...
+  searchFor: '',
   thisCard: {
     key: '',
     list: '',
@@ -68,6 +70,12 @@ const compareString = (a, b) => {
 const CardReducer = (state = initialState, action) => {
   //console.log('Card Reducer State: ', state, '  Action: ', action);
   switch (action.type) {
+
+    case SEARCH_CARDS_CHANGED:
+      return {
+        ...state,
+        searchFor: action.payload.text
+      };
 
     case OPEN_TAGS_MODAL:
       return {
@@ -254,7 +262,7 @@ const CardReducer = (state = initialState, action) => {
           mimeType: action.payload.item.mimeType,
           imageThumb: action.payload.item.imageThumb,
           barcode: action.payload.item.barcode,
-          tags: action.payload.item.tags,
+          tags: JSON.parse(action.payload.item.tags),
           notes: action.payload.item.notes
         },
         detailView: true

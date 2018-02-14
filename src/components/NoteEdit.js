@@ -102,6 +102,18 @@ class NoteEdit extends PureComponent {
     );
   }
 
+  renderPhoto() {
+    if (this.props.photo === '') return;
+    return (
+      <View style={styles.photoContainer}>
+        <Image 
+         style={styles.photoStyle} 
+         source={{ uri: `data:${this.props.mimeType};base64,${this.props.photo}` }} 
+        /> 
+      </View>
+    );
+  }
+
   renderAddButton(noteId) {
     if (noteId !== '') return;     // ... don't need to show '+' button ...
     return (
@@ -116,15 +128,21 @@ class NoteEdit extends PureComponent {
     );
   }
 
+/*
+
+            <Text style={styles.whiteText}>{this.props.mimeType}</Text>
+*/
+
   render() {
-    console.log('Key = ', this.props.id);
+    const title = (this.props.id === '' ? 'Add a New Note' : 'Edit a Note');
+    console.log('Has Photo: ', this.props.mimeType);
     return (
       <View style={styles.outerContainer}>
 
         <View style={styles.headerContainer}>
           <View style={{ flexDirection: 'row' }}>
             <Image style={styles.imageIconStyle} source={ItemNotes} />
-            <Text style={styles.headline}>Add a New Note</Text>
+            <Text style={styles.headline}>{title}</Text>
           </View>
           <TouchableOpacity onPress={this.props.onClosePress}>
             <View style={{ alignSelf: 'flex-end' }}>
@@ -165,6 +183,7 @@ class NoteEdit extends PureComponent {
           { this.renderOptionButtons() }
         </View>
         { this.renderColorSwatches() }
+        { this.renderPhoto() }
         <View style={[styles.noteContainer, { backgroundColor: `${this.props.noteColor}` }]}>
           <TextInput
             style={styles.noteInputStyle}
@@ -209,6 +228,21 @@ export default NoteEdit;
 */
 
 const styles = StyleSheet.create({
+  photoStyle: {
+    width: '80%',
+    height: 150,
+    borderRadius: 7,
+    resizeMode: 'contain'
+  },  
+  photoContainer: {
+    padding: 7,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#333'
+  },  
+  whiteText: {
+    color: 'white'
+  },
   colorBar: {
     flexDirection: 'row',
     flexWrap: 'wrap',    
