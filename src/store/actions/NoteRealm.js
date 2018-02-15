@@ -1,3 +1,4 @@
+import { ToastAndroid } from 'react-native';
 import { tsRealm } from '../data/tsObjects';
 //import { UniqueId } from '../../components/common/UniqueId';
 
@@ -20,9 +21,11 @@ export const getAllNotes = (searchFor) => {
   let noteList = '';
   //searchFor = '';
   if (searchFor !== null && searchFor !== undefined) {
+    //ToastAndroid.show(`Matching Notes: ${queryStr}\n${foundCards}`, ToastAndroid.SHORT);
+    ToastAndroid.show(`Getting Notes: ${searchFor}`, ToastAndroid.SHORT);
     noteList = tsRealm.objects('Note')
       .filtered('note CONTAINS[c] $0 OR title CONTAINS[c] $0', searchFor)
-      .sorted('updatedTimestamp', true);  
+      .sorted('updatedTimestamp', true);
   } else {
     noteList = tsRealm.objects('Note').sorted('updatedTimestamp', true);  
   }

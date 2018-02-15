@@ -6,6 +6,7 @@ import {
   Alert,
   Image,
   Modal,
+  Keyboard,
   FlatList,
   StyleSheet,
   ScrollView,
@@ -18,7 +19,7 @@ import {
 } from 'react-native-popup-menu';
 import AppColors from '../templates/appColors';
 import PaintSplash from '../images/Color-Splash.png';
-import CardItem from '../components/CardItem';
+import CardDisplay from '../components/CardDisplay';
 import TagEdit from '../components/TagEdit';
 //import RenderTags from '../components/RenderTags';
 import {
@@ -36,6 +37,7 @@ import {
   setCardSelected,
   itemCardChanged,
   searchCardsChanged,        // ... brand, spanking NEW ...
+  searchNotesChanged,        // ... brand, spanking NEW ...
   propertyNoteChanged
 } from '../store/actions';
 import store from '../store';
@@ -103,6 +105,7 @@ class ShowCard extends React.PureComponent {
     this.onCardItemMenuPress = this.onCardItemMenuPress.bind(this);
     this.onNavigatorEvent = this.onNavigatorEvent.bind(this);
     this.onSearchChanged = this.onSearchChanged.bind(this);
+    this.onSearchFocusChange = this.onSearchFocusChange.bind(this);
     this.state = {
       searchOpen: false,
       localSearchFor: '',
@@ -205,6 +208,14 @@ class ShowCard extends React.PureComponent {
     this.setState({ localSearchFor: text });
   }
 
+  onSearchFocusChange() {
+    Keyboard.dismiss();  // ... does not seem to work ...
+    ToastAndroid.show('Cards: Focus Lost', ToastAndroid.SHORT);
+    // ... ensure the keyboard is closed ...
+    // ... make sure we stop the other searches from looking for new matches ...
+    this.props.dispatch(searchNotesChanged(''));
+  }
+
   doNothing() {
     console.log('Be Lazy ...');
   }
@@ -216,13 +227,14 @@ class ShowCard extends React.PureComponent {
       navBarComponentAlignment: 'fill',
       navBarCustomViewInitialProps: { 
         thisSearch: this.state.localSearchFor,
+        searchLostFocus: this.onSearchFocusChange,
         searchTextChanged: this.onSearchChanged 
       }
     });
   }
 
   hideSearchBar() {
-    this.props.dispatch(searchCardsChanged(''));   // ... se we use the live results again ...
+    this.props.dispatch(searchCardsChanged(''));   // ... so we use the live results again ...
     this.props.navigator.setStyle({ navBarCustomView: '' });
   }
 
@@ -358,7 +370,7 @@ class ShowCard extends React.PureComponent {
 
   renderCardItem = ({ item }) => {
     return (
-      <CardItem
+      <CardDisplay
         item={item}
         marked={item.key === this.props.highlighted}
         numTags={this.countItems(JSON.parse(item.tags))}

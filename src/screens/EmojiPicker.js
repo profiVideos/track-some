@@ -7,6 +7,7 @@ import {
   Platform,
   //TextInput,
   StyleSheet,
+  ToastAndroid,
   //ActivityIndicator,
   TouchableNativeFeedback
 } from 'react-native';
@@ -175,6 +176,7 @@ class EmojiPicker extends PureComponent {
     } else {
       // ... call the GUID function to generate a new unique id or key ...
       dataStore.dispatch(addEmoji(emoji, name));
+      ToastAndroid.show('Added to Favs', ToastAndroid.SHORT);      
     }
   }
 

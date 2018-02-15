@@ -6,6 +6,7 @@ import {
   Alert,
   Image,
   Modal,
+  Keyboard,
   FlatList,
   StyleSheet,
   ScrollView,
@@ -38,6 +39,7 @@ import {
   setNoteSelected,
   updateCardNotes,
   toggleColorPicker,
+  searchCardsChanged,        // ... brand, spanking NEW ...
   searchNotesChanged,        // ... brand, spanking NEW ...
   propertyNoteChanged
 } from '../store/actions';
@@ -156,6 +158,7 @@ class ShowNotes extends React.PureComponent {
     this.onNoteItemToggle = this.onNoteItemToggle.bind(this);
     this.onNoteItemMenuPress = this.onNoteItemMenuPress.bind(this);
     this.onSearchChanged = this.onSearchChanged.bind(this);
+    this.onSearchFocusChange = this.onSearchFocusChange.bind(this);
     this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     this.state = {
       canClose: false,
@@ -204,7 +207,7 @@ class ShowNotes extends React.PureComponent {
         this.props.dispatch(updateCardNotes(this.props.thisCard.key, nextProps.thisCard.notes));
       }
       this.props.dispatch(clearNote());  // ... removes the card link from note record ...
-      this.props.dispatch(clearCard());
+      //this.props.dispatch(clearCard());
     }
   }
 
@@ -305,6 +308,14 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
     this.setState({ localSearchFor: text });
   }
 
+  onSearchFocusChange() {
+    Keyboard.dismiss();  // ... does not seem to work ...
+    ToastAndroid.show('Notes: Focus Lost', ToastAndroid.SHORT);
+    // ... ensure the keyboard is closed ...
+    // ... make sure we stop the other searches from looking for new matches ...
+    this.props.dispatch(searchCardsChanged(''));
+ }
+
   doNothing() {
     console.log('Be Lazy ...');
   }
@@ -316,6 +327,7 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
       navBarComponentAlignment: 'fill',
       navBarCustomViewInitialProps: { 
         thisSearch: this.state.localSearchFor,
+        searchLostFocus: this.onSearchFocusChange,
         searchTextChanged: this.onSearchChanged 
       }
     });

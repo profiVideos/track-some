@@ -20,7 +20,7 @@ import { MenuProvider } from 'react-native-popup-menu';
 //import { UniqueId } from '../components/common/UniqueId';
 import MDInput from '../components/common/mdInput';
 import AppColors from '../templates/appColors';
-import CardItem from '../components/CardItem';
+import CardDisplay from '../components/CardDisplay';
 //import TagEdit from '../components/TagEdit';
 import RenderTags from '../components/RenderTags';
 
@@ -484,7 +484,7 @@ class BuildCard extends PureComponent {
       <MenuProvider>
       <View style={styles.previewCard}>
         <Text style={styles.cardPreviewText} >Your New Card - List Preview</Text>
-        <CardItem 
+        <CardDisplay 
           id={this.props.thisCard.key}
           icon={this.props.thisCard.icon}
           name={this.props.thisCard.name}

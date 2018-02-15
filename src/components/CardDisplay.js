@@ -31,7 +31,7 @@ Cast: Cathy Heaven, Barbara Bieber, Ashley Woods, Jennifer James
 Genres: All Sex, Big Boobs
 */
 
-class CardItem extends React.PureComponent {
+class CardDisplay extends React.PureComponent {
   constructor(props) {
     super(props);
     Dimensions.addEventListener('change', this.onDeviceChange);
@@ -129,8 +129,8 @@ class CardItem extends React.PureComponent {
     const tagsBadge = (this.props.numTags === 0) ? <View /> :
       (<View style={{ flexDirection: 'row', alignItems: 'center' }}>
          <Text style={styles.extraInfo}>Tags:</Text>
-         <View style={styles.taaaaaaaaaagsBadge}>
-           <Text style={styles.taaaaaaaaaaagsTextStyle}>{this.props.item.tags}</Text>
+         <View style={styles.tagsBadge}>
+           <Text style={styles.tagsTextStyle}>{this.props.numTags}</Text>
          </View>
        </View>);
     const notesBadge = (this.props.numNotes === 0) ? <View /> :
@@ -201,7 +201,7 @@ class CardItem extends React.PureComponent {
 
 }
 
-export default CardItem;
+export default CardDisplay;
 
 const menuOptionsStyles = {
   optionsContainer: {

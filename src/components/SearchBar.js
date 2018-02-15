@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import {
   View,
   //Text,
+  //Alert,
+  Keyboard,
   TextInput,
   StyleSheet
 } from 'react-native';
@@ -10,9 +12,16 @@ import {
 export default class SearchBar extends Component {
   constructor(props) {
     super(props);
+    this.onLostFocus = this.onLostFocus.bind(this);
     this.state = {
       searchInput: this.props.thisSearch
     };
+  }
+
+  onLostFocus() {
+    Keyboard.dismiss(); 
+    this.props.searchLostFocus();
+    //Alert.alert('Lost Focus!');
   }
 
   onChangedInput(value) {
@@ -31,6 +40,7 @@ export default class SearchBar extends Component {
             returnKeyType='done'
             //ref={input => { this.inputs.title = input; }}
             blurOnSubmit
+            onBlur={() => this.onLostFocus()}
             //onSubmitEditing={() => { this.inputs.note.focus(); }}
             disableFullscreenUI
             underlineColorAndroid={'transparent'}

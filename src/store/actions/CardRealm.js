@@ -1,21 +1,38 @@
+//import { ToastAndroid } from 'react-native';
+//import { Alert } from 'react-native';
+import { ToastAndroid } from 'react-native';
 import { tsRealm } from '../data/tsObjects';
 import { UniqueId } from '../../components/common/UniqueId';
 
 // ... Realm supports the following basic types: bool, int, float, double, string, data, and date.
 // ... Each property has a name and is described by either a string containing the property’s type, 
 // ... or an object with name, type, objectType, optional, default, and indexed fields.
+//  else foundCards += `key = "${note.card}"`;
 //      .filtered('name CONTAINS[c] $0 OR tags CONTAINS[c] $0', searchFor)
 //      .filtered('name CONTAINS[c] $0 OR desc CONTAINS[c] $0', searchFor)
 
-export const getAllCards = (searchFor) => {
+export const getAllCards = (lookFor) => {
   let cardList = '';
+  let foundCards = '';
   //searchFor = '';
-  if (searchFor !== null && searchFor !== undefined) {
+  if (lookFor !== null && lookFor !== undefined) {
+    // ... find any card notes that may have this search term ...
+    const tempList = tsRealm.objects('Note')
+      .filtered('note CONTAINS[c] $0 OR title CONTAINS[c] $0 AND card != ""', lookFor);
+    const snapShot = tempList.snapshot();
+    snapShot.forEach(note => {
+       foundCards += ` OR key = "${note.card}"`;
+    });
+    const queryStr = 
+`name CONTAINS[c] '${lookFor}' OR tags CONTAINS[c] '${lookFor}' OR desc CONTAINS[c] '${lookFor}'`;
+    ToastAndroid.show(`Matching Notes: ${queryStr}\n${foundCards}`, ToastAndroid.SHORT);
+    //Alert.alert(`Matching Notes: ${queryStr}\n${foundCards}`);
     cardList = tsRealm.objects('Card')
       //.filtered('name CONTAINS[c] $0 OR desc CONTAINS[c] $0', searchFor)
-      .filtered('name CONTAINS[c] $0 OR tags CONTAINS[c] $0', searchFor)
+      .filtered(`${queryStr}${foundCards}`)
       .sorted('name');  // + ,true for reverse sorting ...
   } else {
+    foundCards = 'NONE';
     cardList = tsRealm.objects('Card').sorted('name');  // + ,true for reverse sorting ...
   }
   return cardList;
