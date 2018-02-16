@@ -32,15 +32,12 @@ import PhotoAdd from '../images/PhotoAdd.png';
 
 import { 
   addCard,
-  //clearCard,
   addCardTag,
   addCardImage,
   openTagsModal,
   deleteCardTag,
+  openNotesModal,
   closeTagsModal,
-
-//closeNotesModal,
-
   loadCategories,
   itemCardChanged,
 } from '../store/actions';
@@ -80,6 +77,7 @@ class BuildCard extends PureComponent {
     this.onSelectEmoji = this.onSelectEmoji.bind(this);
     this.doSomeFunction = this.doSomeFunction.bind(this);
     this.openTagsEditModal = this.openTagsEditModal.bind(this);
+    this.openNotesEditModal = this.openNotesEditModal.bind(this);
     this.state = {
       image: null,
       images: null,
@@ -241,6 +239,11 @@ class BuildCard extends PureComponent {
       backgroundColor: '#333', // optional
       duration: 'long' // default is `short`. Available options: short, long, indefinite
     });
+  }
+
+  openNotesEditModal() {
+    //this.props.dispatch(currentNote(item));
+    this.props.dispatch(openNotesModal(this.props.thisCard.key));
   }
 
   openTagsEditModal() {
@@ -405,7 +408,7 @@ class BuildCard extends PureComponent {
           <Image style={styles.imageIconStyle} source={PhotoAdd} />
         </View>
       </TouchableNativeFeedback>
-      <TouchableNativeFeedback onPress={this.doSomeFunction}>
+      <TouchableNativeFeedback onPress={this.openNotesEditModal}>
         <View style={styles.iconsPadding}>
           <Image style={styles.imageIconStyle} source={ItemNotes} />
         </View>
@@ -508,36 +511,6 @@ class BuildCard extends PureComponent {
   }
 
 /*
-  renderTagEditScreen() {
-    return (
-    <View style={styles.popupContainer}>
-      <Modal
-          visible={this.props.tagsModalOpen}
-          transparent
-          animationType={'fade'}
-          onRequestClose={() => this.closeTagsEditModal()}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalInnerContainer}>
-            <TagEdit
-              tagsList={this.props.thisCard.tags}
-              tagName={this.props.thisCard.tag}
-              photo={this.props.thisCard.imageThumb}
-              mimeType={this.props.thisCard.mimeType}
-              onTagAdd={() => this.addTag2Card()} 
-              onTagChange={text => this.itemTagChanged(text)}
-              onTagRemove={tag => this.itemTagRemove(tag)}
-              onClosePress={() => this.closeTagsEditModal()} 
-            />
-          </View>
-        </View>
-      </Modal>
-    </View>
-    );
-  }
-*/
-
-/*
     const renderImage = Object.keys(this.props.thisCard.image).length === 0 && 
                         this.props.thisCard.image.constructor === Object ?  
                       <Text style={styles.previewText}>Preview Here!</Text> :
@@ -547,7 +520,7 @@ class BuildCard extends PureComponent {
 */
 
   renderItemExtras() {
-    // ... these two constants could be moved into a function ...
+    // ... these four constants could be moved into a function ...
     const image = this.props.thisCard.imageThumb;
     const mimeType = this.props.thisCard.mimeType;
     const renderIcon = this.props.thisCard.icon !== '' ?
@@ -593,13 +566,45 @@ class BuildCard extends PureComponent {
     );
   }
 
+/*
+    console.log('Has Photo: ', this.props.mimeType);
+    return (
+      <View style={styles.outerContainer}>
+
+        <View style={styles.headerContainer}>
+          <View style={{ flexDirection: 'row' }}>
+            <Image style={styles.imageIconStyle} source={ItemNotes} />
+            <Text style={styles.headline}>{title}</Text>
+          </View>
+          <TouchableOpacity onPress={this.props.onClosePress}>
+            <View style={{ alignSelf: 'flex-end' }}>
+              <Icon size={20} name='times' color={AppColors.mainLiteColor} />
+            </View>
+          </TouchableOpacity>
+        </View>
+*/
+
   //----------------------------------------------------
   // ... the main JSX render section for this class ...
   //----------------------------------------------------
   render() {
+    const title = (this.props.id === '' ? 'Add a New Card' : 'Edit Card');
     return (
       <ScrollView style={{ flex: 1 }} keyboardShouldPersistTaps='always'>
         <View style={styles.cardContainer}>
+  
+          <View style={styles.headerContainer}>
+            <View style={{ flexDirection: 'row' }}>
+              <Image style={styles.imageIconStyle} source={ItemNotes} />
+              <Text style={styles.headline}>{title}</Text>
+            </View>
+            <TouchableOpacity onPress={this.props.onClosePress}>
+              <View style={{ alignSelf: 'flex-end' }}>
+                <Icon size={20} name='times' color={AppColors.mainLiteColor} />
+              </View>
+            </TouchableOpacity>
+          </View>
+  
           <View style={styles.textContainer}>
             <View style={styles.topRowStyle}>
               { this.renderIcon() }
@@ -609,10 +614,13 @@ class BuildCard extends PureComponent {
             { this.renderDescription() }
           </View>
           { this.renderTags() }
+  
         </View>
+  
         { this.renderItemExtras() }
         { this.renderActionIcons() }
         { this.renderPreview() }
+  
       </ScrollView>
     );
   }
@@ -639,6 +647,26 @@ dbx.filesUpload({
 */
 
 const styles = StyleSheet.create({
+  headline: {
+    color: AppColors.accentColor,
+    paddingTop: 2,
+    paddingLeft: 12,
+    fontSize: 18,
+    fontWeight: '500',
+    alignSelf: 'center'
+  },
+  headerContainer: {
+    width: '100%',
+    backgroundColor: AppColors.mainDarkColor,
+    //borderTopLeftRadius: 8,
+    //borderTopRightRadius: 8,
+    padding: 12,
+    paddingTop: 8,
+    paddingBottom: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
   cardPreviewText: {
     color: AppColors.accentColor,
     fontSize: 15,
@@ -810,19 +838,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.65)',
+    backgroundColor: 'rgba(0,0,0,0.60)',
   },
   modalInnerContainer: {
     width: '90%',
-  },
-  outerContainer: {
-    flex: 1,
-    borderRadius: 2,
-    //backgroundColor: 'blue',
-    shadowColor: '#121212',
-    shadowOffset: { width: 1, height: 3 },
-    shadowOpacity: 0.85,
-    elevation: 2
   },
   textContainer: {
     width: '90%',
@@ -849,32 +868,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  imageNotUsedStyle: {
-    height: 200,
-    borderRadius: 5,
-    shadowColor: '#121212',
-    shadowOffset: { width: 1, height: 3 },
-    shadowOpacity: 0.85,
-    resizeMode: 'contain'
-  },
   nameWidth: {     // ... used to define the item name input width ...
     width: '72%'
   },
   inputStyle: {   // ... used to define the item desc input width ...
     width: '100%'
-  },
-  buttonNotUsedText: {
-    alignSelf: 'center',
-    fontSize: 17,
-    marginTop: -45,
-    marginBottom: 25,
-    fontWeight: '600',
-    elevation: 2,
-    color: '#858585'
-  },
-  columnContainer: {
-    width: '50%',
-    alignItems: 'center'
   },
   imageContainer: {
     width: '100%',
@@ -885,10 +883,6 @@ const styles = StyleSheet.create({
     elevation: 2,
     alignItems: 'center'
   },
-  boldText: {   // ... not used ...
-    color: 'black',
-    fontWeight: '700',
-  }
 });
 
 /*

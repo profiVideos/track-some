@@ -6,23 +6,27 @@ import {
   UPDATE_CARD,
   REMOVE_CARD,
   CURRENT_CARD,
-  ADD_CARD_TAG,               // ... NEW ...
-  ADD_CARD_NOTE,              // ... REALLY NEW ...
-  ADD_CARD_IMAGE,             // ... NEW ...
-  HIGHLIGHT_CARD,             // ... NEW ...
+  ADD_CARD_TAG,
+  ADD_CARD_NOTE,
+  ADD_CARD_IMAGE,
+  HIGHLIGHT_CARD,
   DELETE_CARD_TAG,
-  DELETE_CARD_NOTE,           // ... REALLY NEW ...
-  OPEN_TAGS_MODAL,            // ... NEW ...
-  CLOSE_TAGS_MODAL,           // ... NEW ...
+  DELETE_CARD_NOTE,           // ... VERY NEW ...
+  OPEN_TAGS_MODAL,
+  CLOSE_TAGS_MODAL,
+
+  OPEN_CARDS_MODAL,           // ... VERY, VERY NEW ...
+  CLOSE_CARDS_MODAL,          // ... VERY, VERY NEW ...
+
   CARD_EDIT_CHANGE,
   UPDATE_CARD_TAGS,
-  UPDATE_CARD_NOTES,          // ... REALLY NEW ...
+  UPDATE_CARD_NOTES,          // ... VERY NEW ...
   //SAVE_CARDS_SUCCESS,
   //SAVE_CARDS_FAILURE,
   //LOAD_CARDS_SUCCESS,
   //LOAD_CARDS_FAILURE
   SEARCH_CARDS_CHANGED,       // ... brand, spanking NEW ...
-  UPDATE_CARD_SELECTED,       // ... NEW ...
+  UPDATE_CARD_SELECTED,
   DELETE_SELECTED_CARDS
 } from './actionTypes';
 import store from '../../store';   // ... Realm DB Routines ...
@@ -123,6 +127,20 @@ export const currentCard = (item) => {
 export const clearCard = () => {
   return {
     type: CLEAR_CARD
+  };
+};
+
+export const openCardsModal = (key) => {
+  return {
+    type: OPEN_CARDS_MODAL,
+    payload: { key }
+  };
+};
+
+export const closeCardsModal = (key) => {
+  return {
+    type: CLOSE_CARDS_MODAL,
+    payload: { key }
   };
 };
 

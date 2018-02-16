@@ -29,7 +29,7 @@ const OpenMainTabs = () => {
           tabs: [
             {
               screen: 'tracksome.ShowCards',
-              label: 'Show Cards',
+              label: 'Cards',
               title: 'Show Cards',
               icon: sources[1],
               leftButtons: [{ icon: sources[4], id: 'menu' }],
@@ -51,14 +51,14 @@ const OpenMainTabs = () => {
               animated: true
             },
             {
-              screen: 'tracksome.BuildCard',
+              screen: 'tracksome.ShowLists',
               label: 'Lists',
               title: 'Choose List',
               icon: sources[2],  // ... paper ...
               leftButtons: [{ icon: sources[4], id: 'menu' }],
               rightButtons: [
                 { icon: sources[5], id: 'options' },
-                { icon: sources[7], id: 'search' },
+                //{ icon: sources[7], id: 'search' },
               ],
               animated: true
             },

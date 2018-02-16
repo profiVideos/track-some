@@ -46,10 +46,15 @@ export const LOAD_CATEGORIES_SUCCESS = 'LOAD_CATEGORIES_SUCCESS';
 export const LOAD_CATEGORIES_FAILURE = 'LOAD_CATEGORIES_FAILURE';
 export const DELETE_SELECTED_CATS = 'DELETE_SELECTED_CATS';
 
-// ... everything dealing with cards ...
+// ... all our popup or modal windows ...
 export const OPEN_TAGS_MODAL = 'OPEN_TAGS_MODAL';
 export const CLOSE_TAGS_MODAL = 'CLOSE_TAGS_MODAL';
+export const OPEN_NOTES_MODAL = 'OPEN_NOTES_MODAL';
+export const CLOSE_NOTES_MODAL = 'CLOSE_NOTES_MODAL';
+export const OPEN_CARDS_MODAL = 'OPEN_CARDS_MODAL';
+export const CLOSE_CARDS_MODAL = 'CLOSE_CARDS_MODAL';
 
+// ... everything dealing with cards ...
 export const CARDS_STORAGE_KEY = '@track!some:my_cards';
 export const CARD_EDIT_CHANGE = 'CARD_EDIT_CHANGE';
 export const ADD_CARD = 'ADD_CARD';
@@ -81,8 +86,6 @@ export const REMOVE_NOTE = 'REMOVE_NOTE';
 export const CURRENT_NOTE = 'CURRENT_NOTE';
 export const HIGHLIGHT_NOTE = 'HIGHLIGHT_NOTE';
 export const NOTE_EDIT_CHANGE = 'NOTE_EDIT_CHANGE';
-export const OPEN_NOTES_MODAL = 'OPEN_NOTES_MODAL';
-export const CLOSE_NOTES_MODAL = 'CLOSE_NOTES_MODAL';
 export const TOGGLE_COLOR_PICKER = 'TOGGLE_COLOR_PICKER';
 export const UPDATE_NOTE_SELECTED = 'UPDATE_NOTE_SELECTED';
 export const DELETE_SELECTED_NOTES = 'DELETE_SELECTED_NOTES';

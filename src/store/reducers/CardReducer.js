@@ -13,6 +13,10 @@ import {
   CARD_EDIT_CHANGE,
   OPEN_TAGS_MODAL,
   CLOSE_TAGS_MODAL,
+
+  OPEN_CARDS_MODAL,           // ... VERY, VERY NEW ...
+  CLOSE_CARDS_MODAL,          // ... VERY, VERY NEW ...
+
   UPDATE_CARD_TAGS,
   DELETE_CARD_TAG,
   DELETE_CARD_NOTE,
@@ -33,8 +37,11 @@ const initialState = {
   detailView: false,
   highlighted: '',        // ... the unique key of the currently highlighted item ...
   tagsChanged: false,
-  notesChanged: false,
   tagsWindowOpen: false,
+  notesChanged: false,
+  cardChanged: false,
+  cardWindowOpen: true,
+  editCard: '',          // ... ht eunique key of the item being edited (blank for new) ...
   editCardTags: '',      // ... the unique key of the item to be edited ...
   searchFor: '',
   thisCard: {
@@ -70,6 +77,21 @@ const compareString = (a, b) => {
 const CardReducer = (state = initialState, action) => {
   //console.log('Card Reducer State: ', state, '  Action: ', action);
   switch (action.type) {
+
+    case OPEN_CARDS_MODAL:
+      return {
+        ...state,
+        editCard: action.payload.key,
+        cardChanged: false,
+        cardWindowOpen: true
+      };
+
+    case CLOSE_CARDS_MODAL:
+      return {
+        ...state,
+        editCard: '',
+        cardWindowOpen: false
+      };
 
     case SEARCH_CARDS_CHANGED:
       return {

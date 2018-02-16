@@ -34,6 +34,8 @@ import {
   updateCardTags,
   closeTagsModal,
   openNotesModal,
+  openCardsModal,             // ... VERY, VERY NEW ...
+  closeCardsModal,            // ... also very, very NEW ...
   setCardSelected,
   itemCardChanged,
   searchCardsChanged,        // ... brand, spanking NEW ...
@@ -67,12 +69,10 @@ const whatDoYouNeed = state => {
     cardList: (state.cards.searchFor === '' ? 
       cardsLiveResults : store.getAllCards(state.cards.searchFor)),
     thisCard: state.cards.thisCard,
-    //thisNote: state.notes.thisNote,
-    //colorPicker: state.notes.colorPicker,
     highlighted: state.cards.highlighted, 
     cardsUpdated: state.cards.lastUpdated,
-    //notesChanged: state.cards.notesChanged,
-    //notesModalOpen: state.notes.notesWindowOpen,
+    cardChanged: state.cards.cardChanged,
+    cardModalOpen: state.notes.cardWindowOpen,
     tagsChanged: state.cards.tagsChanged,
     tagsModalOpen: state.cards.tagsWindowOpen,
     editTagsForItem: state.cards.editCardTags
@@ -87,7 +87,7 @@ class ShowCard extends React.PureComponent {
     navBarTranslucent: false
   };
 
-  /*
+  /* ... brain dead navigation FAB (needs image or it doesn't work) ...
   static navigatorButtons = {
     fab: {
       collapsedId: 'share',
@@ -104,6 +104,7 @@ class ShowCard extends React.PureComponent {
     this.onCardItemToggle = this.onCardItemToggle.bind(this);
     this.onCardItemMenuPress = this.onCardItemMenuPress.bind(this);
     this.onNavigatorEvent = this.onNavigatorEvent.bind(this);
+    this.closeBuildCardModal = this.closeBuildCardModal.bind(this);
     this.onSearchChanged = this.onSearchChanged.bind(this);
     this.onSearchFocusChange = this.onSearchFocusChange.bind(this);
     this.state = {
@@ -286,6 +287,33 @@ class ShowCard extends React.PureComponent {
     }
   }
 
+  openBuildCardModal(card = '') {
+    ToastAndroid.show(`Card: ${card}`, ToastAndroid.SHORT);
+    if (card === '') this.props.dispatch(clearCard());
+    this.props.dispatch(openCardsModal(card));
+    this.showBuildCardScreen(card);
+  }
+
+  closeBuildCardModal() {
+    this.props.dispatch(closeCardsModal(''));
+    this.props.navigator.dismissLightBox();
+  }
+
+  showBuildCardScreen(card) {
+    this.props.navigator.showLightBox({
+      screen: 'tracksome.BuildCard',
+      passProps: {
+        id: card,
+        onClosePress: this.closeBuildCardModal
+      },
+      style: {
+       backgroundBlur: 'dark',
+       backgroundColor: 'rgba(0,0,0,0.60)', 
+      },
+      adjustSoftInput: 'resize'
+    });
+  }
+
   showWelcome() {
     const plusSymbol = ' +  ';
     return (
@@ -385,6 +413,10 @@ class ShowCard extends React.PureComponent {
     );
   }
 
+/*
+          { this.renderBuildCardScreen() }
+*/
+
   render() {
     return (
       <MenuProvider>
@@ -395,7 +427,7 @@ class ShowCard extends React.PureComponent {
         <TouchableHighlight 
           style={styles.addButton}
           underlayColor='#999' 
-          onPress={() => { console.log('pressed'); }} 
+          onPress={() => { this.openBuildCardModal(); }} 
         >
           <Text style={{ fontSize: 36, color: 'white', paddingBottom: 3 }}>+</Text>
         </TouchableHighlight>
