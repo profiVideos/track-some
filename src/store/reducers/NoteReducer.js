@@ -11,6 +11,7 @@ import {
   OPEN_NOTES_MODAL,
   CLOSE_NOTES_MODAL,
   TOGGLE_COLOR_PICKER,
+  TOGGLE_PHOTO_VIEWER,
   SEARCH_NOTES_CHANGED,
   UPDATE_NOTE_SELECTED,
   DELETE_SELECTED_NOTES
@@ -22,6 +23,7 @@ const initialState = {
   detailView: false,
   highlighted: '',          // ... the unique key of the currently highlighted item ...
   colorPicker: false,
+  photoViewer: false,
   editChange: false,
   notesWindowOpen: false,
   editNote: '',             // ... the unique key of the item being edited ...
@@ -91,6 +93,13 @@ const NoteReducer = (state = initialState, action) => {
       return {
         ...state,
         lastUpdated: Date.now()
+      };
+
+    case TOGGLE_PHOTO_VIEWER:
+      // ... open / close the photo viewer control ...
+      return { 
+        ...state,
+        photoViewer: !action.payload.isActive
       };
 
     case TOGGLE_COLOR_PICKER:

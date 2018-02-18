@@ -10,6 +10,7 @@ import {
   CLOSE_NOTES_MODAL,          // ... NEW ...
   NOTE_EDIT_CHANGE,
   TOGGLE_COLOR_PICKER,        // ... NEW ...
+  TOGGLE_PHOTO_VIEWER,        // ... super brand spanking NEW ...
   SEARCH_NOTES_CHANGED,       // ... brand, spanking NEW ...
   UPDATE_NOTE_SELECTED,       // ... NEW ...
   DELETE_SELECTED_NOTES
@@ -81,6 +82,13 @@ export const currentNote = (item) => {
 export const clearNote = () => {
   return {
     type: CLEAR_NOTE
+  };
+};
+
+export const togglePhotoViewer = (isActive) => {
+  return {
+    type: TOGGLE_PHOTO_VIEWER,
+    payload: { isActive }
   };
 };
 

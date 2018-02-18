@@ -91,7 +91,7 @@ class BuildCard extends PureComponent {
       showIcon: true,
       showName: true,
       showCategory: true,
-      showDesc: false,
+      showDesc: true,
       showTags: true,
       showRating: true,
       showListPreview: false,

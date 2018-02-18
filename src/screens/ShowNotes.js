@@ -52,32 +52,10 @@ adb shell am broadcast -a react.native.RELOAD
 
 --------------------------------------------------------------------------------------
 
-Search Bar Implementation; See the example app (actions tab) for a CustomTopBar example
-
-navBarCustomView
-navBarComponentAlignment: 'fill'
-navBarCustomViewInitialProps
-
-I ended up using redux since it's already part of my application, simply connected the 
-CustomTopBar component to redux and changed onChangeText to 
-onChangeText={this.props.updateSearchQuery}, and then also connected the 
-SearchResults component to read the input of the search query via mapStateToProps
-
 md-arrow-dropdown - ascending sort
 md-arrow-dropup - descending sort
 
 --------------------------------------------------------------------------------------
-
-const CustomButton = ({ text }) =>
-  <TouchableOpacity
-    style={[styles.buttonContainer]}
-    onPress={() => { return 'options'; }}
-  >
-    <View style={styles.button}>
-      <Text style={{ color: 'white' }}>{text}</Text>
-    </View>
-  </TouchableOpacity>;
-Navigation.registerComponent('tracksome.Menu', () => OptionMenu);
 */
 
 const notesLiveResults = store.getAllNotes();     // ... Realm updates this in real time ...
@@ -85,6 +63,7 @@ const notesLiveResults = store.getAllNotes();     // ... Realm updates this in r
 const whatDoYouNeed = state => {
   return {
     saveMode: state.login.saveMode,
+    thisNote: state.notes.thisNote,
     noteList: (state.notes.searchFor === '' ? 
       notesLiveResults : store.getAllNotes(state.notes.searchFor)),
     highlighted: state.notes.highlighted,
@@ -127,8 +106,6 @@ class ShowNotes extends React.PureComponent {
       canClose: false,
       searchOpen: false,
       localSearchFor: '',
-      //title: '',
-      //note: '',
       //infoWidth: Dimensions.get('window').width - 112
     };
   }
@@ -201,8 +178,7 @@ class ShowNotes extends React.PureComponent {
     switch (option) {
       case 'edit': {
         this.props.dispatch(currentNote(note));
-        this.openNoteEditModal(note.key); 
-        //this.props.dispatch(openNotesModal(note.key));
+        this.openNoteEditModal(note); 
         break;
       }
       case 'delete': {
@@ -215,19 +191,6 @@ class ShowNotes extends React.PureComponent {
       default: break;
     }  // ... switch ...
   }
-
-/*
-          ToastAndroid.show(`Get Photo for Card: ${note.card}`, ToastAndroid.SHORT);
-
-    this.props.navigator.dismissContextualMenu();
-
-    static navigatorStyle = {
-      contextualMenuStatusBarColor: '#0092d1',
-      contextualMenuBackgroundColor: '#00adf5',
-      contextualMenuButtonsColor: '#ffffff'
-    };
-
-*/
 
   onSearchChanged(text) {
     console.log('search changed: ', text);
@@ -266,41 +229,33 @@ class ShowNotes extends React.PureComponent {
   }
 
   showNoteEditScreen(note = '') {
+    let thisCard = '';
+    if (note.card !== '' && note.card !== undefined) {
+      thisCard = store.getCard(note.card);  // ... get the photo of the attached card ...
+    }
     this.props.navigator.showLightBox({
       screen: 'tracksome.NoteEdit',
-      title: 'My Modal',      
       passProps: {
-        id: note,
+        id: (note.key === undefined ? '' : note.key),
+        photo: (thisCard === undefined ? '' : thisCard.imageThumb),
+        mimeType: (thisCard === undefined ? '' : thisCard.mimeType),
         onClosePress: this.closeNoteEditModal
       },
       style: {
         backgroundBlur: 'none',  // dark
         backgroundColor: 'rgba(0,0,0,0.60)',
-        drawUnderNavBar: false,
         //tapBackgroundToDismiss: true 
       },
-      adjustSoftInput: 'resize'
+      //adjustSoftInput: 'resize'
     });
   }
 
   openNoteEditModal(note = '') {
-    ToastAndroid.show(`Open Note: ${note}`, ToastAndroid.SHORT);
-    if (note === '') this.props.dispatch(clearNote());
+    //ToastAndroid.show(`Open Note: ${note.key}`, ToastAndroid.SHORT);
+    if (note.key === '' || note.key === undefined) this.props.dispatch(clearNote());
     this.props.dispatch(openNotesModal(note));
     this.showNoteEditScreen(note);
   }
-
-  //openNoteAddModal() {
-    // ... if this note is linked to a card - get the card photo (for reference) ...
-    //this.props.dispatch(openNotesEditModal(card = ''));        
-    //ToastAndroid.show(`Get Photo for Card: ${card}`, ToastAndroid.LONG);
-    //if (note.card !== '') {
-    //  this.props.dispatch(getCard(note.card));
-    //}
-
-    //this.props.dispatch(openNotesModal(''));
-    //this.showNoteEditModal('');
-  //}
 
   closeNoteEditModal() {
     this.props.dispatch(closeNotesModal(''));
@@ -343,49 +298,7 @@ class ShowNotes extends React.PureComponent {
   }
 
 /*
-  renderNoteEditScreen() {
-    //if (this.props.editNote === '') return;
-    return (
-      <View style={styles.popupContainer}>
-        <Modal
-            visible={this.props.notesModalOpen}
-            transparent
-            animationType={'fade'}
-            onRequestClose={this.doNothing}
-        >
-          <View style={styles.modalContainer}>
-            <ScrollView
-              contentContainerStyle={styles.scrollStyle}
-              keyboardShouldPersistTaps='always'
-            >
-              <View style={styles.modalInnerContainer}>
-                <NoteEdit
-                  --->>>id={this.props.thisNote.key}
-                  --->>>note={this.props.thisNote.note}
-                  --->>> WAS NEVER USED: card={this.props.thisNote.card}
-                  photo={this.props.thisCard.imageThumb}
-                  mimeType={this.props.thisCard.mimeType}
-                  --->>>noteTitle={this.props.thisNote.title}
-                  --->>>noteColor={this.props.thisNote.color !== '' ? 
-                  --->>>  this.props.thisNote.color : '#f8f8f8'}
-                  --->>>pickerActive={this.props.colorPicker}
-                  --->>>onNoteAdd={() => this.addNote2Card(this.props.thisNote.card, false)}
-                  --->>> onButtonPress={() => this.buttonPressed()}
-                  --->>>onNoteChange={text => this.noteBodyChanged(text)}
-                  --->>>onColorChange={color => this.noteColorChanged(color)}
-                  --->>>onTitleChange={title => this.noteTitleChanged(title)}
-                  --->>>onClosePress={() => this.closeNoteEditModal(this.props.thisNote.card)} 
-                />
-              </View>
-            </ScrollView>
-          </View>
-        </Modal>
-      </View>
-    );
-  }
-*/
 
-/*
   renderCatDescription(category) {
     const indexPos = this.findCategoryByKey(category);
     if (indexPos >= 0) {

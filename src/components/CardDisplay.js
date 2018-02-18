@@ -73,6 +73,9 @@ class CardDisplay extends React.PureComponent {
   }
 /*
       <View style={styles.fullCard}>
+import PictureFrame from '../images/PictureFrameBare.png';
+import ItemInfo from '../images/ItemInfo.png';
+import ItemNote from       
 */
 
   renderFullCard() {
@@ -83,7 +86,7 @@ class CardDisplay extends React.PureComponent {
         //tabBarPosition='overlayTop'
         renderTabBar={() => <ImageTabBar optionMenu={this.renderOptionMenu} />}
       >
-        <View tabLabel="paw" style={styles.tabView}>
+        <View tabLabel="PictureFrame" style={styles.tabView}>
           <View style={styles.responsiveContainer}>
             <Image 
              style={styles.fullWidthImage}
@@ -93,10 +96,10 @@ class CardDisplay extends React.PureComponent {
             />
           </View>
         </View>
-        <View tabLabel="pizza" style={styles.tabView}>
+        <View tabLabel="ItemInfo" style={styles.tabView}>
           <Text>This is the info panel</Text>
         </View>
-        <View tabLabel="tennisball" style={styles.tabView}>
+        <View tabLabel="ItemNote" style={styles.tabView}>
           <Text>And the notes go here</Text>
         </View>
       </ScrollableTabView>

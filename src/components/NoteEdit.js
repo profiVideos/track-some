@@ -8,8 +8,8 @@ import {
   Image,
   TextInput,
   StyleSheet,
-  ScrollView,
-  ToastAndroid,
+  //ScrollView,
+  //ToastAndroid,
   TouchableOpacity,
   //TouchableHighlight,
   TouchableNativeFeedback
@@ -17,7 +17,9 @@ import {
 import IonIcon from 'react-native-vector-icons/Ionicons';
 import { UniqueId } from '../components/common/UniqueId';
 import AppColors from '../templates/appColors';
-import ItemNotes from '../images/ItemNotes.png';
+import ItemNotes from '../images/ItemNote.png';
+import ColorPalette from '../images/ColorPalette.png';
+import PictureFrame from '../images/PictureFrameBare.png';
 import RenderColors from './RenderColors';
 import {
   addNote,
@@ -26,6 +28,7 @@ import {
   addCardNote,
   updateCardNotes,
   toggleColorPicker,
+  togglePhotoViewer,
   propertyNoteChanged
 } from '../store/actions';
 
@@ -50,6 +53,7 @@ const whatDoYouNeed = state => {
     thisCard: state.cards.thisCard,
     somethingChanged: state.notes.editChange,
     colorPicker: state.notes.colorPicker,
+    photoViewer: state.notes.photoViewer,
     notesModalOpen: state.notes.notesWindowOpen,
     cardNoteLinksChanged: state.cards.notesChanged,
   };
@@ -117,7 +121,7 @@ class NoteEdit extends PureComponent {
   }
 
   onClosePress(card) {
-    ToastAndroid.show(`Close Note with Card: ${card}`, ToastAndroid.SHORT);
+    //ToastAndroid.show(`Close Note with Card: ${card}`, ToastAndroid.SHORT);
     if (this.props.thisNote.note !== '') {
       // ... user closed without hitting the plus '+' button first (can happen!) ...
       this.addNote2Card(card, true);  // ... true = we are finished ...
@@ -130,15 +134,22 @@ class NoteEdit extends PureComponent {
   }
 
   pressedButton(whichOne) {
-    console.log('Pressed this button: ', whichOne);
-    //Alert.alert('pressed the button - ' + which);
-    //this.props.onButtonPress(whichOne);
-    this.props.dispatch(toggleColorPicker(this.props.colorPicker));
+    switch (whichOne) {
+      case 'color': {
+        this.props.dispatch(toggleColorPicker(this.props.colorPicker));
+        break;
+      }
+      case 'photo': {
+        this.props.dispatch(togglePhotoViewer(this.props.photoViewer));
+        break;
+      }
+      default: break;
+    }  // ... switch ...
   }
 
   addOrUpdateNote(card, canClose) {
     console.log(canClose);
-    ToastAndroid.show(`Add/Update Note with Card: ${card}`, ToastAndroid.SHORT);
+    //ToastAndroid.show(`Add/Update Note with Card: ${card}`, ToastAndroid.SHORT);
     if (this.props.somethingChanged) {
       if (this.props.thisNote.key === '') {
         const newNoteKey = UniqueId();
@@ -199,22 +210,35 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
     );
   }
 
-  renderOptionButtons() {
-    return (
-      <TouchableNativeFeedback onPress={() => this.pressedButton('color')}>
-        <Text style={styles.colorChooser}>🎨</Text>
-      </TouchableNativeFeedback>
-    );
-  }
-
-  renderPhoto() {
-    if (this.props.photo === '') return;
+  renderPhotoViewer() {
+    if (this.props.photoViewer === false) return;
+    if (this.props.photo === '' || this.props.photo === undefined) return;
     return (
       <View style={styles.photoContainer}>
         <Image 
          style={styles.photoStyle} 
          source={{ uri: `data:${this.props.mimeType};base64,${this.props.photo}` }} 
         /> 
+      </View>
+    );
+  }
+
+  renderPhotoButton(photo) {
+    if (photo === '' || photo === undefined) return;
+    return (
+      <TouchableNativeFeedback onPress={() => this.pressedButton('photo')}>
+        <Image style={styles.imageIconStyle} source={PictureFrame} />
+      </TouchableNativeFeedback>
+    );
+  }
+
+  renderOptionButtons() {
+    return (
+      <View style={styles.optionsBar}>
+        <TouchableNativeFeedback onPress={() => this.pressedButton('color')}>
+          <Image style={styles.imageIconStyle} source={ColorPalette} />
+        </TouchableNativeFeedback>
+        { this.renderPhotoButton(this.props.photo) }
       </View>
     );
   }
@@ -234,8 +258,12 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
   }
 
 /*
-
             <Text style={styles.whiteText}>{this.props.mimeType}</Text>
+        <ScrollView
+          contentContainerStyle={styles.scrollStyle}
+          keyboardShouldPersistTaps='always'
+        >
+        </ScrollView>
 */
 
   render() {
@@ -244,10 +272,7 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
     //console.log('Has Photo: ', this.props.mimeType);
     return (
       <View style={styles.outerContainer}>
-        <ScrollView
-          contentContainerStyle={styles.scrollStyle}
-          keyboardShouldPersistTaps='always'
-        >
+        <View style={styles.innerContainer}>
           <View style={styles.headerContainer}>
             <View style={{ flexDirection: 'row' }}>
               <Image style={styles.imageIconStyle} source={ItemNotes} />
@@ -287,16 +312,14 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
               </View>
             </TouchableNativeFeedback>
           </View>
-          <View style={styles.optionsBar}>
-            { this.renderOptionButtons() }
-          </View>
+          { this.renderOptionButtons() }
           { this.renderColorSwatches() }
-          { this.renderPhoto() }
+          { this.renderPhotoViewer() }
           <View style={[styles.noteContainer, { backgroundColor: noteColor }]}>
             <TextInput
               style={styles.noteInputStyle}
               multiline
-              numberOfLines={10}
+              //numberOfLines={3}
               //placeholderTextColor='#aaa'
               returnKeyType='done'
               ref={input => { this.inputs.note = input; }}
@@ -310,7 +333,7 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
               onChangeText={text => this.onNoteChange(text)}
             />
           </View>
-        </ScrollView>
+        </View>
       </View>
     );
   }
@@ -318,6 +341,76 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
 }
 
 export default connect(whatDoYouNeed)(NoteEdit);
+
+/*
+import React, { Component } from 'react';
+import {
+  StyleSheet,
+  TextInput,
+  View,
+  ScrollView,
+  KeyboardAvoidingView
+} from 'react-native';
+
+export default class App extends Component {
+
+  state = {
+      text: '',
+      textYPosition: 0,
+      textHeight: 0
+  };
+
+  updateScrollPosition(width, height){
+    let yPositionDifference = (height - this.state.textHeight)
+    let newYPosition = this.state.textYPosition + yPositionDifference
+    this.scroll.scrollTo({x: 0, y: newYPosition, animated: false})
+    this.setState({textHeight: height})
+  }
+
+  handleScroll(scrollEvent){
+    let textYPosition = scrollEvent.nativeEvent.contentOffset.y
+    this.setState({textYPosition})
+  }
+
+  render() {
+    return (
+      <KeyboardAvoidingView
+        behavior = "position"
+        keyboardVerticalOffset= {80}
+        keyboardDismissMode = "on-drag"
+      >
+        <View
+        style ={{height:500, backgroundColor: "blue"}}
+        />
+        <ScrollView
+          ref={(scroll) => {this.scroll = scroll;}}
+          onContentSizeChange = {(width, height) => this.updateScrollPosition(width, height)}
+          style = {{height:80}}
+          scrollEventThrottle = {1}
+          onScroll = {nativeEvent => this.handleScroll(nativeEvent)}
+        >
+            <TextInput
+              blurOnSubmit = {false}
+              multiline = {true}
+              style={styles.text}
+              underlineColorAndroid = "transparent"
+              onChangeText={text => this.setState({ text })}
+              placeholder={"Start Typing..."}
+            />
+        </ScrollView>
+      </KeyboardAvoidingView>
+    );
+  }
+}
+
+const styles = StyleSheet.create({
+  text: {
+    marginBottom: 16,
+    paddingHorizontal: 8,
+  },
+});
+
+*/
 
 /*
 
@@ -374,8 +467,9 @@ const styles = StyleSheet.create({
     fontSize: 24,
   },
   optionsBar: {
-    height: 34,
-    paddingBottom: 2,
+    height: 36,
+    flexDirection: 'row',
+    paddingTop: 2,
     justifyContent: 'center',
     alignItems: 'center',
     borderBottomWidth: 0.75,
@@ -386,6 +480,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f8f8',
   },
   noteInputStyle: {
+    //height: 400,
     paddingLeft: 12,
     paddingRight: 12,
     marginBottom: 30,
@@ -406,8 +501,9 @@ const styles = StyleSheet.create({
     fontWeight: '600'
   },
   imageIconStyle: {
-    height: 32,
-    width: 32,
+    height: 34,
+    width: 34,
+    marginHorizontal: 6,
     resizeMode: 'contain'
   },
   statusBar: {
@@ -427,6 +523,12 @@ const styles = StyleSheet.create({
     flex: 1,
     marginTop: 16,
     //borderRadius: 8,
+  },
+  innerContainer: {
+    flex: 1,
+    //alignItems: 'center',
+    backgroundColor: 'transparent',  // ... medium orange ...
+    //justifyContent: 'center',
   },
   inputContainer: {
     width: '70%',
