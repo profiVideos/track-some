@@ -2,10 +2,10 @@ import React from 'react';
 import { 
   View, 
   Text,
-  //Image, 
+  Alert,
+  Image, 
   StyleSheet, 
   Dimensions,
-  TouchableOpacity,
   TouchableNativeFeedback 
 } from 'react-native';
 import {
@@ -16,7 +16,7 @@ import {
 } from 'react-native-popup-menu';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import AppColors from '../templates/appColors';
-//import VerticalLink from '../images/verticalLink.png';
+import NotesLink from '../images/notesLink.png';
 
 const IconMenuOption = (props) => (
   <MenuOption 
@@ -24,17 +24,6 @@ const IconMenuOption = (props) => (
     text={`${props.icon}  ${props.text}`} 
   />
 );
-
-/*
-
-NEW:***********************************************************************
-
-My First Realm Cloud Instance;
-https://tracksome-live.us1.cloud.realm.io/
-
-NEW:***********************************************************************
-
-*/
 
 class NoteDisplay extends React.PureComponent {
   constructor(props) {
@@ -47,11 +36,6 @@ class NoteDisplay extends React.PureComponent {
     };
   }
 
-  componentWillMount() {
-    //console.log('inside note item ...');
-    //console.log('This Note Details are: ', JSON.stringify(this.props.item));
-  }
-
   componentWillUnmount() {
     Dimensions.removeEventListener('change', this.onDeviceChange);
   }
@@ -61,6 +45,10 @@ class NoteDisplay extends React.PureComponent {
       infoWidth: dims.window.width - 46
     });
   };
+
+  onNoteLinkPress = (card) => { 
+    Alert.alert('Go see this card: ', card);
+  }
 
   onTouchablePress = () => { 
     this.props.onPressItem(this.props.item.key);
@@ -86,42 +74,26 @@ class NoteDisplay extends React.PureComponent {
     </Menu>
   )
 
-/*
-    const lastUpdateDate = new Date(Number(this.props.item.updatedTimestamp))
-      .toLocaleString('de-DE', { hour12: false });
-        <View style={styles.dateWrapper}>
-          <Text style={styles.noteDate}>{lastUpdateDate}</Text>
-        </View>
-
-  <View style={styles.imageWrapper}>
-    <TouchableOpacity onPress={this.onColorChange}>
-      {this.props.item.imageThumb === '' ?  
-         <Text style={styles.itemIcon}>{this.props.item.icon}</Text> :
-         <Text style={styles.itemIcon}>Color Swatches</Text>} 
-    </TouchableOpacity>
-  </View>
-
-*/
   renderNoteLink() {
     if (this.props.item.card === '') return;
     return (
-      <View style={styles.cardLink}>
-        <Text>{this.props.item.card}</Text>
-      </View>
+      <TouchableNativeFeedback onPress={() => this.onNoteLinkPress(this.props.item.card)}>
+        <View style={styles.cardLink}>
+          <Image style={styles.imageStyle} source={NotesLink} />
+        </View>
+      </TouchableNativeFeedback>
     );
   }
 
   renderFullNote() {
-    if (!this.props.marked) return;
     const lastUpdateDate = new Date(Number(this.props.item.updatedTimestamp))
       .toLocaleString('de-DE', { hour12: false });
     return (
-      <View style={[styles.fullView, { backgroundColor: this.props.paperColor }]}>
+      <View>
         <View style={styles.infoBar}>
           <Text style={styles.dateMessage}>Updated: 
-            <Text style={styles.noteDate}> {lastUpdateDate}</Text>
+            <Text style={styles.boldedText}> {lastUpdateDate}</Text>
           </Text>
-          { this.renderNoteLink() }
         </View>
         <View style={styles.fullNote}>
           <Text style={styles.noteBody}>{this.props.item.note}</Text>
@@ -139,10 +111,19 @@ class NoteDisplay extends React.PureComponent {
     );
   }
 
+  renderNoteDetails() {
+    if (this.props.marked) return (this.renderFullNote());
+    const descLines = this.props.item.title === '' ? 2 : 1;
+    return (
+      <Text ellipsizeMode='tail' numberOfLines={descLines} style={styles.itemNote}>
+       {this.props.item.note}
+      </Text>
+    );
+  }
+
   render() {
-    const descLines = this.props.item.title === '' ? 3 : 2;
     const infoWidth = this.state.infoWidth;
-    const backColor = this.props.hilite;   // ... AppsColor.hiliteColor, otherwise white ...
+    const backColor = this.props.hilite;   // ... AppColors.hiliteColor, otherwise white ...
     return (
       <View style={styles.mainWrapper}>
         <View style={styles.outerWrapper}>
@@ -152,28 +133,20 @@ class NoteDisplay extends React.PureComponent {
           <View style={[styles.noteWrapper, { backgroundColor: backColor }]}>
             <TouchableNativeFeedback onPress={this.onTouchablePress}>
               <View style={[styles.infoWrapper, { width: infoWidth }]}>
-                { this.renderNoteTitle() }
-                <Text ellipsizeMode='tail' numberOfLines={descLines} style={styles.itemNote}>
-                 {this.props.item.note}
-                </Text>
+                <View style={styles.titleBar}>
+                  { this.renderNoteTitle() }
+                  { this.renderNoteLink() }
+                </View>
+                { this.renderNoteDetails() }
               </View>
             </TouchableNativeFeedback>
             <View style={styles.checkWrapper}>
               <TouchableNativeFeedback>
                 { this.renderOptionMenu() }
               </TouchableNativeFeedback>
-              <TouchableOpacity onPress={this.onToggleCheck}>
-                <Icon 
-                  size={19}
-                  name={this.props.checkIcon} 
-                  style={styles.checkStyle} 
-                  color={'#212121'} 
-                />            
-              </TouchableOpacity>
             </View>
           </View>
         </View>
-        { this.renderFullNote() }
       </View>
     );
   }
@@ -200,16 +173,32 @@ const styles = StyleSheet.create({
   noteBody: {
     color: 'black'
   },
+  imageStyle: {
+    height: 14,
+    width: 14,
+    //opacity: 0.65,
+    resizeMode: 'contain'
+  },
+  cardLink: {
+    //marginHorizontal: 3,
+    alignSelf: 'flex-end'
+    //width: '7%',
+    //paddingVertical: 3,
+    //paddingHorizontal: 5,
+    //borderRadius: 20,
+    //borderWidth: 1,
+    //borderColor: '#aaa'
+  },
   infoBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-around',
-    backgroundColor: AppColors.darkerColor
+    justifyContent: 'space-between',
+    //backgroundColor: AppColors.mainDarkColor
   },
   fullNote: {
-    padding: 12,
-    paddingTop: 6,
-    paddingBottom: 8,
+    paddingVertical: 5,
+    //paddingTop: 6,
+    //paddingBottom: 8,
   },
   fullView: {
     marginLeft: 16,
@@ -232,9 +221,12 @@ const styles = StyleSheet.create({
     //width: '33.3333333%',
     //maxWidth: 70,
     elevation: 3,
-    height: 65,
-    paddingLeft: 3,
-    paddingRight: 5,
+    //height: 65,
+    //paddingLeft: 3,
+    //paddingRight: 5,
+    paddingVertical: 5,
+    paddingHorizontal: 6,
+    paddingBottom: 8,
     marginRight: 3,
     marginLeft: 2,
     borderRadius: 3,
@@ -244,23 +236,24 @@ const styles = StyleSheet.create({
   },
   priorityView: {
     width: 4,
-    height: 36,
+    //height: 36,
     marginTop: 3,
     borderTopLeftRadius: 2,
     borderBottomLeftRadius: 2,
   },
   dateMessage: {
     fontSize: 11,
-    padding: 3,
+    //paddingHorizontal: 3,
     //textAlign: 'center',
-    color: '#ccc',
+    color: '#777',
   },
-  noteDate: {
+  boldedText: {
     fontSize: 11,
-    padding: 3,
-    marginLeft: 5,
+    //paddingHorizontal: 3,
+    marginHorizontal: 5,
+    fontWeight: '500',
     //textAlign: 'center',
-    color: 'white',
+    //color: 'white',
   },
   menuTitle: {
     fontWeight: '500', 
@@ -271,7 +264,7 @@ const styles = StyleSheet.create({
   },
   itemNote: {
     fontSize: 13,
-    marginTop: -3,
+    //marginTop: -3,
   },
   extraInfo: {
     fontSize: 11,
@@ -292,17 +285,24 @@ const styles = StyleSheet.create({
   },
   menuWrapper: {
     padding: 5,
-    paddingTop: 0,
+    paddingTop: 8,
     alignItems: 'center',
     justifyContent: 'center'
   },
   checkStyle: {
     paddingTop: 3
   },
+  titleBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
   itemTitle: {
+    width: '95%',
     fontSize: 15,
     fontWeight: '500',
     color: '#333',
+    marginBottom: -3
   },
   itemIcon: {
     height: 60,

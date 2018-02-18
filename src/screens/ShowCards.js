@@ -177,8 +177,8 @@ class ShowCard extends React.PureComponent {
   onCardItemMenuPress(option, item) {
     switch (option) {
       case 'edit': {
-        //console.log('Edit was selected for item key ', item.key);
-        ToastAndroid.show('Edit that Info', ToastAndroid.LONG);
+        this.props.dispatch(currentCard(item));
+        this.openBuildCardModal(item.key);
         break;
       }
       case 'tags': {

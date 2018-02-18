@@ -28,17 +28,6 @@ const OpenMainTabs = () => {
         Navigation.startTabBasedApp({
           tabs: [
             {
-              screen: 'tracksome.ShowCards',
-              label: 'Cards',
-              title: 'Show Cards',
-              icon: sources[1],
-              leftButtons: [{ icon: sources[4], id: 'menu' }],
-              rightButtons: [
-                { icon: sources[5], id: 'options' },
-                { icon: sources[7], id: 'search' },
-              ]
-            },
-            {
               screen: 'tracksome.ShowNotes',
               label: 'Notes',
               title: 'List Notes',
@@ -49,6 +38,17 @@ const OpenMainTabs = () => {
                 { icon: sources[7], id: 'search' },
               ],
               animated: true
+            },
+            {
+              screen: 'tracksome.ShowCards',
+              label: 'Cards',
+              title: 'Show Cards',
+              icon: sources[1],
+              leftButtons: [{ icon: sources[4], id: 'menu' }],
+              rightButtons: [
+                { icon: sources[5], id: 'options' },
+                { icon: sources[7], id: 'search' },
+              ]
             },
             {
               screen: 'tracksome.ShowLists',

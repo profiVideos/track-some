@@ -1,21 +1,33 @@
 import React, { PureComponent } from 'react';
+import { connect } from 'react-redux';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {
   View,
   Text,
-  //Alert,
+  Alert,
   Image,
   TextInput,
   StyleSheet,
-  //ScrollView,
+  ScrollView,
+  ToastAndroid,
   TouchableOpacity,
   //TouchableHighlight,
   TouchableNativeFeedback
 } from 'react-native';
 import IonIcon from 'react-native-vector-icons/Ionicons';
+import { UniqueId } from '../components/common/UniqueId';
 import AppColors from '../templates/appColors';
 import ItemNotes from '../images/ItemNotes.png';
 import RenderColors from './RenderColors';
+import {
+  addNote,
+  clearNote,
+  updateNote,
+  addCardNote,
+  updateCardNotes,
+  toggleColorPicker,
+  propertyNoteChanged
+} from '../store/actions';
 
 //const itemHeight = 65;  // ... used to calculate faster scrolls ...
 
@@ -32,7 +44,27 @@ const optionStyles = (color) => {
 };
 */
 
+const whatDoYouNeed = state => {
+  return {
+    thisNote: state.notes.thisNote,
+    thisCard: state.cards.thisCard,
+    somethingChanged: state.notes.editChange,
+    colorPicker: state.notes.colorPicker,
+    notesModalOpen: state.notes.notesWindowOpen,
+    cardNoteLinksChanged: state.cards.notesChanged,
+  };
+};
+
 class NoteEdit extends PureComponent {
+  static navigatorStyle = {
+    drawUnderNavBar: false,
+    screenBackgroundColor: AppColors.paperColor,
+    navBarBackgroundColor: AppColors.accentColor,
+    contextualMenuStatusBarColor: '#0092d1',
+    contextualMenuBackgroundColor: '#00adf5',
+    contextualMenuButtonsColor: '#ffffff',
+    navBarTranslucent: false
+  };
 
   constructor(props) {
     super(props);
@@ -58,37 +90,110 @@ class NoteEdit extends PureComponent {
     };
   }
 
-/*
-  onClosePressed = () => {
-    Alert.alert('Tag inside TagEdit and requested the close: ');
+  componentWillReceiveProps(nextProps) {
+    //-------------------------------------------------------------------------------------
+    // ... due to the async processing we can only save when everything has been added ...
+    // ... if main if is true - the tags Modal window has now closed - save & clean up ...
+    //-------------------------------------------------------------------------------------
+    if (this.props.notesModalOpen && nextProps.notesModalOpen === false) {
+      if (nextProps.cardNoteLinksChanged === true && this.props.thisCard.key !== '') {   
+        this.props.dispatch(updateCardNotes(this.props.thisCard.key, nextProps.thisCard.notes));
+      }
+      this.props.dispatch(clearNote());  // ... removes the card link from note record ...
+      //this.props.dispatch(clearCard());
+    }
+  }
+
+  onColorChange(color) {
+    this.props.dispatch(propertyNoteChanged('color', color));
+  }
+
+  onTitleChange(text) {
+    this.props.dispatch(propertyNoteChanged('title', text));
+  }
+
+  onNoteChange(text) {
+    this.props.dispatch(propertyNoteChanged('note', text));
+  }
+
+  onClosePress(card) {
+    ToastAndroid.show(`Close Note with Card: ${card}`, ToastAndroid.SHORT);
+    if (this.props.thisNote.note !== '') {
+      // ... user closed without hitting the plus '+' button first (can happen!) ...
+      this.addNote2Card(card, true);  // ... true = we are finished ...
+    }
     this.props.onClosePress();
-    //this.props.onTapItem(this.props.emojiName, this.props.emojiString);
-  } 
-*/
+  }
 
   focusNextField(id) {
     this.inputs[id].focus();
   }
 
-/*
-  textInputDone(text) {
-    console.log('Finished the entry of: ', text);
-  }
-*/
-
   pressedButton(whichOne) {
+    console.log('Pressed this button: ', whichOne);
     //Alert.alert('pressed the button - ' + which);
-    this.props.onButtonPress(whichOne);
+    //this.props.onButtonPress(whichOne);
+    this.props.dispatch(toggleColorPicker(this.props.colorPicker));
+  }
+
+  addOrUpdateNote(card, canClose) {
+    console.log(canClose);
+    ToastAndroid.show(`Add/Update Note with Card: ${card}`, ToastAndroid.SHORT);
+    if (this.props.somethingChanged) {
+      if (this.props.thisNote.key === '') {
+        const newNoteKey = UniqueId();
+        this.props.dispatch(addNote(
+          newNoteKey,
+          this.props.thisNote.card,
+          this.props.thisNote.icon, 
+          this.props.thisNote.title, 
+          this.props.thisNote.note, 
+          this.props.thisNote.color, 
+          this.props.thisNote.priority, 
+          this.props.thisNote.reminder
+        ));
+        // ... if we are editing an existing card, we need ...
+        // ... to update the card with this new note link ...
+        if (card !== '') {
+          this.props.dispatch(addCardNote(newNoteKey));
+        }
+      } else {
+        // ... update this note ...
+        this.props.dispatch(updateNote(this.props.thisNote));
+        // ... the key is not being added or deleted from the card so all's good ...
+      }
+    }
+    // ... close the window if the user requested it ...
+    //if (canClose) {
+    //  this.props.dispatch(closeNotesModal(''));
+    //  //ToastAndroid.show(`Link with Card is: ${card}`, ToastAndroid.SHORT);
+    //}
+  }
+
+  addNote2Card(card, canClose) {
+    if (this.props.thisNote.note !== '') {
+      if (this.props.thisNote.title === '') {
+        Alert.alert('Adding Note', 
+          `You are about to add a note without a title.
+Do you really want to do this?\n
+If you DO NOT wish to use note titles, please turn them off in the options panel.`,
+          [{ text: 'Cancel', style: 'cancel' },
+           { text: 'OK', onPress: () => this.addOrUpdateNote(card, canClose) }]);
+      } else {
+        // ... just save the note ...
+        this.addOrUpdateNote(card, canClose);
+      }
+    }
   }
 
   renderColorSwatches() {
-    if (this.props.pickerActive === false) return;
+    if (this.props.colorPicker === false) return;
     return (
       <View style={styles.colorBar}>
         <RenderColors 
           myColors={this.state.colors}
-          activeColor={this.props.noteColor}
-          onPressColor={color => this.props.onColorChange(color)} 
+          activeColor={this.props.thisNote.color !== '' ? this.props.thisNote.color : '#f8f8f8'}
+          onPressColor={color => this.onColorChange(color)} 
         />
       </View>
     );
@@ -114,12 +219,12 @@ class NoteEdit extends PureComponent {
     );
   }
 
-  renderAddButton(noteId) {
-    if (noteId !== '') return;     // ... don't need to show '+' button ...
+  renderAddButton(noteKey) {
+    if (noteKey !== '') return;   // ... no need to show '+' button when updating note ...
     return (
       <TouchableOpacity 
         //disabled={this.props.thisNote.title === ''} 
-        onPress={this.props.onNoteAdd} 
+        onPress={() => this.addNote2Card(this.props.thisNote.card, false)} 
       >
         <View style={{ alignItems: 'center' }}>
           <Icon size={28} name='plus' color={AppColors.darkerColor} />
@@ -135,83 +240,90 @@ class NoteEdit extends PureComponent {
 
   render() {
     const title = (this.props.id === '' ? 'Add a New Note' : 'Edit a Note');
-    console.log('Has Photo: ', this.props.mimeType);
+    const noteColor = (this.props.thisNote.color !== '' ? this.props.thisNote.color : '#f8f8f8');
+    //console.log('Has Photo: ', this.props.mimeType);
     return (
       <View style={styles.outerContainer}>
-
-        <View style={styles.headerContainer}>
-          <View style={{ flexDirection: 'row' }}>
-            <Image style={styles.imageIconStyle} source={ItemNotes} />
-            <Text style={styles.headline}>{title}</Text>
-          </View>
-          <TouchableOpacity onPress={this.props.onClosePress}>
-            <View style={{ alignSelf: 'flex-end' }}>
-              <Icon size={20} name='times' color={AppColors.mainLiteColor} />
+        <ScrollView
+          contentContainerStyle={styles.scrollStyle}
+          keyboardShouldPersistTaps='always'
+        >
+          <View style={styles.headerContainer}>
+            <View style={{ flexDirection: 'row' }}>
+              <Image style={styles.imageIconStyle} source={ItemNotes} />
+              <Text style={styles.headline}>{title}</Text>
             </View>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.statusBar}>
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.textInputStyle}
-              autoFocus
-              returnKeyType='next'
-              ref={input => { this.inputs.title = input; }}
-              blurOnSubmit={false}
-              onSubmitEditing={() => { this.inputs.note.focus(); }}
-              //onBlur={() => { this.textInputDone(this.props.noteTitle); }}
-              disableFullscreenUI
-              underlineColorAndroid={'transparent'}
-              placeholder={'Note Title ... '}
-              value={this.props.noteTitle}
-              onChangeText={this.props.onTitleChange}
-            />
+            <TouchableOpacity onPress={this.props.onClosePress}>
+              <View style={{ alignSelf: 'flex-end' }}>
+                <Icon size={20} name='times' color={AppColors.mainLiteColor} />
+              </View>
+            </TouchableOpacity>
           </View>
-          { this.renderAddButton(this.props.id) }
-          <TouchableNativeFeedback onPress={this.props.onClosePress}>
-            <View style={styles.buttonFinish}> 
-              <IonIcon 
-                name='md-checkmark-circle-outline' 
-                size={34} 
-                color={AppColors.paperColor} 
+
+          <View style={styles.statusBar}>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.textInputStyle}
+                autoFocus
+                returnKeyType='next'
+                ref={input => { this.inputs.title = input; }}
+                blurOnSubmit={false}
+                onSubmitEditing={() => { this.inputs.note.focus(); }}
+                disableFullscreenUI
+                underlineColorAndroid={'transparent'}
+                placeholder={'Note Title ... '}
+                value={this.props.thisNote.title}
+                onChangeText={text => this.onTitleChange(text)}
               />
             </View>
-          </TouchableNativeFeedback>
-        </View>
-        <View style={styles.optionsBar}>
-          { this.renderOptionButtons() }
-        </View>
-        { this.renderColorSwatches() }
-        { this.renderPhoto() }
-        <View style={[styles.noteContainer, { backgroundColor: `${this.props.noteColor}` }]}>
-          <TextInput
-            style={styles.noteInputStyle}
-            multiline
-            numberOfLines={10}
-            //placeholderTextColor='#aaa'
-            returnKeyType='done'
-            ref={input => { this.inputs.note = input; }}
-            underlineColorAndroid={'transparent'}
-            //onBlur={() => { this.textInputDone(this.props.note); }}
-            blurOnSubmit={false}
-            textBreakStrategy={'highQuality'}
-            disableFullscreenUI
-            placeholder={'Write something amazing ... '}
-            value={this.props.note}
-            onChangeText={this.props.onNoteChange}
-          />
-        </View>
-
+            { this.renderAddButton(this.props.id) }
+            <TouchableNativeFeedback onPress={() => this.onClosePress(this.props.thisNote.card)}>
+              <View style={styles.buttonFinish}> 
+                <IonIcon 
+                  name='md-checkmark-circle-outline' 
+                  size={34} 
+                  color={AppColors.paperColor} 
+                />
+              </View>
+            </TouchableNativeFeedback>
+          </View>
+          <View style={styles.optionsBar}>
+            { this.renderOptionButtons() }
+          </View>
+          { this.renderColorSwatches() }
+          { this.renderPhoto() }
+          <View style={[styles.noteContainer, { backgroundColor: noteColor }]}>
+            <TextInput
+              style={styles.noteInputStyle}
+              multiline
+              numberOfLines={10}
+              //placeholderTextColor='#aaa'
+              returnKeyType='done'
+              ref={input => { this.inputs.note = input; }}
+              underlineColorAndroid={'transparent'}
+              //onBlur={() => { this.textInputDone(this.props.note); }}
+              blurOnSubmit={false}
+              textBreakStrategy={'highQuality'}
+              disableFullscreenUI
+              placeholder={'Write something amazing ... '}
+              value={this.props.thisNote.note}
+              onChangeText={text => this.onNoteChange(text)}
+            />
+          </View>
+        </ScrollView>
       </View>
     );
   }
 
 }
 
-export default NoteEdit;
+export default connect(whatDoYouNeed)(NoteEdit);
 
 /*
+
+IMPORTANT TRICK: 
+<View style={[styles.noteContainer, { backgroundColor: `${this.props.noteColor}` }]}>
+
   renderConversations() {
     let conversationContent = this.state.conversationArray.map((convObj, i) => {
       return <View key={i} 
@@ -228,6 +340,10 @@ export default NoteEdit;
 */
 
 const styles = StyleSheet.create({
+  scrollStyle: {
+    //flex: 1
+    //marginTop: 40,
+  },
   photoStyle: {
     width: '80%',
     height: 150,
@@ -308,7 +424,9 @@ const styles = StyleSheet.create({
     shadowRadius: 3
   },
   outerContainer: {
-    borderRadius: 8,
+    flex: 1,
+    marginTop: 16,
+    //borderRadius: 8,
   },
   inputContainer: {
     width: '70%',
@@ -331,8 +449,8 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     backgroundColor: AppColors.mainDarkColor,
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
+    //borderTopLeftRadius: 8,
+    //borderTopRightRadius: 8,
     padding: 12,
     paddingTop: 8,
     paddingBottom: 8,

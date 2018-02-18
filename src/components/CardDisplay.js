@@ -119,6 +119,8 @@ class CardDisplay extends React.PureComponent {
 
 /*
            <Text style={styles.tagsTextStyle}>{this.props.numTags}</Text>
+         <View style={styles.tagsBadge}>
+         <View style={styles.notesBadge}>
 
 */
 
@@ -129,16 +131,12 @@ class CardDisplay extends React.PureComponent {
     const tagsBadge = (this.props.numTags === 0) ? <View /> :
       (<View style={{ flexDirection: 'row', alignItems: 'center' }}>
          <Text style={styles.extraInfo}>Tags:</Text>
-         <View style={styles.tagsBadge}>
-           <Text style={styles.tagsTextStyle}>{this.props.numTags}</Text>
-         </View>
+         <Text style={styles.numTextStyle}>{this.props.numTags}</Text>
        </View>);
     const notesBadge = (this.props.numNotes === 0) ? <View /> :
       (<View style={{ flexDirection: 'row', alignItems: 'center' }}>
          <Text style={styles.extraInfo}>Notes:</Text>
-         <View style={styles.notesBadge}>
-           <Text style={styles.notesTextStyle}>{this.props.numNotes}</Text>
-         </View>
+         <Text style={styles.numTextStyle}>{this.props.numNotes}</Text>
        </View>);
     const itemDesc = (this.props.item.desc === '') ? <View /> :
       (<Text ellipsizeMode='tail' numberOfLines={1} style={styles.subHeading}>
@@ -260,10 +258,12 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 3,
     resizeMode: 'cover'
   },
-  tagsTextStyle: {
-    color: 'white',
-    textAlign: 'center',
+  numTextStyle: {
+    color: '#777',
     fontSize: 10,
+    fontWeight: '500',
+    marginHorizontal: 4,
+    paddingBottom: 2,
   },
   tagsBadge: {
     backgroundColor: 'rgba(30,30,200,0.45)',
@@ -273,11 +273,6 @@ const styles = StyleSheet.create({
     height: 14,
     borderRadius: 14,
     marginBottom: 3,
-  },
-  notesTextStyle: {
-    color: 'black',
-    textAlign: 'center',
-    fontSize: 10,
   },
   notesBadge: {
     backgroundColor: 'rgba(200,200,30,0.45)',

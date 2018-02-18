@@ -58,6 +58,7 @@ export const CLOSE_CARDS_MODAL = 'CLOSE_CARDS_MODAL';
 export const CARDS_STORAGE_KEY = '@track!some:my_cards';
 export const CARD_EDIT_CHANGE = 'CARD_EDIT_CHANGE';
 export const ADD_CARD = 'ADD_CARD';
+export const GET_CARD = 'GET_CARD';
 export const ADD_CARD_TAG = 'ADD_CARD_TAG';
 export const ADD_CARD_NOTE = 'ADD_CARD_NOTE';
 export const ADD_CARD_IMAGE = 'ADD_CARD_IMAGE';

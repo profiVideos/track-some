@@ -98,10 +98,25 @@ export const updateCardNotes = (key, newNotes) => {
   });
 };
 
-export const updateCard = (key, name, desc, icon, category) => {
+export const updateCard = 
+  (key, list, name, desc, icon, type, rating, cat, thumb, mime, bcode, cTags, notes) => {
   tsRealm.write(() => {
     // ... update this card based on the key ...
-    tsRealm.create('Card', { key, name, desc, icon, category }, true);
+    tsRealm.create('Card', {
+      key, 
+      list,
+      name,
+      desc,
+      icon,
+      iconType: type,
+      rating,
+      category: cat,
+      imageThumb: thumb,
+      mimeType: mime,
+      barcode: bcode,
+      tags: JSON.stringify(cTags),
+      notes
+    }, true);  // ... update based on unique key ...
   });
 };
 

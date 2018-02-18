@@ -32,6 +32,7 @@ import PhotoAdd from '../images/PhotoAdd.png';
 
 import { 
   addCard,
+  updateCard,
   addCardTag,
   addCardImage,
   openTagsModal,
@@ -115,6 +116,7 @@ class BuildCard extends PureComponent {
 
   componentWillMount() {
     console.log('inside build cards ...');
+    this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     this.cleanTempSpace();  // ... cleans up images in tmp directory ...
     if (this.props.catlist === undefined) {
       this.props.dispatch(loadCategories());
@@ -145,7 +147,6 @@ class BuildCard extends PureComponent {
       this.setState({ getIcon4Card: false });
       //console.log('A new Emoji Code was selected');
     }
-    this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     // ... if the cards list is dirty (used) then we should save it ...
     // ... this disappears once we move this module over to Realm ...
     //if (nextProps.listUpdated) {
@@ -159,7 +160,6 @@ class BuildCard extends PureComponent {
     if (event.type === 'NavBarButtonPress') {
       switch (event.id) {
         case 'menu': {
-          console.log('pressed the menu icon');
           this.props.navigator.toggleDrawer({ side: 'left', animated: true });
           break;
         }
@@ -319,23 +319,45 @@ class BuildCard extends PureComponent {
     }
   }
 
-  addThisCard() {
-    //console.log('Inside Add This Card: ', this.props.thisCard.name);
+  updateThisCard() {
+    // ... we have to have a card name in order to save ...
     if (this.props.thisCard.name !== '') {
-      this.props.dispatch(addCard(
-        this.props.thisCard.list,
-        this.props.thisCard.name,
-        this.props.thisCard.desc,
-        this.props.thisCard.icon,
-        this.props.thisCard.iconType,
-        this.props.thisCard.rating,
-        this.props.thisCard.category,
-        this.props.thisCard.imageThumb,
-        this.props.thisCard.mimeType,
-        this.props.thisCard.barcode,
-        this.props.thisCard.tags,
-        this.props.thisCard.notes
-      ));
+      if (this.props.thisCard.key === '') {
+        // ... we are adding a new card ...
+        this.props.dispatch(addCard(
+          this.props.thisCard.list,
+          this.props.thisCard.name,
+          this.props.thisCard.desc,
+          this.props.thisCard.icon,
+          this.props.thisCard.iconType,
+          this.props.thisCard.rating,
+          this.props.thisCard.category,
+          this.props.thisCard.imageThumb,
+          this.props.thisCard.mimeType,
+          this.props.thisCard.barcode,
+          this.props.thisCard.tags,
+          this.props.thisCard.notes
+        ));
+      } else {
+        // ... we should update this card ...
+        this.props.dispatch(updateCard(
+          this.props.thisCard.key,
+          this.props.thisCard.list,
+          this.props.thisCard.name,
+          this.props.thisCard.desc,
+          this.props.thisCard.icon,
+          this.props.thisCard.iconType,
+          this.props.thisCard.rating,
+          this.props.thisCard.category,
+          this.props.thisCard.imageThumb,
+          this.props.thisCard.mimeType,
+          this.props.thisCard.barcode,
+          this.props.thisCard.tags,
+          this.props.thisCard.notes
+        ));
+        // ... on an update auto close the modal window ...
+        this.props.onClosePress();
+      }
     }
   }
 
@@ -543,7 +565,7 @@ class BuildCard extends PureComponent {
         </View>
         <TouchableOpacity 
           disabled={this.props.thisCard.name === ''} 
-          onPress={this.addThisCard.bind(this)}
+          onPress={this.updateThisCard.bind(this)}
           style={styles.masterButton}
         >
           <View style={styles.innerButton}>

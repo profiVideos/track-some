@@ -1,6 +1,7 @@
 import { ToastAndroid } from 'react-native';
 import {
   ADD_CARD,
+  GET_CARD,
   //SORT_CARDS, 
   CLEAR_CARD,
   UPDATE_CARD,
@@ -44,6 +45,7 @@ const initialState = {
   editCard: '',          // ... ht eunique key of the item being edited (blank for new) ...
   editCardTags: '',      // ... the unique key of the item to be edited ...
   searchFor: '',
+  //cardFound: {},
   thisCard: {
     key: '',
     list: '',
@@ -266,6 +268,7 @@ const CardReducer = (state = initialState, action) => {
         lastUpdated: Date.now()
       };
 
+    case GET_CARD:
     case CURRENT_CARD:
       return {
         ...state,

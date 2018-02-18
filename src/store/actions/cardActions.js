@@ -2,6 +2,7 @@
 //import { AsyncStorage } from 'react-native';
 import {
   ADD_CARD,
+  GET_CARD,
   CLEAR_CARD,
   UPDATE_CARD,
   REMOVE_CARD,
@@ -54,6 +55,14 @@ export const addCard =
   };
 };
 
+export const getCard = (key) => {
+  const item = store.getCard(key);
+  return {
+    type: GET_CARD,
+    payload: { item }
+  };
+};
+
 export const addCardTag = (tag) => {
   return {
     type: ADD_CARD_TAG,
@@ -96,8 +105,9 @@ export const setCardSelected = (key, isSelected) => {
   };
 };
 
-export const updateCard = (key, name, desc, icon, category) => {
-  store.updateCard(key, name, desc, icon, category);
+export const updateCard = 
+  (key, list, name, desc, icon, type, rating, cat, thumb, mime, bcode, tags, notes) => {
+  store.updateCard(key, list, name, desc, icon, type, rating, cat, thumb, mime, bcode, tags, notes);
   return {
     type: UPDATE_CARD
   };
