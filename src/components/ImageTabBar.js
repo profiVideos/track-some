@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     height: 32,
     flexDirection: 'row',
     backgroundColor: '#525252',
-    paddingTop: 2,
+    paddingTop: 3,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0,0,0,0.25)',
   },

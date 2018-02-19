@@ -75,6 +75,7 @@ Padding below text input line: 4dp
           underlineColor={this.props.dense ? 'transparent' : ulineColor}
           underlineActiveColor={this.props.dense ? 'transparent' : ulineActiveColor} 
           underlineColorAndroid='transparent'
+          multiline={this.props.multiline}
           {...this.props}
         />
       </View>

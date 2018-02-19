@@ -39,19 +39,21 @@ const styles = StyleSheet.create({
   }
 });
 
-const RenderTags = ({ myTags, onPressTag }) => {
-  const myTagsContent = myTags.map((tag, i) => {
+const RenderTags = (props) => {
+  const showDeleteIcon = (props.noRemove === true ? <Text /> :
+          <Icon size={13} name='times-circle' color={AppColors.accentColor} />);
+  const myTagsContent = props.myTags.map((tag, i) => {
     return (
       <TouchableHighlight 
         key={i} 
-        onPress={() => { onPressTag(tag); }} 
+        onPress={() => { props.onPressTag(tag); }} 
         style={styles.tagItem} 
         underlayColor='rgba(255,0,0,0.05)'
       >
         <View key={i} style={{ flexDirection: 'row', alignItems: 'center' }} >
           <Text style={styles.smallDot}>⚫</Text>
           <Text style={styles.textValue}>{ tag }</Text>
-          <Icon size={13} name='times-circle' color={AppColors.accentColor} />
+          {showDeleteIcon}
         </View> 
       </TouchableHighlight>
     );                          

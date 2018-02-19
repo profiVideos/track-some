@@ -462,6 +462,7 @@ class BuildCard extends PureComponent {
       <View style={styles.editFieldStyle}>
         <MDInput
           style={styles.inputStyle}
+          multiline
           label='Description (optional)'
           placeholder='Briefly describe this item ... '
           value={this.props.thisCard.desc}

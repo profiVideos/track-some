@@ -5,6 +5,8 @@ import {
   Image,
   StyleSheet, 
   Dimensions,
+  //ScrollView,
+  //ToastAndroid,
   TouchableOpacity,
   TouchableNativeFeedback 
 } from 'react-native';
@@ -14,10 +16,12 @@ import {
   MenuOption,
   MenuTrigger
 } from 'react-native-popup-menu';
+import { Tab, Tabs } from 'native-base';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import ScrollableTabView from 'react-native-scrollable-tab-view';
+//import ScrollableTabView from 'react-native-scrollable-tab-view';
 import ImageTabBar from './ImageTabBar';
 import AppColors from '../templates/appColors';
+import RenderTags from '../components/RenderTags';
 
 const IconMenuOption = (props) => (
   <MenuOption 
@@ -26,15 +30,26 @@ const IconMenuOption = (props) => (
   />
 );
 
+const menuOptionsStyles = {
+  optionsContainer: {
+    width: 120,
+    backgroundColor: AppColors.darkerColor,  // ... dark cyan ...
+  },
+  optionText: {
+    color: 'white',
+  },
+};
+
 /*
 Cast: Cathy Heaven, Barbara Bieber, Ashley Woods, Jennifer James
 Genres: All Sex, Big Boobs
 */
 
-class CardDisplay extends React.PureComponent {
+class CardDisplay extends React.Component {
   constructor(props) {
     super(props);
     Dimensions.addEventListener('change', this.onDeviceChange);
+    //this.renderMyTags = this.renderMyTags.bind(this);
     this.state = {
       didSave: false,
       isVisible: false,
@@ -71,22 +86,28 @@ class CardDisplay extends React.PureComponent {
   onMenuSelect = (value, item) => { 
     this.props.onMenuPress(value, item);
   }
+
+  itemTagRemove() {
+    //this.props.dispatch(deleteCardTag(tag));
+  }
+
 /*
       <View style={styles.fullCard}>
 import PictureFrame from '../images/PictureFrameBare.png';
 import ItemInfo from '../images/ItemInfo.png';
 import ItemNote from       
-*/
 
-  renderFullCard() {
-    return (
+        <View tabLabel="PictureFrame" style={styles.tabView}>
+        <View tabLabel="ItemInfo" style={styles.tabView}>
+        <View tabLabel="ItemNote" style={styles.tabView}>
+
       <ScrollableTabView
-        style={{ backgroundColor: 'black', height: 345 }}
+        style={{ backgroundColor: AppColors.paperColor, height: 345 }}
         initialPage={0}
         //tabBarPosition='overlayTop'
         renderTabBar={() => <ImageTabBar optionMenu={this.renderOptionMenu} />}
       >
-        <View tabLabel="PictureFrame" style={styles.tabView}>
+        <ScrollView style={{ height: 200 }} contentContainerStyle={{ height: 200 }}>
           <View style={styles.responsiveContainer}>
             <Image 
              style={styles.fullWidthImage}
@@ -95,14 +116,52 @@ import ItemNote from
               `data:${this.props.item.mimeType};base64,${this.props.item.imageThumb}` }} 
             />
           </View>
-        </View>
-        <View tabLabel="ItemInfo" style={styles.tabView}>
-          <Text>This is the info panel</Text>
-        </View>
-        <View tabLabel="ItemNote" style={styles.tabView}>
+        </ScrollView>
+        <ScrollView>
+          { this.renderInfoPanel() }
+        </ScrollView>
+        <ScrollView>
           <Text>And the notes go here</Text>
-        </View>
+        </ScrollView>
       </ScrollableTabView>
+      <View style={{ flex: 1, backgroundColor: AppColors.paperColor }}>
+      </View>
+
+*/
+
+  renderFullCard() {
+    return (
+      <Tabs renderTabBar={() => <ImageTabBar />}>
+        <Tab heading="Tab1" style={styles.tabView}>
+          <View style={styles.responsiveContainer}>
+            <Image 
+             style={styles.fullWidthImage}
+             //style={styles.responsiveImg} 
+             source={{ uri: 
+              `data:${this.props.item.mimeType};base64,${this.props.item.imageThumb}` }} 
+            />
+          </View>
+        </Tab>
+        <Tab heading="Tab2" style={styles.tabView}>
+          { this.renderInfoPanel() }
+        </Tab>
+        <Tab heading="Tab3" style={styles.tabView}>
+          <Text>And the notes go here</Text>
+        </Tab>
+      </Tabs>
+    );
+  }
+
+  renderMyTags() {
+    if (this.props.marked === false) return;
+    return (
+      <View style={styles.tagsBar}>
+        <RenderTags
+          noRemove
+          myTags={JSON.parse(this.props.item.tags)} 
+          onPressTag={tag => this.itemTagRemove(tag)} 
+        />
+      </View>
     );
   }
 
@@ -120,8 +179,34 @@ import ItemNote from
     </Menu>
   )
 
+  renderInfoPanel() {
+    if (this.props.marked === false) return;
+    return (
+      <View style={styles.cardContainer}>
+        <View style={styles.textContainer}>
+
+          <View style={styles.rowStyle}>
+            <View style={styles.previewOutline}>
+              <Text style={styles.emojiIcon}>{this.props.item.icon}</Text>
+            </View>
+            <View>
+              <Text>Rating goes here!</Text>
+              <Text style={styles.extraInfo} >{this.props.catDesc}</Text>
+            </View>
+          </View>
+
+          <Text style={[styles.itemName, { paddingTop: 7 }]}>{this.props.item.name}</Text>
+          <Text style={[styles.subHeading, { marginTop: 0 }]}>{this.props.item.desc}</Text>
+          { this.renderMyTags() }
+
+        </View>
+      </View>
+    );
+  }
+
 /*
-           <Text style={styles.tagsTextStyle}>{this.props.numTags}</Text>
+
+         <Text style={styles.tagsTextStyle}>{this.props.numTags}</Text>
          <View style={styles.tagsBadge}>
          <View style={styles.notesBadge}>
 
@@ -129,7 +214,7 @@ import ItemNote from
 
   render() {
     const infoWidth = this.state.infoWidth;
-    const backColor = this.props.hilite;   // ... AppsColor.hiliteColor, otherwise white ...
+    const backColor = this.props.hilite;   // ... AppColors.hiliteColor, otherwise white ...
     const renderFull = this.props.marked ? this.renderFullCard() : <View />;
     const tagsBadge = (this.props.numTags === 0) ? <View /> :
       (<View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -199,29 +284,81 @@ import ItemNote from
       </View>
     );
   }
+/*
+            <View>
+              { this.renderRating() }
+              { this.renderCategory() }
+            </View>
+*/
 
 }
 
 export default CardDisplay;
 
-const menuOptionsStyles = {
-  optionsContainer: {
-    width: 120,
-    backgroundColor: AppColors.darkerColor,  // ... dark cyan ...
-  },
-  optionText: {
-    color: 'white',
-  },
-};
-
 const styles = StyleSheet.create({
+  tagsBar: {
+    flexDirection: 'row',
+    marginTop: 10,
+    borderTopColor: '#ccc',
+    borderTopWidth: 1,
+    paddingTop: 7,
+    flexWrap: 'wrap',    
+    width: '100%',
+    alignItems: 'center'
+  },
+  emojiIcon: {
+    color: 'black',
+    fontSize: 42,
+    textAlign: 'center',
+    paddingBottom: 1
+  },
+  previewOutline: {
+    height: 62,
+    width: 82,
+    //padding: 3,
+    alignItems: 'center', 
+    borderRadius: 5,
+    marginTop: 5,
+    marginRight: 8,
+    marginBottom: 3,
+    borderColor: '#aaa',
+    borderWidth: 1
+  },
+  rowStyle: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    //justifyContent: 'space-between'
+  },
+  textContainer: {
+    width: '90%',
+    paddingTop: 4,
+    paddingBottom: 10,
+    shadowColor: '#121212',
+    shadowOffset: { width: 1, height: 3 },
+    shadowOpacity: 0.85,
+    alignSelf: 'center',
+    elevation: 2,
+  },
+  cardContainer: {
+    //flex: 1,
+    //height: 345,
+    //width: '100%',
+    backgroundColor: 'white',
+    paddingBottom: 12,
+    shadowColor: '#121212',
+    shadowOffset: { width: 1, height: 3 },
+    shadowOpacity: 0.85,
+    elevation: 2,
+    //justifyContent: 'center',
+    //alignItems: 'center'
+  },
   fullView: {
+    //flex: 1,
     //backgroundColor: '#000'
   },
   responsiveContainer: {
     width: '100%',
     aspectRatio: (1056 / 768),
-    //backgroundColor: '#00f',
   },
   fullWidthImage: {
     height: '100%',
@@ -233,11 +370,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',    
   },
   tabView: {
-    //height: 200,
-    alignItems: 'center',
-    justifyContent: 'center',
     backgroundColor: '#727272', 
-    //backgroundColor: AppColors.paperColor
   },
   menuTitle: {
     fontWeight: '500', 
@@ -287,8 +420,8 @@ const styles = StyleSheet.create({
     marginBottom: 3,
   },
   outerWrapper: {
-    width: '100%',
-    height: 60,
+    //width: '100%',
+    //height: 60,
     paddingRight: 16,
     //elevation: 2,
     flexDirection: 'row',
