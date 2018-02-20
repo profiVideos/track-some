@@ -53,6 +53,8 @@ export const OPEN_NOTES_MODAL = 'OPEN_NOTES_MODAL';
 export const CLOSE_NOTES_MODAL = 'CLOSE_NOTES_MODAL';
 export const OPEN_CARDS_MODAL = 'OPEN_CARDS_MODAL';
 export const CLOSE_CARDS_MODAL = 'CLOSE_CARDS_MODAL';
+export const OPEN_LISTS_MODAL = 'OPEN_LISTS_MODAL';
+export const CLOSE_LISTS_MODAL = 'CLOSE_LISTS_MODAL';
 
 // ... everything dealing with cards ...
 export const CARDS_STORAGE_KEY = '@track!some:my_cards';
@@ -91,6 +93,18 @@ export const TOGGLE_PHOTO_VIEWER = 'TOGGLE_PHOTO_VIEWER';
 export const TOGGLE_COLOR_PICKER = 'TOGGLE_COLOR_PICKER';
 export const UPDATE_NOTE_SELECTED = 'UPDATE_NOTE_SELECTED';
 export const DELETE_SELECTED_NOTES = 'DELETE_SELECTED_NOTES';
+
+export const ADD_LIST = 'ADD_LIST';
+export const CLEAR_LIST = 'CLEAR_LIST';
+export const UPDATE_LIST = 'UPDATE_LIST';
+export const REMOVE_LIST = 'REMOVE_LIST';
+export const CURRENT_LIST = 'CURRENT_LIST';
+export const ADD_LIST_IMAGE = 'ADD_LIST_IMAGE';
+export const HIGHLIGHT_LIST = 'HIGHLIGHT_LIST';
+export const LIST_EDIT_CHANGE = 'LIST_EDIT_CHANGE';
+export const SORT_LISTS = 'SORT_LISTS'; 
+export const UPDATE_LIST_SELECTED = 'UPDATE_LIST_SELECTED';
+export const DELETE_SELECTED_LISTS = 'DELETE_SELECTED_LISTS';
 
 //export const ADD_TAG = 'add_tag';
 //export const UPDATE_TAG = 'update_tag';

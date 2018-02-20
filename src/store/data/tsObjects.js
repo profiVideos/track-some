@@ -95,5 +95,26 @@ Card.schema = {
   }
 };
 
-export const tsRealm = new Realm({ schema: [Emoji, Category, Note, Card] });
+class List extends Realm.Object {}
+List.schema = {
+  name: 'List',
+  primaryKey: 'key',
+  properties: {
+    key: 'string',
+    name: { type: 'string', indexed: true },
+    desc: 'string?',
+    icon: 'string?',
+    iconType: 'string?',            // ... 'ICO', 'PHO', 'BAR', 'QRC' ...
+    imageThumb: 'string?',          // ... base64 encoded thumbnail (256x256) ...
+    mimeType: 'string?',            // ... same as full image in imageRealm ...
+    barcode: 'string?',             // ... definition same as one above ...
+    notes: 'string?[]',             // ... keys (links) to 'notes' - not really needed ...
+    numCards: { type: 'int', default: 0 },
+    selected: { type: 'bool', default: false },
+    createdTimestamp: 'date',
+    updatedTimestamp: 'date'
+  }
+};
+
+export const tsRealm = new Realm({ schema: [Emoji, Category, Note, Card, List] });
 //export const imageRealm = new Realm({ schema: [Image] });

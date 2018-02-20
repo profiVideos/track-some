@@ -10,6 +10,7 @@ import TrackSomeConfig from './drawers/SlideMenu';
 import EmojiPicker from './EmojiPicker';
 import SearchBar from '../components/SearchBar';
 import NoteEdit from '../components/NoteEdit';
+import ListEdit from '../components/ListEdit';
 
 // ... register screens ...
 export default (store, Provider) => {
@@ -22,6 +23,7 @@ export default (store, Provider) => {
   Navigation.registerComponent('tracksome.EmojiPicker', () => EmojiPicker, store, Provider);
   Navigation.registerComponent('tracksome.ConfigMenu', () => TrackSomeConfig, store, Provider);
   Navigation.registerComponent('tracksome.NoteEdit', () => NoteEdit, store, Provider);
+  Navigation.registerComponent('tracksome.ListEdit', () => ListEdit, store, Provider);
 };
 
 // ... register screens that don't need redux ...

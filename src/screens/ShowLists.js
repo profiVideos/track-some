@@ -9,36 +9,39 @@ import React, { PureComponent } from 'react';
 import { 
   View, 
   Text,
-  ScrollView,
+  Image,
+  FlatList,
   StyleSheet,
   ToastAndroid, 
 } from 'react-native';
 import { connect } from 'react-redux';
-import ScrollableTabView from 'react-native-scrollable-tab-view';
-//import RenderTags from '../components/RenderTags';
-import ImageTabBar from '../components/ImageTabBar';
-import AppColors from '../templates/appColors';
-
 import {
-  //addList,
+  MenuProvider
+} from 'react-native-popup-menu';
+import PaintSplash from '../images/Color-Splash.png';
+import AppColors from '../templates/appColors';
+import ListItemDisplay from '../components/ListDisplay';
+import {
+  clearListItem,
+  openListsModal,
+  closeListsModal,
   //searchCardsChanged,        // ... brand, spanking NEW ...
   //searchNotesChanged,        // ... brand, spanking NEW ...
 } from '../store/actions';
-//import store from '../store';
+import store from '../store';
 
-//const listsLiveResults = store.getAllLists();     // ... Realm updates this in real time ...
+import PlusIcon from '../images/PlusIcon.png';
+
+const listsLiveResults = store.getAllLists();     // ... Realm updates this in real time ...
 
 const whatDoYouNeed = state => {
   return {
+    myLists: listsLiveResults,
     saveMode: state.login.saveMode,
-    thisCard: state.cards.thisCard,
-    //emojiCode: state.emojis.emojiCode,
-    //mainLists: (state.lists.searchFor === '' ? 
-    //  listsLiveResults : store.getAllLists(state.lists.searchFor)),
-    //mainLists: listsLiveResults,
-    //thisList: state.lists.thisList,
+    thisList: state.lists.thisList,
+    emojiCode: state.emojis.emojiCode,
+    listsUpdated: state.lists.lastUpdated,
     //highlighted: state.lists.highlighted, 
-    //listsUpdated: state.lists.lastUpdated,
   };
 };
 
@@ -53,9 +56,19 @@ class ShowLists extends PureComponent<{}> {
     navBarTranslucent: false
   };
 
+  static navigatorButtons = {
+    fab: {
+      collapsedId: 'addList',
+      collapsedIcon: PlusIcon,   //require('../../img/ic_share.png'),
+      collapsedIconColor: 'white', // optional
+      backgroundColor: AppColors.darkerColor
+    }
+  };
+
   constructor(props) {
     super(props);
     this.onNavigatorEvent = this.onNavigatorEvent.bind(this);
+    this.closeListEditModal = this.closeListEditModal.bind(this);
     this.state = {
       searchOpen: false,
       localSearchFor: '',
@@ -78,6 +91,11 @@ class ShowLists extends PureComponent<{}> {
           ToastAndroid.show('Menu Options', ToastAndroid.SHORT);
           break;
         }
+        case 'addList': {
+          this.openListEditModal();
+          //ToastAndroid.show('Add List', ToastAndroid.SHORT);
+          break;
+        }
         default: 
           ToastAndroid.show('Default - Not Defined', ToastAndroid.SHORT);
           break;
@@ -85,62 +103,146 @@ class ShowLists extends PureComponent<{}> {
     }
   }
 
-  renderInfoPanel() {
-    //if (this.props.marked === false) return;
+  doSomeFunction() {
+    console.log('About to do something');
+    ToastAndroid.show('Pressed Something', ToastAndroid.SHORT);
+  }
+
+  openListEditModal(list = '') {
+    //ToastAndroid.show(`List: ${list}`, ToastAndroid.SHORT);
+    if (list === '') this.props.dispatch(clearListItem());
+    this.props.dispatch(openListsModal(list));
+    this.showListEditScreen(list);
+  }
+
+  closeListEditModal() {
+    this.props.dispatch(closeListsModal(''));
+    this.props.navigator.dismissLightBox();
+  }
+
+  itemSeparator() {
+    return (<View style={styles.separatorStyle} />);
+  }
+
+  showListEditScreen(list) {
+    this.props.navigator.showLightBox({
+      screen: 'tracksome.ListEdit',
+      passProps: {
+        id: list,
+        onClosePress: this.closeListEditModal
+      },
+      style: {
+       backgroundBlur: 'dark',
+       backgroundColor: 'rgba(0,0,0,0.60)', 
+      },
+      adjustSoftInput: 'resize'
+    });
+  }
+
+  showWelcome() {
+    const plusSymbol = ' +  ';
     return (
-      <View style={styles.cardContainer}>
-        <View style={styles.textContainer}>
-
-          <View style={styles.rowStyle}>
-            <View style={styles.previewOutline}>
-              <Text style={styles.emojiIcon}>
-               Emoji {/*this.props.item.icon*/}
-              </Text>
-            </View>
-            <View>
-              <Text>Rating goes here!</Text>
-              <Text style={styles.extraInfo} >Category{/*this.props.catDesc*/}</Text>
-            </View>
-          </View>
-
-          <Text style={[styles.itemName, { paddingTop: 7 }]}>Name{/*this.props.item.name*/}</Text>
-          <Text style={[styles.subHeading, { marginTop: 0 }]}>Desc{/*this.props.item.desc*/}</Text>
-          { /*this.renderMyTags()*/ }
-
-        </View>
+      <View style={styles.bannerContainer}>
+        <Text style={styles.bannerText}>
+          photo!Drops is ready to build your first list ...
+        </Text>
+        <Image style={styles.imageStyle} source={PaintSplash} />
+        <Text style={styles.bannerText}>
+          Press the <Text style={styles.boldText}>{plusSymbol}</Text>
+          icon to get started!
+        </Text>
       </View>
     );
   }
 
+  showMainList() {
+    return (
+      <FlatList
+        //keyboardShouldPersistTaps='always'
+        numColumns={2}
+        horizontal={false}
+        data={this.props.myLists}
+        extraData={this.props.listsUpdated}
+        renderItem={this.renderListItem}
+        ItemSeparatorComponent={this.itemSeparator}
+        contentContainerStyle={styles.listContainer}
+      />
+    );
+  }
+
+/*
+      <View style={{ flex: 1, marginTop: 50 }}>
+        <Text>{item.desc}</Text>
+      </View>
+*/
+
+  renderListItem = ({ item }) => {
+    return (
+      <ListItemDisplay 
+        item={item}
+        onTapItem={this.doSomeFunction}   // ... simulate an item press ...
+        onLongPress={this.doSomeFunction}  // ... simulate a check box press ...
+      />
+    );
+  }
+
+  renderMainScreen() {
+    return (this.props.myLists.length === 0 ? this.showWelcome() : this.showMainList());
+  }
+
+  //----------------------------------------------------
+  // ... the main JSX render section for this class ...
+  //----------------------------------------------------
   render() {
     return (
-      <View style={styles.outerContainer}>
-        <ScrollableTabView
-          style={{ flex: 1, backgroundColor: AppColors.paperColor /*, height: 345*/ }}
-          initialPage={0}
-          //tabBarPosition='overlayTop'
-          renderTabBar={() => <ImageTabBar optionMenu={this.renderOptionMenu} />}
-        >
-          <ScrollView contentContainerStyle={{ flex: 1 }}>
-            <Text>Hello World!</Text>
-          </ScrollView>
-          <ScrollView contentContainerStyle={{ flex: 1 }}>
-            { this.renderInfoPanel() }
-          </ScrollView>
-          <ScrollView contentContainerStyle={{ flex: 1 }}>
-            <Text>Goodbye World!</Text>
-          </ScrollView>
-        </ScrollableTabView>
-      </View>
+      <MenuProvider>
+        <View style={styles.outerContainer}>
+          { this.renderMainScreen() }
+        </View>
+      </MenuProvider>
     );
   }
+
 }
+
 export default connect(whatDoYouNeed)(ShowLists);
 
 const styles = StyleSheet.create({
+  listContainer: {
+    //flex: 1,
+    //marginTop: 12,
+    //marginBottom: 20,
+    //width: '100%',
+    alignItems: 'baseline',
+    //backgroundColor: '#333',
+    //justifyContent: 'center',
+  },
+  bannerText: {
+    color: 'rgba(0,0,0,0.35)',
+    fontSize: 18,
+    textAlign: 'center'
+  },
+  imageStyle: {
+    height: 200,
+    width: 200,
+    opacity: 0.45,
+    resizeMode: 'contain'
+  },
+  boldText: {
+    fontSize: 22,
+    color: 'black',
+    fontWeight: '700'
+  },
+  bannerContainer: {
+    flex: 1,
+    padding: 35,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
   outerContainer: {
     flex: 1,
-    //alignItems: 'center',
-    //justifyContent: 'center',
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

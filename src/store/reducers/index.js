@@ -6,6 +6,7 @@ import EmojiReducer from './EmojiReducer';
 import LoginInfo from './LoginReducer';
 import CardReducer from './CardReducer';
 import NoteReducer from './NoteReducer';
+import ListReducer from './ListReducer';
 import CategoryReducer from './CategoryReducer';
 
 const MainReducer = combineReducers({
@@ -14,6 +15,7 @@ const MainReducer = combineReducers({
   login: LoginInfo,
   cards: CardReducer,
   notes: NoteReducer,
+  lists: ListReducer,
   emojis: EmojiReducer,
   categories: CategoryReducer
 });

@@ -79,24 +79,13 @@ const whatDoYouNeed = state => {
   };
 };
 
-class ShowCard extends React.PureComponent {
+class ShowCards extends React.PureComponent {
   static navigatorStyle = {
     drawUnderNavBar: false,
     screenBackgroundColor: AppColors.paperColor,
     navBarBackgroundColor: AppColors.accentColor,
     navBarTranslucent: false
   };
-
-  /* ... brain dead navigation FAB (needs image or it doesn't work) ...
-  static navigatorButtons = {
-    fab: {
-      collapsedId: 'share',
-      collapsedIcon: { ' + ' },   //require('../../img/ic_share.png'),
-      collapsedIconColor: 'red', // optional
-      backgroundColor: AppColors.darkerColor //'#607D8B'
-    }
-  };
-  */
 
   constructor(props) {
     super(props);
@@ -437,7 +426,7 @@ class ShowCard extends React.PureComponent {
 
 }
 
-export default connect(whatDoYouNeed)(ShowCard);
+export default connect(whatDoYouNeed)(ShowCards);
 
 /*
           <View>
