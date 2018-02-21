@@ -1,6 +1,7 @@
 import { ToastAndroid } from 'react-native';
 import {
   ADD_LIST,
+  ADD_CARD,
   //SORT_LISTS, 
   CLEAR_LIST,
   UPDATE_LIST,
@@ -8,6 +9,7 @@ import {
   CURRENT_LIST,
   ADD_LIST_IMAGE,
   HIGHLIGHT_LIST,            // ... NEW ...
+  SET_ACTIVE_LIST,
   LIST_EDIT_CHANGE,
   OPEN_LISTS_MODAL,
   CLOSE_LISTS_MODAL,
@@ -24,6 +26,10 @@ const initialState = {
   editChange: false,
   listWindowOpen: false,
   editList: '',             // ... the unique key of the item being edited ...
+  activeList: {             // ... used EVERYWHERE!!! to know which list we are dealing with ...
+    key: '',
+    name: ''
+  },
   thisList: {
     key: '',
     name: '',
@@ -54,6 +60,24 @@ NEW:***********************************************************************
 
 const ListReducer = (state = initialState, action) => {
   switch (action.type) {
+
+    case ADD_CARD:
+      // ... force an update of the list state as well - we added a card ...
+      return { 
+        ...state,
+        lastUpdated: Date.now()
+      };
+
+    case SET_ACTIVE_LIST:
+      return {
+        ...state,
+        activeList: {   // ... used EVERYWHERE!!! to know which list we are dealing with ...
+          key: action.payload.key,
+          name: action.payload.name,
+        },
+        highlighted: action.payload.key,
+        lastUpdated: Date.now()
+      };
 
     case OPEN_LISTS_MODAL:
       return {

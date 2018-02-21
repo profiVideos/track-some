@@ -24,6 +24,15 @@ const IconMenuOption = (props) => (
     text={`${props.icon}  ${props.text}`} 
   />
 );
+const menuOptionsStyles = {
+  optionsContainer: {
+    width: 120,
+    backgroundColor: AppColors.darkerColor,  // ... dark cyan ...
+  },
+  optionText: {
+    color: 'white',
+  },
+};
 
 class NoteDisplay extends React.PureComponent {
   constructor(props) {
@@ -154,16 +163,6 @@ class NoteDisplay extends React.PureComponent {
 }
 
 export default NoteDisplay;
-
-const menuOptionsStyles = {
-  optionsContainer: {
-    width: 120,
-    backgroundColor: AppColors.darkerColor,  // ... dark cyan ...
-  },
-  optionText: {
-    color: 'white',
-  },
-};
 
 const styles = StyleSheet.create({
   mainWrapper: {

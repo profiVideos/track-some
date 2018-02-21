@@ -41,6 +41,7 @@ import {
   closeTagsModal,
   loadCategories,
   itemCardChanged,
+  propertyListChanged,
 } from '../store/actions';
 
 /*
@@ -58,6 +59,7 @@ const whatDoYouNeed = state => {
     catList: state.categories.itemList,
     emojiCode: state.emojis.emojiCode,     // ... current emoji selected in PickEmojis ...
     thisCard: state.cards.thisCard,
+    activeList: state.lists.activeList,
     tagsModalOpen: state.cards.tagsWindowOpen
   };
 };
@@ -325,7 +327,7 @@ class BuildCard extends PureComponent {
       if (this.props.thisCard.key === '') {
         // ... we are adding a new card ...
         this.props.dispatch(addCard(
-          this.props.thisCard.list,
+          this.props.activeList.key,  // ... we must add the active list key here ...
           this.props.thisCard.name,
           this.props.thisCard.desc,
           this.props.thisCard.icon,
@@ -338,6 +340,7 @@ class BuildCard extends PureComponent {
           this.props.thisCard.tags,
           this.props.thisCard.notes
         ));
+        this.props.dispatch(propertyListChanged('numCards', 1));
       } else {
         // ... we should update this card ...
         this.props.dispatch(updateCard(

@@ -9,9 +9,11 @@ import React, { PureComponent } from 'react';
 import { 
   View, 
   Text,
+  Alert,
   Image,
   FlatList,
   StyleSheet,
+  Dimensions,
   ToastAndroid, 
 } from 'react-native';
 import { connect } from 'react-redux';
@@ -22,26 +24,32 @@ import PaintSplash from '../images/Color-Splash.png';
 import AppColors from '../templates/appColors';
 import ListItemDisplay from '../components/ListDisplay';
 import {
+  deleteList,
+  currentList,
+  //highlightList,
   clearListItem,
+  setActiveList,
   openListsModal,
   closeListsModal,
   //searchCardsChanged,        // ... brand, spanking NEW ...
   //searchNotesChanged,        // ... brand, spanking NEW ...
 } from '../store/actions';
-import store from '../store';
+import realmDB from '../store';
 
 import PlusIcon from '../images/PlusIcon.png';
 
-const listsLiveResults = store.getAllLists();     // ... Realm updates this in real time ...
+const listsLiveResults = realmDB.getAllLists();     // ... Realm updates this in real time ...
+const itemWidth = 180;  // ... add this to state - used to calculate column spacing ...
 
 const whatDoYouNeed = state => {
   return {
     myLists: listsLiveResults,
     saveMode: state.login.saveMode,
     thisList: state.lists.thisList,
+    activeList: state.lists.activeList,
     emojiCode: state.emojis.emojiCode,
     listsUpdated: state.lists.lastUpdated,
-    //highlighted: state.lists.highlighted, 
+    highlighted: state.lists.highlighted, 
   };
 };
 
@@ -53,6 +61,10 @@ class ShowLists extends PureComponent<{}> {
     navBarButtonColor: AppColors.hiliteColor,
     navBarTextColor: AppColors.accentColor,
     navBarBackgroundColor: AppColors.mainDarkColor,
+    //navBarSubtitleColor: AppColors.paperColor,
+    //navBarSubtitleFontFamily: 'font-name', // subtitle font, 'sans-serif-thin' for example
+    //navBarSubtitleFontSize: 13,    
+    //navBarTitleTextCentered: true,
     navBarTranslucent: false
   };
 
@@ -67,17 +79,35 @@ class ShowLists extends PureComponent<{}> {
 
   constructor(props) {
     super(props);
+    this.onMenuPress = this.onMenuPress.bind(this);
+    this.onItemPress = this.onItemPress.bind(this);
     this.onNavigatorEvent = this.onNavigatorEvent.bind(this);
     this.closeListEditModal = this.closeListEditModal.bind(this);
     this.state = {
+      didSave: false,
       searchOpen: false,
       localSearchFor: '',
+      scrnWidth: Dimensions.get('window').width
     };
   }
 
   componentWillMount() {
     console.log('inside show lists ...');
     this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (this.props.highlighted !== '' || nextProps.highlighted !== '') {
+      const scrTitle = (nextProps.activeList.name === '' ? 
+        'Choose List' : nextProps.activeList.name);
+      this.props.navigator.setTitle({ title: scrTitle });
+    }
+  }
+
+  onLayout() {
+    this.setState({
+      scrnWidth: Dimensions.get('window').width
+    });
   }
 
   onNavigatorEvent(event) {
@@ -93,7 +123,6 @@ class ShowLists extends PureComponent<{}> {
         }
         case 'addList': {
           this.openListEditModal();
-          //ToastAndroid.show('Add List', ToastAndroid.SHORT);
           break;
         }
         default: 
@@ -101,6 +130,45 @@ class ShowLists extends PureComponent<{}> {
           break;
       }  // ... switch ...
     }
+  }
+
+  onItemPress(item) {
+    // ... if item was already selected - and user presses again - deselect ...
+    if (this.props.highlighted === item.key) {
+      this.props.dispatch(setActiveList('', ''));
+    } else {
+      this.props.dispatch(setActiveList(item.key, item.name));
+      this.props.navigator.switchToTab({ tabIndex: 0 });
+    }
+  }
+
+  onMenuPress(option, item) {
+    switch (option) {
+      case 'edit': {
+        //ToastAndroid.show(`Stuff: ${myStore}`, ToastAndroid.LONG);
+        this.props.dispatch(currentList(item));
+        this.openListEditModal(item); 
+        break;
+      }
+      case 'delete': {
+        Alert.alert('Delete List', 
+          `You are about to delete this list.
+All of the cards, notes and associated settings of this list will also be removed!\n
+Do you really want to do this?`,
+          [{ text: 'Cancel', style: 'cancel' },
+           { text: 'OK', onPress: () => this.doListRemoval(item) }]);
+        break;
+      }
+      default: break;
+    }  // ... switch ...
+  }
+
+  doListRemoval(item) {
+    // ... if list was deleted - update in Redux ...
+    if (this.props.highlighted === item.key) {
+      this.props.dispatch(setActiveList('', ''));
+    }
+    this.props.dispatch(deleteList(item.key));
   }
 
   doSomeFunction() {
@@ -111,11 +179,17 @@ class ShowLists extends PureComponent<{}> {
   openListEditModal(list = '') {
     //ToastAndroid.show(`List: ${list}`, ToastAndroid.SHORT);
     if (list === '') this.props.dispatch(clearListItem());
-    this.props.dispatch(openListsModal(list));
+    this.props.dispatch(openListsModal(list.key));
     this.showListEditScreen(list);
   }
 
   closeListEditModal() {
+    if (this.props.highlighted !== '' && this.props.highlighted === this.props.thisList.key) {
+      // ... if selected list name was changed - update in Redux ...
+      if (this.props.activeList.name !== this.props.thisList.name) {
+        this.props.dispatch(setActiveList(this.props.thisList.key, this.props.thisList.name));
+      }
+    }
     this.props.dispatch(closeListsModal(''));
     this.props.navigator.dismissLightBox();
   }
@@ -159,11 +233,12 @@ class ShowLists extends PureComponent<{}> {
     return (
       <FlatList
         //keyboardShouldPersistTaps='always'
-        numColumns={2}
+        numColumns={Math.floor(this.state.scrnWidth / itemWidth)}
         horizontal={false}
         data={this.props.myLists}
         extraData={this.props.listsUpdated}
         renderItem={this.renderListItem}
+        key={this.state.scrnWidth}        
         ItemSeparatorComponent={this.itemSeparator}
         contentContainerStyle={styles.listContainer}
       />
@@ -180,8 +255,9 @@ class ShowLists extends PureComponent<{}> {
     return (
       <ListItemDisplay 
         item={item}
-        onTapItem={this.doSomeFunction}   // ... simulate an item press ...
-        onLongPress={this.doSomeFunction}  // ... simulate a check box press ...
+        hilite={item.key === this.props.highlighted ? AppColors.hiliteColor : 'white'}
+        onMenuPress={this.onMenuPress}   // ... do the selected menu item ...
+        onItemPress={this.onItemPress}   // ... highlight this item - set list as active ...
       />
     );
   }
@@ -196,7 +272,7 @@ class ShowLists extends PureComponent<{}> {
   render() {
     return (
       <MenuProvider>
-        <View style={styles.outerContainer}>
+        <View style={styles.outerContainer} onLayout={this.onLayout.bind(this)}>
           { this.renderMainScreen() }
         </View>
       </MenuProvider>
@@ -213,7 +289,7 @@ const styles = StyleSheet.create({
     //marginTop: 12,
     //marginBottom: 20,
     //width: '100%',
-    alignItems: 'baseline',
+    alignItems: 'center',
     //backgroundColor: '#333',
     //justifyContent: 'center',
   },

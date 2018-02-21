@@ -27,7 +27,7 @@ export const getAllLists = () => {
   //    .filtered('list CONTAINS[c] $0 OR title CONTAINS[c] $0', searchFor)
   //    .sorted('updatedTimestamp', true);
   //} else {
-    listOfLists = tsRealm.objects('List').sorted('name', true);  
+    listOfLists = tsRealm.objects('List').sorted('name');  
   //}
   return listOfLists;
 };

@@ -11,7 +11,7 @@ import { UniqueId } from '../../components/common/UniqueId';
 //      .filtered('name CONTAINS[c] $0 OR tags CONTAINS[c] $0', searchFor)
 //      .filtered('name CONTAINS[c] $0 OR desc CONTAINS[c] $0', searchFor)
 
-export const getAllCards = (lookFor) => {
+export const getAllCards = (activeList = '', lookFor) => {
   let cardList = '';
   let foundCards = '';
   //searchFor = '';
@@ -32,12 +32,19 @@ export const getAllCards = (lookFor) => {
       .filtered(`${queryStr}${foundCards}`)
       .sorted('name');  // + ,true for reverse sorting ...
   } else {
+    //ToastAndroid.show(`Cards: ${activeList}`, ToastAndroid.SHORT);
     foundCards = 'NONE';
-    cardList = tsRealm.objects('Card').sorted('name');  // + ,true for reverse sorting ...
+    //if (activeList !== null && activeList !== undefined && activeList !== '') {
+      //ToastAndroid.show(`Get Cards: ${activeList}`, ToastAndroid.SHORT);
+      cardList = tsRealm.objects('Card')
+        .filtered('list = $0', activeList)
+        .sorted('name');  // + ,true for reverse sorting ...
+    //}      
   }
   return cardList;
 };
 
+//export default connect(whatDoYouNeed)(getAllCards);
 /*
 // ... proper way to write values ...
 try {
@@ -74,6 +81,12 @@ export const createCard =
       selected: false,
       createdTimestamp: new Date()
     });
+    // ... increment the total cards counter in the lists object ...
+    const thisListItem = tsRealm.objectForPrimaryKey('List', cList);
+    tsRealm.create('List', {
+      key: cList,
+      numCards: thisListItem.numCards + 1
+    }, true);   // ... key based update of list item ...
   });
 };
 
@@ -134,7 +147,8 @@ export const deleteCard = (key) => {
 
 export const deleteSelectedCards = () => {
   tsRealm.write(() => {
-    const allSelected = tsRealm.objects('Card').filtered('selected = true');
-    tsRealm.delete(allSelected);
+    // .... need to fix this to be list specific ...
+    //const allSelected = tsRealm.objects('Card').filtered('selected = true');
+    //tsRealm.delete(allSelected);
   });
 };

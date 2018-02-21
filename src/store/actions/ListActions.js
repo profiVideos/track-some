@@ -7,9 +7,10 @@ import {
   CURRENT_LIST,
   ADD_LIST_IMAGE,
   HIGHLIGHT_LIST,             // ... NEW ...
+  SET_ACTIVE_LIST,
   OPEN_LISTS_MODAL,           // ... NEW ...
-  CLOSE_LISTS_MODAL,          // ... NEW ...
   LIST_EDIT_CHANGE,
+  CLOSE_LISTS_MODAL,          // ... NEW ...
   UPDATE_LIST_SELECTED,       // ... NEW ...
   DELETE_SELECTED_LISTS
 } from './actionTypes';
@@ -25,6 +26,13 @@ https://tracksome-live.us1.cloud.realm.io/
 NEW:***********************************************************************
 
 */
+
+export const setActiveList = (key, name) => {
+  return {
+    type: SET_ACTIVE_LIST,
+    payload: { key, name }
+  };
+};
 
 export const propertyListChanged = (prop, value) => {
   return {

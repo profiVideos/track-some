@@ -1,46 +1,98 @@
 import React, { PureComponent } from 'react';
-//import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import {
   View,
   Text,
   Image,
+  Dimensions,
   StyleSheet,
+  //ToastAndroid,
   TouchableNativeFeedback
 } from 'react-native';
+import {
+  Menu,
+  MenuOptions,
+  MenuOption,
+  MenuTrigger
+} from 'react-native-popup-menu';
 import AppColors from '../templates/appColors';
 
 //const uri = 'http://profigraphics.com/images/Christina-100px.jpg';
 
-//const itemHeight = 65;  // ... used to calculate faster scrolls ...
+//const itemWidth = 176;  // ... used to calculate column spacing ...
+const itemWidth = 180;  // ... add this to state - used to calculate column spacing ...
+const IconMenuOption = (props) => (
+  <MenuOption 
+    value={props.value} 
+    text={`${props.icon}  ${props.text}`} 
+  />
+);
+const menuOptionsStyles = {
+  optionsContainer: {
+    width: 120,
+    backgroundColor: AppColors.darkerColor,  // ... dark cyan ...
+  },
+  optionText: {
+    color: 'white',
+  },
+};
 
 class ListItemDisplay extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      didSave: false
+      didSave: false,
     };
   }
 
+  componentWillMount() {
+    this.onLayout();
+  }
+
+  onLayout() {
+    const scrnWidth = Dimensions.get('window').width;
+    const numColumns = Math.floor(scrnWidth / itemWidth);
+    const horizontalMargin = (((scrnWidth / numColumns) - itemWidth) / 2) - 5;
+    this.setState({
+      numCols: numColumns,
+      horizMargin: horizontalMargin,
+      scrnWidth: Dimensions.get('window').width
+    });
+  }
+
   onPressItem = () => { 
-    this.props.onTapItem(this.props.emojiName, this.props.emojiString);
+    this.props.onItemPress(this.props.item);
   } 
 
-  onLongPressItem = () => { 
-    this.props.onLongPress(this.props.emojiKey);
-  } 
+  //onLongPressItem = () => { 
+  //  this.props.onLongPress(this.props.emojiKey);
+  //} 
 
-/*
-        <TouchableNativeFeedback onPress={this.onPressItem} onLongPress={this.onLongPressItem}>
-          <View style={styles.container}>
-            <Text>{this.props.item.name}</Text>
-          </View>
-        </TouchableNativeFeedback>
-*/
+  onMenuSelect = (value, item) => { 
+    this.props.onMenuPress(value, item);
+  }
+
+  renderOptionMenu = () => (
+    <Menu onSelect={value => this.onMenuSelect(value, this.props.item)}>
+      <MenuTrigger>
+        <Icon size={16} name={'ellipsis-v'} style={styles.iconWrapper} color={'#f2f2f2'} />
+      </MenuTrigger>
+      <MenuOptions customStyles={menuOptionsStyles}>
+        <IconMenuOption value={'edit'} icon='✏️' text='Edit' />
+        <IconMenuOption value={'delete'} icon='🗑️' text='Delete' />
+      </MenuOptions>
+    </Menu>
+  )
 
   render() {
+    //ToastAndroid.show(`Window Width: ${this.state.horizMargin}`, ToastAndroid.SHORT);
+    const backColor = this.props.hilite;   // ... AppColors.hiliteColor, otherwise white ...
     return (
-      <View style={styles.outerWrapper}>
-        <TouchableNativeFeedback onPress={this.onPressItem} onLongPress={this.onLongPressItem}>
+      <View 
+        style={[styles.outerWrapper, { marginHorizontal: this.state.horizMargin }]} 
+        onLayout={this.onLayout.bind(this)}
+      >
+        <TouchableNativeFeedback onPress={this.onPressItem}>
           <View style={styles.container}>
 
             <View style={styles.imageWrapper}>
@@ -55,9 +107,14 @@ class ListItemDisplay extends PureComponent {
 
             <View style={styles.statusPanel}>
               <Text style={styles.numberText}>Cards: {this.props.item.numCards}</Text>
+              <View style={styles.menuWrapper}>
+                <TouchableNativeFeedback>
+                  { this.renderOptionMenu() }
+                </TouchableNativeFeedback>
+              </View>
             </View>
 
-            <View style={styles.infoPanel}>
+            <View style={[styles.infoPanel, { backgroundColor: backColor }]}>
               <Text style={styles.listName}>{this.props.item.name}</Text>
               <Text 
                 ellipsizeMode='tail' 
@@ -79,19 +136,18 @@ class ListItemDisplay extends PureComponent {
 export default ListItemDisplay;
 
 const styles = StyleSheet.create({
+  iconWrapper: {
+    paddingHorizontal: 7,
+    justifyContent: 'flex-end'
+  },
+  menuWrapper: {
+    //width: 20,
+  },
   imageWrapper: {
-    //width: 80,
-    //borderTopRightRadius: 3,
-    //borderTopLeftRadius: 3,
-    //borderLeftWidth: 1,
-    //borderRightWidth: 1,
-    //borderColor: '#b9b9b9',
-    //backgroundColor: '#f5f5f5',
     justifyContent: 'center',
     alignItems: 'center'
   },
   itemIcon: {
-    //height: 180,
     width: '100%',
     paddingBottom: 10,
     textAlign: 'center',
@@ -99,8 +155,8 @@ const styles = StyleSheet.create({
     color: 'black'
   },
   imageStyle: {
-    height: 190,
-    width: 190,
+    height: itemWidth - 6,
+    width: itemWidth - 6,
     borderTopRightRadius: 3,
     borderTopLeftRadius: 3,
     //maxWidth: 256,
@@ -113,30 +169,28 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '300',
     color: AppColors.paperColor,
+    paddingLeft: 7,
     textAlign: 'center'
   },
   statusPanel: {
     padding: 2,
     width: '100%',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexDirection: 'row',
     backgroundColor: AppColors.darkerColor
   },
   infoPanel: {
     padding: 3,
+    paddingHorizontal: 5,
     width: '100%',
     borderBottomLeftRadius: 5,
     borderBottomRightRadius: 5,
-    backgroundColor: 'white'
   },
   outerWrapper: {
-    margin: 4,
-    //width: 194,
-    //elevation: 3,
-    //borderRadius: 5,
-    //backgroundColor: AppColors.paperColor,
-    //backgroundColor: 'blue',
+    marginVertical: 7,
     justifyContent: 'center',
     alignItems: 'stretch',
-    //justifyContent: 'center',
     shadowColor: '#121212',
     shadowOffset: { width: 1, height: 3 },
     shadowOpacity: 0.5,
@@ -144,12 +198,9 @@ const styles = StyleSheet.create({
   },
   container: {
     margin: 3,
-    //width: '100%',
-    width: 190,
+    width: itemWidth - 6,
     elevation: 3,
     borderRadius: 7,
-    //height: 150,
-    //padding: 3,
     backgroundColor: '#f2f2f2',
     justifyContent: 'flex-end',
     alignItems: 'center',

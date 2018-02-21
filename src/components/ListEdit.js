@@ -266,7 +266,7 @@ class ListEdit extends PureComponent {
       <MDInput
         style={styles.nameWidth}
         label='List Name*'
-        autoFocus
+        //autoFocus
         returnKeyType='next'
         placeholder='Please enter a short list name '
         value={this.props.thisList.name}
@@ -356,17 +356,18 @@ class ListEdit extends PureComponent {
               </View>
             </TouchableOpacity>
           </View>
-  
+          { this.renderActionIcons() }
           <View style={styles.textContainer}>
-            { this.renderIcon() }
-            { this.renderNameInput() }
+            <View style={styles.topRow}>
+              { this.renderIcon() }
+              { this.renderNameInput() }
+            </View>
             { this.renderDescription() }
           </View>
   
         </View>
   
         { this.renderItemExtras() }
-        { this.renderActionIcons() }
   
       </ScrollView>
     );
@@ -389,6 +390,34 @@ dbx.filesUpload({
 */
 
 const styles = StyleSheet.create({
+  topRow: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between'
+  },
+  actionBar: {
+    height: 42,
+    flexDirection: 'row',
+    paddingTop: 2,
+    borderTopWidth: 0.5,
+    borderTopColor: 'rgba(255,255,255,0.15)',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.25)',
+    width: '100%',
+    alignItems: 'center',
+    backgroundColor: '#525252',
+    justifyContent: 'space-around'
+  },
+  imageIconStyle: {
+    height: 38,
+    width: 38,
+    resizeMode: 'contain'
+  },
+  iconsPadding: {
+    alignItems: 'center', 
+    padding: 5
+  },
   headline: {
     color: AppColors.accentColor,
     paddingTop: 2,
@@ -455,7 +484,7 @@ const styles = StyleSheet.create({
   },
   statusBar: {
     width: '100%',
-    height: 64,
+    height: 58,
     marginTop: -4,
     marginLeft: -11,
     flexDirection: 'row',
@@ -501,26 +530,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingBottom: 2
   },
-  iconsPadding: {
-    alignItems: 'center', 
-    padding: 5
-  },
-  imageIconStyle: {
-    height: 52,
-    width: 52,
-    resizeMode: 'contain'
-  },
-  actionBar: {
-    height: 62,
-    flexDirection: 'row',
-    marginTop: -4,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.25)',
-    width: '100%',
-    alignItems: 'center',
-    backgroundColor: AppColors.paperColor,  // ... light grey ...
-    justifyContent: 'space-around'
-  },
   previewText: {
     fontSize: 14,
     color: 'rgba(0, 0, 0, .5)',
@@ -534,6 +543,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 1, height: 3 },
     shadowOpacity: 0.85,
     alignItems: 'center',
+    justifyContent: 'space-between',
     elevation: 2,
   },
   listContainer: {

@@ -43,6 +43,7 @@ import {
   propertyNoteChanged
 } from '../store/actions';
 import store from '../store';
+//import { getAllCards } from '../store/actions/CardRealm';
 
 /*
 const AppColors = {
@@ -59,16 +60,19 @@ To Restart the currently running App;
 adb shell am broadcast -a react.native.RELOAD
 */
 
-const cardsLiveResults = store.getAllCards();     // ... Realm updates this in real time ...
+// ... Realm updates this in real time ...
+let cardsLiveResults = store.getAllCards('');
 
 const whatDoYouNeed = state => {
   return {
     //saveMode: state.login.saveMode,
     //emojiCode: state.emojis.emojiCode,
     catList: state.categories.itemList,
-    cardList: (state.cards.searchFor === '' ? 
-      cardsLiveResults : store.getAllCards(state.cards.searchFor)),
+    cardList: (state.cards.searchFor === '' ? cardsLiveResults : 
+      store.getAllCards(state.cards.searchFor)),
+    //cardList: store.getAllCards(state.lists.activeList),
     thisCard: state.cards.thisCard,
+    activeList: state.lists.activeList,
     highlighted: state.cards.highlighted, 
     cardsUpdated: state.cards.lastUpdated,
     cardChanged: state.cards.cardChanged,
@@ -122,7 +126,16 @@ class ShowCards extends React.PureComponent {
       if (nextProps.tagsChanged === true && this.props.thisCard.key !== '') {   
         this.props.dispatch(updateCardTags(this.props.thisCard.key, nextProps.thisCard.tags));
       }
-      //this.props.dispatch(clearCard());
+    }
+    //-------------------------------------------------------------------------------
+    // ... make sure we are aware of a list change so we can get the right cards ...
+    //-------------------------------------------------------------------------------
+    if (this.props.activeList.key !== nextProps.activeList.key) {
+      const scrTitle = (nextProps.activeList.name === '' ? 
+        'Show Cards' : nextProps.activeList.name);
+      this.props.navigator.setTitle({ title: scrTitle });
+      cardsLiveResults = store.getAllCards(nextProps.activeList.key);
+      this.props.dispatch(itemCardChanged('list', nextProps.activeList.key));
     }
   }
 
@@ -382,7 +395,8 @@ class ShowCards extends React.PureComponent {
   }
 
   renderMainScreen() {
-    return (this.props.cardList.length === 0 ? this.showWelcome() : this.showMainList());
+    //return (this.props.cardList.length === 0 ? this.showWelcome() : this.showMainList());
+    return this.showMainList();
   }
 
   renderCardItem = ({ item }) => {
