@@ -41,7 +41,7 @@ const OpenMainTabs = () => {
             {
               screen: 'tracksome.ShowNotes',
               label: 'Notes',
-              title: 'List Notes',
+              title: 'Notes',
               icon: sources[6],  // ... light bulb ...
               leftButtons: [{ icon: sources[4], id: 'menu' }],
               rightButtons: [
@@ -65,7 +65,7 @@ const OpenMainTabs = () => {
             {
               screen: 'tracksome.EditCategories',
               label: 'Categories',
-              title: 'Update Categories',
+              title: 'Categories',
               icon: sources[3],
               leftButtons: [{ icon: sources[4], id: 'menu' }],
               rightButtons: [

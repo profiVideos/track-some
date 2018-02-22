@@ -42,8 +42,8 @@ export const propertyNoteChanged = (prop, value) => {
   };
 };
 
-export const addNote = (key, card, icon, title, note, color, priority, reminder) => {
-  store.createNote(key, card, icon, title, note, color, priority, reminder);
+export const addNote = (key, list, card, icon, title, note, color, priority, reminder) => {
+  store.createNote(key, list, card, icon, title, note, color, priority, reminder);
   return {
     type: ADD_NOTE,     // ... just need to inform Redux that something was added ...
     payload: { card }   // ... and preserve the card link if it exists ...
@@ -57,7 +57,6 @@ export const setNoteSelected = (key, isSelected) => {
   };
 };
 
-//export const updateNote = (key, card, icon, title, note, color, priority, reminder) => {
 export const updateNote = (item) => {
   store.updateNote(item);
   return {

@@ -110,6 +110,7 @@ List.schema = {
     barcode: 'string?',             // ... definition same as one above ...
     notes: 'string?[]',             // ... keys (links) to 'notes' - not really needed ...
     numCards: { type: 'int', default: 0 },
+    numNotes: { type: 'int', default: 0 },
     selected: { type: 'bool', default: false },
     createdTimestamp: 'date',
     updatedTimestamp: 'date'

@@ -25,6 +25,7 @@ import {
   setNoteSelected,
   searchCardsChanged,        // ... brand, spanking NEW ...
   searchNotesChanged,        // ... brand, spanking NEW ...
+  propertyNoteChanged
 } from '../store/actions';
 import store from '../store';
 
@@ -58,12 +59,13 @@ md-arrow-dropup - descending sort
 --------------------------------------------------------------------------------------
 */
 
-const notesLiveResults = store.getAllNotes();     // ... Realm updates this in real time ...
+let notesLiveResults = store.getAllNotes('');     // ... Realm updates this in real time ...
 
 const whatDoYouNeed = state => {
   return {
     saveMode: state.login.saveMode,
     thisNote: state.notes.thisNote,
+    activeList: state.lists.activeList,
     noteList: (state.notes.searchFor === '' ? 
       notesLiveResults : store.getAllNotes(state.notes.searchFor)),
     highlighted: state.notes.highlighted,
@@ -112,29 +114,20 @@ class ShowNotes extends React.PureComponent {
 
   componentWillMount() {
     console.log('inside show notes ...');
-/*
-    this.props.navigator.setButtons({
-      rightButtons: [{
-      //  component: 'tracksome.Menu',
-      //  passProps: { text: 'Hi!' },
-      //  component: 'example.CustomButton', // if you want a custom button
-      //  passProps: {}, // Object that will be passed as props to custom components (optional)
-        //title: 'Edit',      
-        id: 'more',
-        title: 'More Stuff', 
-        showAsAction: 'never', // optional, Android only. Control how the button is 
-      //  icon: require('../../img/navicon_add.png'),
-      //  disabled: true, // used to disable the button (appears faded and doesn't interact)
-      },
-      { 
-        title: 'Edit', 
-        id: 'search', 
-        showAsAction: 'never', // optional, Android only. Control how the button is 
-      }
-      ],
-      animated: true
-    });
-*/
+  }
+
+  componentWillReceiveProps(nextProps) {
+    //-------------------------------------------------------------------------------
+    // ... make sure we are aware of a list change so we can get the right cards ...
+    //-------------------------------------------------------------------------------
+    if (this.props.activeList.key !== nextProps.activeList.key) {
+      const scrTitle = (nextProps.activeList.name === '' ? 
+        'Notes' : nextProps.activeList.name);
+      this.props.navigator.setTitle({ title: scrTitle });
+      notesLiveResults = store.getAllNotes(nextProps.activeList.key);
+      // ... this next line is VERY IMPORTANT - otherwise the flatlist would update much later ...
+      this.props.dispatch(propertyNoteChanged('list', nextProps.activeList.key));
+    }
   }
 
   onNavigatorEvent(event) {
@@ -272,7 +265,7 @@ class ShowNotes extends React.PureComponent {
         <Image style={styles.imageStyle} source={NoteSplash} />
         <Text style={styles.bannerText}>
           Press the <Text style={styles.boldText}>{plusSymbol}</Text>
-          symbol to get started!
+          button to get started!
         </Text>
       </View>
     );
@@ -376,33 +369,6 @@ document.getElementById('counter').addEventListener('click', elapsedTime, false)
 
 export default connect(whatDoYouNeed)(ShowNotes);
 
-/*
-          <View>
-            <TouchableHighlight 
-              style={styles.addButton}
-              underlayColor='#ff7043' onPress={() => { console.log('pressed'); }} 
-            >
-                <Text style={{ fontSize: 40, color: 'white' }}>+</Text>
-            </TouchableHighlight>
-          </View>          
-
-          <TouchableOpacity 
-            activeOpacity={0.5} 
-            onPress={this.SampleFunction} 
-            style={styles.TouchableOpacityStyle} 
-          >
-          <Image 
-            source={{ uri: 'https://reactnativecode.com/wp-content/uploads/2017/11/Floating_Button.png' }} 
-            style={styles.FloatingButtonStyle} 
-          />
-          </TouchableOpacity>
-
-Pfeffenhausen Rathaus          
-Dienstag 13:30 – 16:00 Uhr
-Donnerstag 13:30 – 18:00 Uhr
-
-*/
-
 const styles = StyleSheet.create({
   buttonContainer: {
     width: 48,
@@ -421,8 +387,6 @@ const styles = StyleSheet.create({
   },  
   popupContainer: {
     flex: 1,
-    //width: '100%',
-    //justifyContent: 'center',
   },
   FloatingButtonStyle: {
     resizeMode: 'contain',
@@ -460,24 +424,12 @@ const styles = StyleSheet.create({
     }
   },  
   separatorStyle: {
-    //backgroundColor: 'rgba(0,0,0,0.85)',
-    //backgroundColor: 'white',
     margin: 2,
-    //width: '85%',
-    //alignSelf: 'center',
-    //height: 1
   },
   listContainer: {
-    //elevation: 2,
-    //marginBottom: 10,
-    //paddingBottom: 12,
-    //shadowColor: '#121212',
-    //shadowOffset: { width: 1, height: 3 },
-    //shadowOpacity: 0.85,
-    //backgroundColor: 'yellow'
   },
   bannerContainer: {
-    height: '100%',
+    flex: 1,
     padding: 35,
     alignItems: 'center',
     justifyContent: 'center'
@@ -490,13 +442,12 @@ const styles = StyleSheet.create({
   bannerText: {
     color: 'rgba(0,0,0,0.45)',
     fontSize: 18,
-    padding: 20,
     textAlign: 'center'
   },
   imageStyle: {
-    height: 150,
-    width: 150,
-    opacity: 0.35,
+    height: 200,
+    width: 200,
+    opacity: 0.55,
     resizeMode: 'contain'
   },
   outerContainer: {
@@ -504,9 +455,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 3,
-    //marginRight: 10,
-    //marginBottom: 5,
-    //paddingBottom: 5,
     shadowColor: '#121212',
     shadowOffset: { width: 1, height: 3 },
     shadowOpacity: 0.85,
@@ -517,3 +465,27 @@ const styles = StyleSheet.create({
     textAlign: 'center'
   }
 });
+
+/*
+    this.props.navigator.setButtons({
+      rightButtons: [{
+      //  component: 'tracksome.Menu',
+      //  passProps: { text: 'Hi!' },
+      //  component: 'example.CustomButton', // if you want a custom button
+      //  passProps: {}, // Object that will be passed as props to custom components (optional)
+        //title: 'Edit',      
+        id: 'more',
+        title: 'More Stuff', 
+        showAsAction: 'never', // optional, Android only. Control how the button is 
+      //  icon: require('../../img/navicon_add.png'),
+      //  disabled: true, // used to disable the button (appears faded and doesn't interact)
+      },
+      { 
+        title: 'Edit', 
+        id: 'search', 
+        showAsAction: 'never', // optional, Android only. Control how the button is 
+      }
+      ],
+      animated: true
+    });
+*/

@@ -115,7 +115,7 @@ class NoteDisplay extends React.PureComponent {
     if (this.props.item.title === '') return;
     return (
       <Text ellipsizeMode='tail' numberOfLines={1} style={styles.itemTitle}>
-        {this.props.item.title}
+        {this.props.item.title}*{this.props.item.list}*
       </Text>
     );
   }

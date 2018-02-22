@@ -1,7 +1,10 @@
 import { ToastAndroid } from 'react-native';
 import {
   ADD_LIST,
-  ADD_CARD,
+  ADD_CARD,                 // ... used for screen & flatlist updates ...
+  REMOVE_CARD,              // ... "            "                "
+  ADD_NOTE,                 // ... "            "                "
+  REMOVE_NOTE,              // ... "            "                "
   //SORT_LISTS, 
   CLEAR_LIST,
   UPDATE_LIST,
@@ -38,9 +41,10 @@ const initialState = {
     iconType: '',            // ... 'ICO', 'PHO', 'BAR', 'QRC' ...
     imageThumb: '',          // ... base64 encoded thumbnail (256x256) ...
     mimeType: '',            // ... same as full image in imageRealm ...
-    barcode: '',             // ... definition same as one above ...
-    notes: [],
+    barcode: '',         // ... not being used right now - future expansion ...
+    notes: [],          // ... not being used right now - maybe in the future ...
     numCards: 0,
+    numNotes: 0,
     selected: false,
     createdTimestamp: {},
     updatedTimestamp: {}
@@ -62,7 +66,10 @@ const ListReducer = (state = initialState, action) => {
   switch (action.type) {
 
     case ADD_CARD:
-      // ... force an update of the list state as well - we added a card ...
+    case ADD_NOTE:
+    case REMOVE_CARD:
+    case REMOVE_NOTE:
+      // ... force an update of the list state as well - we added/deleted a card or note ...
       return { 
         ...state,
         lastUpdated: Date.now()
@@ -130,7 +137,8 @@ const ListReducer = (state = initialState, action) => {
 
     case REMOVE_LIST:
       // ... deleted in Realm DB - just show something happened ...
-      // ... however we have to remove the link to this note in cards file (if required) ...
+      // ... however, we do have to remove all notes & cards associated with this list ...
+      // ... just sayin' so we don't forget ...
       ToastAndroid.show('List Deleted', ToastAndroid.LONG);
       //-----------------------------------------------------------------------------
       // ... we should really do this within a transaction so we could roll back ...
@@ -142,8 +150,7 @@ const ListReducer = (state = initialState, action) => {
       };
 
     case ADD_LIST:
-      // ... added in Realm DB - just clear the note input record ...
-      // ... preserve the card link in case person is adding multiple notes at once ...
+      // ... added in Realm DB - just clear the list input record ...
       ToastAndroid.show('List Added', ToastAndroid.SHORT);
       return { 
         ...state,
@@ -158,6 +165,7 @@ const ListReducer = (state = initialState, action) => {
           barcode: '',             // ... definition same as one above ...
           notes: [],
           numCards: 0,
+          numNotes: 0,
           selected: false,
           createdTimestamp: {},
           updatedTimestamp: {}
@@ -190,6 +198,7 @@ const ListReducer = (state = initialState, action) => {
           barcode: action.payload.item.barcode,
           notes: action.payload.item.notes,
           numCards: action.payload.item.numCards,
+          numNotes: action.payload.item.numNotes,
           selected: action.payload.item.selected,
           createdTimestamp: action.payload.item.createdTimestamp,
           updatedTimestamp: action.payload.item.updatedTimestamp
@@ -212,6 +221,7 @@ const ListReducer = (state = initialState, action) => {
           barcode: '',             // ... definition same as one above ...
           notes: [],
           numCards: 0,
+          numNotes: 0,
           selected: false,
           createdTimestamp: {},
           updatedTimestamp: {}

@@ -51,6 +51,7 @@ const whatDoYouNeed = state => {
   return {
     thisNote: state.notes.thisNote,
     thisCard: state.cards.thisCard,
+    activeList: state.lists.activeList,
     somethingChanged: state.notes.editChange,
     colorPicker: state.notes.colorPicker,
     photoViewer: state.notes.photoViewer,
@@ -155,6 +156,7 @@ class NoteEdit extends PureComponent {
         const newNoteKey = UniqueId();
         this.props.dispatch(addNote(
           newNoteKey,
+          this.props.activeList.key,  // ... link this note to our active list ...
           this.props.thisNote.card,
           this.props.thisNote.icon, 
           this.props.thisNote.title, 
@@ -550,9 +552,8 @@ const styles = StyleSheet.create({
     fontWeight: '500'
   },
   headerContainer: {
+    width: '100%',
     backgroundColor: AppColors.mainDarkColor,
-    //borderTopLeftRadius: 8,
-    //borderTopRightRadius: 8,
     padding: 12,
     paddingTop: 8,
     paddingBottom: 8,

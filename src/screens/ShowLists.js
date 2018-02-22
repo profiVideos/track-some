@@ -39,7 +39,7 @@ import realmDB from '../store';
 import PlusIcon from '../images/PlusIcon.png';
 
 const listsLiveResults = realmDB.getAllLists();     // ... Realm updates this in real time ...
-const itemWidth = 180;  // ... add this to state - used to calculate column spacing ...
+const itemWidth = 170;  // ... add this to state - used to calculate column spacing ...
 
 const whatDoYouNeed = state => {
   return {
@@ -138,7 +138,8 @@ class ShowLists extends PureComponent<{}> {
       this.props.dispatch(setActiveList('', ''));
     } else {
       this.props.dispatch(setActiveList(item.key, item.name));
-      this.props.navigator.switchToTab({ tabIndex: 0 });
+      // ... MG - 22.02.2018 - make the following an option ...
+      //this.props.navigator.switchToTab({ tabIndex: 0 });
     }
   }
 
@@ -218,12 +219,12 @@ Do you really want to do this?`,
     return (
       <View style={styles.bannerContainer}>
         <Text style={styles.bannerText}>
-          photo!Drops is ready to build your first list ...
+          photo!Drops is ready to create your first list ...
         </Text>
         <Image style={styles.imageStyle} source={PaintSplash} />
         <Text style={styles.bannerText}>
           Press the <Text style={styles.boldText}>{plusSymbol}</Text>
-          icon to get started!
+          button to get started!
         </Text>
       </View>
     );
@@ -244,12 +245,6 @@ Do you really want to do this?`,
       />
     );
   }
-
-/*
-      <View style={{ flex: 1, marginTop: 50 }}>
-        <Text>{item.desc}</Text>
-      </View>
-*/
 
   renderListItem = ({ item }) => {
     return (
@@ -280,7 +275,6 @@ Do you really want to do this?`,
   }
 
 }
-
 export default connect(whatDoYouNeed)(ShowLists);
 
 const styles = StyleSheet.create({
@@ -294,7 +288,7 @@ const styles = StyleSheet.create({
     //justifyContent: 'center',
   },
   bannerText: {
-    color: 'rgba(0,0,0,0.35)',
+    color: 'rgba(0,0,0,0.45)',
     fontSize: 18,
     textAlign: 'center'
   },

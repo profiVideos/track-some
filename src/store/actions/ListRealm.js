@@ -1,4 +1,4 @@
-import { ToastAndroid } from 'react-native';
+//import { ToastAndroid } from 'react-native';
 import { tsRealm } from '../data/tsObjects';
 //import { UniqueId } from '../../components/common/UniqueId';
 
@@ -61,17 +61,11 @@ export const createList = (cKey, cName, cDesc, cIcon, cType, cThumb, cMime, cBco
       mimeType: cMime,
       barcode: cBcode,
       numCards: 0,
+      numNotes: 0,
       selected: false,
       createdTimestamp: new Date(),
       updatedTimestamp: new Date()
     });
-  });
-};
-
-export const updateListSelected = (key, isSelected) => {
-  tsRealm.write(() => {
-    // ... update this list based on the key ...
-    tsRealm.create('List', { key, selected: isSelected }, true);
   });
 };
 
@@ -88,6 +82,7 @@ export const updateList = (item) => {
       mimeType: item.mimeType, 
       barcode: item.barcode, 
       numCards: item.numCards, 
+      numNotes: item.numNotes, 
       updatedTimestamp: new Date()
     }, true);
   });
@@ -102,6 +97,16 @@ export const deleteList = (key) => {
     if (queryResult !== undefined) {
       tsRealm.delete(queryResult);
     }
+  });
+};
+
+//-----------------------------------------------------------------------
+// ... not really used as I don't anticipate massive list operations ...
+//-----------------------------------------------------------------------
+export const updateListSelected = (key, isSelected) => {
+  tsRealm.write(() => {
+    // ... update this list based on the key ...
+    tsRealm.create('List', { key, selected: isSelected }, true);
   });
 };
 

@@ -30,6 +30,7 @@ const initialState = {
   searchFor: '',
   thisNote: {
     key: '',
+    list: '',
     card: '',
     icon: '',
     title: '',
@@ -44,6 +45,18 @@ const initialState = {
 };
 
 /*
+    key: 'string',    // ... unique GUID() ...
+    list: 'string?',   // ... (key) to which 'list' does this note belong or '' for all ...
+    card: 'string?',   // ... (key) to which 'card' does this note belong or '' for all ...
+    icon: 'string?',
+    title: { type: 'string', indexed: true },
+    note: 'string',
+    color: 'string?',
+    priority: 'int?',
+    reminder: 'date?',
+    selected: 'bool',
+    createdTimestamp: 'date',
+    updatedTimestamp: 'date'
 
 NEW:***********************************************************************
 
@@ -147,6 +160,7 @@ const NoteReducer = (state = initialState, action) => {
         ...state,
         thisNote: {
           key: '',
+          list: '',
           card: action.payload.card,
           icon: '',
           title: '',
@@ -166,6 +180,7 @@ const NoteReducer = (state = initialState, action) => {
         ...state,
         thisNote: {
           key: action.payload.item.key,
+          list: action.payload.item.list,
           card: action.payload.item.card,
           icon: action.payload.item.icon,
           title: action.payload.item.title,
@@ -186,6 +201,7 @@ const NoteReducer = (state = initialState, action) => {
         ...state,
         thisNote: {
           key: '',
+          list: '',
           card: '',
           icon: '',
           title: '',

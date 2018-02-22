@@ -20,23 +20,11 @@ class CategoryItem extends React.PureComponent {
   }
 
   onTouchablePress = () => { 
-    this.props.onPressItem(
-      this.props.id, 
-      this.props.name,
-      this.props.desc,
-      this.props.icon,
-      this.props.selected
-    );
+    this.props.onPressItem(this.props.id);
   }
 
   onToggleCheck = () => { 
-    this.props.onToggleItem(
-      this.props.id, 
-      this.props.name,
-      this.props.desc,
-      this.props.icon,
-      !this.props.selected
-    );
+    this.props.onToggleItem(this.props.id, !this.props.selected);
   }
 
   render() {
@@ -58,8 +46,9 @@ class CategoryItem extends React.PureComponent {
       onPressItem={this.onCatItemPress}
     />
 */
+    const backColor = this.props.hilite;   // ... AppColors.hiliteColor, otherwise white ...
     return (
-      <View style={styles.outerWrapper}>
+      <View style={[styles.outerWrapper, { backgroundColor: backColor }]}>
         <View style={styles.iconWrapper}>
           <TouchableOpacity onPress={this.onIconChange}>
             <Text style={styles.catIcon}>{this.props.icon}</Text>
@@ -72,7 +61,7 @@ class CategoryItem extends React.PureComponent {
               numberOfLines={1} 
               style={styles.catName}
             >
-              {this.props.name}
+              {this.props.name}*{this.props.list}*
             </Text>
           </View>
         </TouchableNativeFeedback>
@@ -114,7 +103,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 45,
     flexDirection: 'row',
-    backgroundColor: 'white',
+    //backgroundColor: 'white',
     alignItems: 'center',
     justifyContent: 'space-between'
   },
@@ -138,12 +127,12 @@ const styles = StyleSheet.create({
     paddingLeft: 7,
     width: '71%',
     justifyContent: 'center',
-    backgroundColor: 'white',
+    //backgroundColor: 'white',
   },
   checkWrapper: {
     padding: 5,
     width: '13%',
-    backgroundColor: 'white',
+    //backgroundColor: 'white',
     alignItems: 'center',
     justifyContent: 'center'
   },

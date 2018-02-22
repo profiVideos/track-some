@@ -13,18 +13,14 @@ import {
   ToastAndroid,
   TouchableHighlight,
 } from 'react-native';
-
-import {
-  MenuProvider
-} from 'react-native-popup-menu';
+import { MenuProvider } from 'react-native-popup-menu';
 import AppColors from '../templates/appColors';
 import PaintSplash from '../images/Color-Splash.png';
 import CardDisplay from '../components/CardDisplay';
 import TagEdit from '../components/TagEdit';
-//import RenderTags from '../components/RenderTags';
 import {
-  //addCard,
   clearCard,
+  clearNote,
   addCardTag,
   deleteCard,
   currentCard,
@@ -36,6 +32,7 @@ import {
   openNotesModal,
   openCardsModal,             // ... VERY, VERY NEW ...
   closeCardsModal,            // ... also very, very NEW ...
+  closeNotesModal,
   setCardSelected,
   itemCardChanged,
   searchCardsChanged,        // ... brand, spanking NEW ...
@@ -43,7 +40,6 @@ import {
   propertyNoteChanged
 } from '../store/actions';
 import store from '../store';
-//import { getAllCards } from '../store/actions/CardRealm';
 
 /*
 const AppColors = {
@@ -62,15 +58,16 @@ adb shell am broadcast -a react.native.RELOAD
 
 // ... Realm updates this in real time ...
 let cardsLiveResults = store.getAllCards('');
+let categoryLiveResults = store.getAllCategories('');  // ... Realm updates this in real time ...
 
 const whatDoYouNeed = state => {
   return {
     //saveMode: state.login.saveMode,
     //emojiCode: state.emojis.emojiCode,
-    catList: state.categories.itemList,
+    catList: categoryLiveResults,
     cardList: (state.cards.searchFor === '' ? cardsLiveResults : 
       store.getAllCards(state.cards.searchFor)),
-    //cardList: store.getAllCards(state.lists.activeList),
+    // ... was a bad idea - cardList: store.getAllCards(state.lists.activeList),
     thisCard: state.cards.thisCard,
     activeList: state.lists.activeList,
     highlighted: state.cards.highlighted, 
@@ -98,6 +95,7 @@ class ShowCards extends React.PureComponent {
     this.onCardItemMenuPress = this.onCardItemMenuPress.bind(this);
     this.onNavigatorEvent = this.onNavigatorEvent.bind(this);
     this.closeBuildCardModal = this.closeBuildCardModal.bind(this);
+    this.closeNoteEditModal = this.closeNoteEditModal.bind(this);
     this.onSearchChanged = this.onSearchChanged.bind(this);
     this.onSearchFocusChange = this.onSearchFocusChange.bind(this);
     this.state = {
@@ -117,7 +115,6 @@ class ShowCards extends React.PureComponent {
 */
 
   componentWillReceiveProps(nextProps) {
-    //this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     //-------------------------------------------------------------------------------------
     // ... due to the async processing we can only save when everything has been added ...
     // ... if main if is true - the tags Modal window has now closed - save & clean up ...
@@ -135,6 +132,8 @@ class ShowCards extends React.PureComponent {
         'Show Cards' : nextProps.activeList.name);
       this.props.navigator.setTitle({ title: scrTitle });
       cardsLiveResults = store.getAllCards(nextProps.activeList.key);
+      categoryLiveResults = store.getAllCategories(nextProps.activeList.key);
+      // ... this next line is VERY IMPORTANT - otherwise the flatlist would update much later ...
       this.props.dispatch(itemCardChanged('list', nextProps.activeList.key));
     }
   }
@@ -176,29 +175,30 @@ class ShowCards extends React.PureComponent {
     this.props.dispatch(setCardSelected(key, selected));
   }
 
-  onCardItemMenuPress(option, item) {
+  onCardItemMenuPress(option, card) {
     switch (option) {
       case 'edit': {
-        this.props.dispatch(currentCard(item));
-        this.openBuildCardModal(item.key);
+        this.props.dispatch(currentCard(card));
+        this.openBuildCardModal(card.key);
         break;
       }
       case 'tags': {
-        this.props.dispatch(currentCard(item));
-        this.props.dispatch(openTagsModal(item.key));
+        this.props.dispatch(currentCard(card));
+        this.props.dispatch(openTagsModal(card.key));
         break;
       }
       case 'note': {
-        this.props.dispatch(currentCard(item));
-        this.props.dispatch(openNotesModal(item.key));
-        this.props.dispatch(propertyNoteChanged('card', item.key));  // ... link note with card ...
+        // ... here we are adding a new note to this card ...
+        this.props.dispatch(currentCard(card));
+        this.openNoteEditModal('', card);  // ... need card record to display photo ...
         break;
       }
       case 'delete': {
+        // ... mae this message more severe and also delete all notes & tags ...
         Alert.alert('Delete Card', 
-          'You are about to remove this item.\nDo you really what to do this?',
+          'You are about to remove this card.\nDo you really what to do this?',
           [{ text: 'Cancel', style: 'cancel' },
-           { text: 'OK', onPress: () => this.props.dispatch(deleteCard(item.key)) }]);
+           { text: 'OK', onPress: () => this.props.dispatch(deleteCard(card.key)) }]);
         break;
       }
       default: break;
@@ -206,7 +206,6 @@ class ShowCards extends React.PureComponent {
   }
 
   onSearchChanged(text) {
-    console.log('search changed: ', text);
     this.props.dispatch(searchCardsChanged(text));
     this.setState({ localSearchFor: text });
   }
@@ -246,7 +245,7 @@ class ShowCards extends React.PureComponent {
   }
 
   countItems(items) {
-    return items.length;
+    return items.length;  // ... to circumvent a weird prop passing bug ...
   }
 
   closeTagsEditModal() {
@@ -277,7 +276,7 @@ class ShowCards extends React.PureComponent {
     // ... if not already in the list for this card - add it ...
     this.props.dispatch(addCardTag(tag));
     // ... also consider adding this tag to the master tags list ...
-    // ... naturally after checking for duplicates ...
+    // ... future enhancement - naturally after checking for duplicates ...
   }
 
   addTag2Card() {
@@ -287,6 +286,37 @@ class ShowCards extends React.PureComponent {
       const tagParts = this.props.thisCard.tag.split(',');  // ... in case commas entered ...
       tagParts.map(tag => this.processTag(tag.trim()));
     }
+  }
+
+  showNoteEditScreen(note = '', card) {
+    this.props.navigator.showLightBox({
+      screen: 'tracksome.NoteEdit',
+      passProps: {
+        id: (note.key === undefined ? '' : note.key),
+        photo: (card === undefined ? '' : card.imageThumb),
+        mimeType: (card === undefined ? '' : card.mimeType),
+        onClosePress: this.closeNoteEditModal
+      },
+      style: {
+        backgroundBlur: 'none',  // dark
+        backgroundColor: 'rgba(0,0,0,0.60)',
+        //tapBackgroundToDismiss: true 
+      },
+      //adjustSoftInput: 'resize'
+    });
+  }
+
+  openNoteEditModal(note = '', card) {
+    //ToastAndroid.show(`Open Note: ${note.key}`, ToastAndroid.SHORT);
+    if (note.key === '' || note.key === undefined) this.props.dispatch(clearNote());
+    this.props.dispatch(openNotesModal(note.key));
+    this.props.dispatch(propertyNoteChanged('card', card.key));  // ... link note with card ...
+    this.showNoteEditScreen(note, card);
+  }
+
+  closeNoteEditModal() {
+    this.props.dispatch(closeNotesModal(''));
+    this.props.navigator.dismissLightBox();
   }
 
   openBuildCardModal(card = '') {
@@ -321,12 +351,12 @@ class ShowCards extends React.PureComponent {
     return (
       <View style={styles.bannerContainer}>
         <Text style={styles.bannerText}>
-          Your track!some list is ready for your first card ...
+          Your photo!Drops list is ready for your first card ...
         </Text>
         <Image style={styles.imageStyle} source={PaintSplash} />
         <Text style={styles.bannerText}>
           Press the <Text style={styles.boldText}>{plusSymbol}</Text>
-          icon or you can choose Build Card to get started!
+          button to get started!
         </Text>
       </View>
     );
@@ -340,7 +370,6 @@ class ShowCards extends React.PureComponent {
     return (
       <FlatList
         keyboardShouldPersistTaps='always'
-        //style={{ width: '100%' }}
         data={this.props.cardList}
         extraData={this.props.cardsUpdated}
         renderItem={this.renderCardItem}
@@ -349,9 +378,10 @@ class ShowCards extends React.PureComponent {
     );
   }
 
-/*
-*/
-
+  //---------------------------------------------------------
+  // ... this should go the way of the dodo bird soon! ...
+  // ... make it like the note edit or build card screen ...
+  //---------------------------------------------------------
   renderTagEditScreen() {
     if (this.props.tagsModalOpen === false) return;
     return (
@@ -395,8 +425,9 @@ class ShowCards extends React.PureComponent {
   }
 
   renderMainScreen() {
-    //return (this.props.cardList.length === 0 ? this.showWelcome() : this.showMainList());
-    return this.showMainList();
+    // ... if no active list (from user defaults record) - ask user to select a list ...
+    if (this.props.activeList.name === '') this.props.navigator.switchToTab({ tabIndex: 2 });
+    return (this.props.cardList.length === 0 ? this.showWelcome() : this.showMainList());
   }
 
   renderCardItem = ({ item }) => {
@@ -416,10 +447,9 @@ class ShowCards extends React.PureComponent {
     );
   }
 
-/*
-          { this.renderBuildCardScreen() }
-*/
-
+  //-------------------------------------------------------------------------------
+  // ... replace this "fake" FAB Button with the Navigation FAB button (SOON!) ...
+  //-------------------------------------------------------------------------------
   render() {
     return (
       <MenuProvider>
@@ -470,7 +500,7 @@ Donnerstag 13:30 – 18:00 Uhr
 */
 
 const styles = StyleSheet.create({
-  scrollStyle: {
+  scrollStyle: {  // ... this actually works when you have many tags ...
     width: '100%'
   },
   popupContainer: {
@@ -528,15 +558,6 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
     height: 1.1
   },
-  listContainer: {
-    //elevation: 2,
-    //marginBottom: 10,
-    //paddingBottom: 12,
-    //shadowColor: '#121212',
-    //shadowOffset: { width: 1, height: 3 },
-    //shadowOpacity: 0.85,
-    //backgroundColor: 'yellow'
-  },
   bannerContainer: {
     height: '100%',
     padding: 35,
@@ -549,14 +570,14 @@ const styles = StyleSheet.create({
     fontWeight: '700'
   },
   bannerText: {
-    color: 'rgba(0,0,0,0.35)',
+    color: 'rgba(0,0,0,0.45)',
     fontSize: 18,
     textAlign: 'center'
   },
   imageStyle: {
     height: 200,
     width: 200,
-    opacity: 0.25,
+    opacity: 0.45,
     resizeMode: 'contain'
   },
   outerContainer: {

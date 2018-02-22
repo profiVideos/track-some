@@ -4,14 +4,11 @@ import {
   View,
   Alert,
   Image,
-  //Modal,
-  //Button,
   FlatList,
-  //Platform,
   TextInput,
   Dimensions,
-  //Animated,
   StyleSheet,
+  TouchableOpacity,
   TouchableNativeFeedback 
 } from 'react-native';
 import {
@@ -22,48 +19,30 @@ import {
   MenuProvider
 } from 'react-native-popup-menu';
 import { connect } from 'react-redux';
-import IconFa from 'react-native-vector-icons/FontAwesome';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import IconIon from 'react-native-vector-icons/Ionicons';
 import HappyGuy from '../images/1f603.png';
-
-//import EmojiPicker from 'react-native-simple-emoji-picker';  ... 1) broken ...
-//import Emoticons from 'react-native-emoticons';  ... 2) also broken ...
-//import EmojiPicker from 'react-native-emoji-picker';   // ... 3) also broken ProcTypes ...
 import AppColors from '../templates/appColors';
-//import MDInput from '../components/common/mdInput';
-import MDButton from '../components/common/mdButton';
-//import { UniqueId } from '../components/common/UniqueId';
 import CategoryItem from '../components/CategoryItem';
 import { 
   addCategory,
-  updateCategory,
-  loadCategories,
+  setCatSelected,
   itemTextChanged,
-  deleteCategories
+  deleteCategories,
+  highlightCategory
 } from '../store/actions';
+import store from '../store';
 
-//import store from '../store';
-//import { reducerCategories } from '../store/reducers';
-
-/*
-const AppColors = {
-  paperColor: '#e2e2e2',      // ... off white ...
-  hiliteColor: '#fff8b2',     // ... light yellow ...
-  accentColor: '#dea140',     // ... medium orange ...
-  mainLiteColor: '#a32b26',   // ... medium red ...
-  mainDarkColor: '#590d0b',   // ... dark red (burgundy) ...
-  darkerColor: '#325a66'      // ... dark cyan ....
-}
-*/
-
-//const categoryLiveResults = store.getAllCategories();  // ... Realm updates this in real time ...
+let categoryLiveResults = store.getAllCategories('');  // ... Realm updates this in real time ...
 
 const mapStateToProps = state => {
   return {
-    //itemList: categoryLiveResults,
-    itemList: state.categories.itemList,        // ... state.categories.itemList,
-    emojiCode: state.emojis.emojiCode,          // ... current emoji selected in PickEmojis ...
+    saveMode: state.login.saveMode,
     currentCat: state.categories.catCurrent,
+    activeList: state.lists.activeList,
+    catList: categoryLiveResults,
+    emojiCode: state.emojis.emojiCode,          // ... current emoji selected in PickEmojis ...
+    highlighted: state.categories.highlighted,
     listUpdated: state.categories.lastUpdated   // ... tells FlatList we have updated Realm data ...
   };
 };
@@ -90,35 +69,34 @@ class EditCategories extends PureComponent {
     this.onSelectEmoji = this.onSelectEmoji.bind(this);
     this.onCatItemPress = this.onCatItemPress.bind(this);
     this.onCatItemToggle = this.onCatItemToggle.bind(this);
-  }
-
-  state = {
-    toggled: false,
-    hasloaded: false,
-    modalVisible: false,
-    myList: [],
-    //removeAnim: new Animated.Value(1),
-    //categoriesAnim: new Animated.Value(0),
-    scrWidth: Dimensions.get('window').width,
-    scrHeight: Dimensions.get('window').height,
-    viewMode: this.scrHeight > this.scrWidth ? 'portrait' : 'landscape'
+    this.state = {
+      toggled: false,
+      //removeAnim: new Animated.Value(1),
+      //categoriesAnim: new Animated.Value(0),
+      scrWidth: Dimensions.get('window').width,
+      scrHeight: Dimensions.get('window').height,
+      viewMode: this.scrHeight > this.scrWidth ? 'portrait' : 'landscape'
+    };
   }
 
   componentWillMount() {
     console.log('inside edit categories ...');
-    this.props.dispatch(loadCategories());
+    //this.props.dispatch(loadCategories());
   }
 
   componentWillReceiveProps(nextProps) {
-    //------------------------------------------------------
-    // ... do this purely for debugging purposes so we ...
-    // ... can see the data being returned from Realm ...
-    //------------------------------------------------------
-    if (this.props.listUpdated !== nextProps.listUpdated) {
-      console.log('New Categories: ', JSON.stringify(nextProps.itemList));
+    //------------------------------------------------------------------------------------
+    // ... make sure we are aware of a list change so we can get the right categories ...
+    //------------------------------------------------------------------------------------
+    if (this.props.activeList.key !== nextProps.activeList.key) {
+      const scrTitle = (nextProps.activeList.name === '' ? 
+        'Categories' : nextProps.activeList.name);
+      this.props.navigator.setTitle({ title: scrTitle });
+      categoryLiveResults = store.getAllCategories(nextProps.activeList.key);
+      // ... this next line is VERY IMPORTANT - otherwise the flatlist would update much later ...
+      this.props.dispatch(itemTextChanged('list', nextProps.activeList.key));
     }
   }
-
 
   onNavigatorEvent(event) {
     if (event.type === 'NavBarButtonPress') { // this is the event type for button presses
@@ -140,16 +118,6 @@ class EditCategories extends PureComponent {
     }
   }
 
-/*
-  componentSomethingorOther() {
-    this.props.navigator.setTabBadge({
-      badge: this.state.itemsCount,
-      badgeColor: '#121212'  // ... doesn't seem to be working ...
-    });
-    //console.log(`Toggled is: ${this.state.toggled}`);
-  }
-*/
-
   onSelectEmoji() {
     this.props.navigator.showModal({
        title: 'Select an Emoji', 
@@ -157,15 +125,15 @@ class EditCategories extends PureComponent {
     });
   }
 
-  onCatItemPress(key, name, desc, icon, selected) {
-    // ... update this item in the categories list ...
-    console.log('An item was pressed.', key, ' Name: ', name, selected);
-    // ... open a popup window to allow this item to be changed ...
-    //this.props.dispatch(updateCategory(key, name, desc, icon, selected));
+  onCatItemPress(key) {
+    // ... if item was already selected - and user presses again - deselect ...
+    if (this.props.highlighted === key) {
+      this.props.dispatch(highlightCategory(''));
+    } else this.props.dispatch(highlightCategory(key));
   }
 
-  onCatItemToggle(key, name, desc, icon, selected) {
-    this.props.dispatch(updateCategory(key, name, desc, icon, selected));
+  onCatItemToggle(key, selected) {
+    this.props.dispatch(setCatSelected(key, selected));
   }
 
   onMenuOptionSelect = (value) => {
@@ -181,7 +149,8 @@ class EditCategories extends PureComponent {
           Alert.alert('Delete Selected Categories', 
             `You are about to remove ${numSelected} categories.\nIs this what you wish to do?`,
             [{ text: 'Cancel', style: 'cancel' },
-             { text: 'OK', onPress: () => this.props.dispatch(deleteCategories()) }]);
+             { text: 'OK', 
+             onPress: () => this.props.dispatch(deleteCategories(this.props.activeList.key)) }]);
             //{ cancelable: false });
         } else {
           Alert.alert('Delete Selected Categories', 
@@ -192,21 +161,13 @@ class EditCategories extends PureComponent {
       default: break;
     }  // ... switch ...
   }
-/*
-  openModal() {
-    this.setState({ modalVisible: true });
-  }
 
-  closeModal() {
-    this.setState({ modalVisible: false });
-  }
-*/
   menuReference = (menuId) => {
     this.optionsMenu = menuId;
   }
 
   countSelectedItems() {
-    return this.props.itemList.filter(item => item.selected === true).length;
+    return this.props.catList.filter(item => item.selected === true).length;
   }
 
   itemNameChanged(text) {
@@ -226,6 +187,7 @@ class EditCategories extends PureComponent {
   addThisItem = () => {
     if (this.props.currentCat.name !== '') {
       this.props.dispatch(addCategory(
+        this.props.activeList.key,
         this.props.currentCat.name,
         this.props.currentCat.desc,
         this.props.emojiCode)
@@ -237,70 +199,21 @@ class EditCategories extends PureComponent {
     return (<View style={styles.separatorStyle} />);
   };
 
-/*
-
-icons on the image server;
-https://res.cloudinary.com/profivideos/icons/apple-64/1f4a3.png
-
-Used for other module - but here it is.
-react-native-image-resizer
-
-  renderMoreFields() {
-    if (this.state.toggled) {
-      return (
-        <View style={{ marginTop: 5 }}>
-          <MDInput 
-            label='Description (optional)'
-            placeholder='An optional category description ... '
-            value={this.state.itemDesc}
-            onChangeText={text => this.itemDescChanged(text)}
-          />
-        </View>
-      );
-    }
-  }
-            <MDButton
-              iconSize={36} iconColor='white' iconName='event-note' 
-              textLabel='Description'
-              onPress={this.toggleDescription} 
-            />
-            {this.renderMoreFields()}fa-plus-circle
-*/
-
   renderCategoryItem = ({ item }) => (
     <CategoryItem 
       id={item.key}
       icon={item.icon}
       name={item.name}
       desc={item.desc}
+      list={item.list}
       checkIcon={item.selected ? 'check-square-o' : 'square-o'}
       selected={item.selected}
+      hilite={item.key === this.props.highlighted ? AppColors.hiliteColor : 'white'}
       onPressItem={this.onCatItemPress}
       onToggleItem={this.onCatItemToggle}
     />
   );
-/*
-  renderModalEditScreen = () => (
-    <View style={styles.container}>
-      <Modal
-          visible={this.state.modalVisible}
-          transparent
-          animationType={'fade'}
-          onRequestClose={() => this.closeModal()}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.innerContainer}>
-            <Text>This is content inside of modal component</Text>
-            <Button
-                onPress={() => this.closeModal()}
-                title="Close modal"
-            />
-          </View>
-        </View>
-      </Modal>
-    </View>
-  );
-*/
+
   renderOptionMenu = () => (
     <Menu onSelect={value => this.onMenuOptionSelect(value)} ref={this.menuReference}>
       <MenuTrigger>
@@ -326,6 +239,7 @@ react-native-image-resizer
       <MenuProvider>
         <View style={styles.outerContainer}>
           <View style={styles.statusBar}>
+
             <TouchableNativeFeedback onPress={this.onSelectEmoji}>
               <View 
                 style={{ 
@@ -334,7 +248,7 @@ react-native-image-resizer
                 justifyContent: 'center' }}
               >
                 { showIconOrEmoji }
-                <IconFa 
+                <Icon
                   size={28}
                   name='plus' 
                   style={styles.overlayPlus} 
@@ -342,6 +256,7 @@ react-native-image-resizer
                 />            
               </View>
             </TouchableNativeFeedback>
+
             <View style={styles.inputContainer}>
               <TextInput
                 style={styles.textInputStyle}
@@ -353,16 +268,31 @@ react-native-image-resizer
                 onChangeText={(text) => this.itemNameChanged(text)}
               />
             </View>
-            <MDButton
-              iconSize={48} iconColor='#333' iconName='add' 
-              onPress={this.addThisItem.bind(this)} 
-            />
+
+            <TouchableOpacity 
+              disabled={this.props.currentCat.name === ''} 
+              onPress={() => this.addThisItem()} 
+            >
+              <View style={{ alignItems: 'center' }}>
+                <Icon size={28} name='plus' color={AppColors.darkerColor} />
+              </View>
+            </TouchableOpacity>
             <View style={styles.menuTrigger}>
               { this.renderOptionMenu() }
             </View>
+            <TouchableNativeFeedback onPress={() => console.log('HI')}>
+              <View style={styles.buttonFinish}> 
+                <IconIon 
+                  name='md-checkmark-circle-outline' 
+                  size={34} 
+                  color={AppColors.paperColor} 
+                />
+              </View>
+            </TouchableNativeFeedback>
+
           </View>
           <FlatList
-            data={this.props.itemList}
+            data={this.props.catList}
             extraData={this.props.listUpdated}
             keyExtractor={(item) => item.key}
             renderItem={this.renderCategoryItem}
@@ -401,8 +331,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     height: 36
   },
+  buttonFinish: {
+    padding: 5,
+    paddingLeft: 7,
+    paddingRight: 7,
+    backgroundColor: AppColors.darkerColor
+  },
   menuTrigger: {
-    //elevation: 100,
     padding: 3,
     width: 0,
     position: 'absolute',
@@ -479,4 +414,32 @@ const styles = StyleSheet.create({
       <View style={this.state.itemsLoaded ? null : styles.buttonContainer}>
         {content}
       </View>
+
+icons on the image server;
+https://res.cloudinary.com/profivideos/icons/apple-64/1f4a3.png
+
+Used for other module - but here it is.
+react-native-image-resizer
+
+  renderMoreFields() {
+    if (this.state.toggled) {
+      return (
+        <View style={{ marginTop: 5 }}>
+          <MDInput 
+            label='Description (optional)'
+            placeholder='An optional category description ... '
+            value={this.state.itemDesc}
+            onChangeText={text => this.itemDescChanged(text)}
+          />
+        </View>
+      );
+    }
+  }
+            <MDButton
+              iconSize={36} iconColor='white' iconName='event-note' 
+              textLabel='Description'
+              onPress={this.toggleDescription} 
+            />
+            {this.renderMoreFields()}fa-plus-circle
 */
+

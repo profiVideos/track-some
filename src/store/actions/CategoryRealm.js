@@ -5,9 +5,24 @@ import { UniqueId } from '../../components/common/UniqueId';
 // ... Each property has a name and is described by either a string containing the property’s type, 
 // ... or an object with name, type, objectType, optional, default, and indexed fields.
 
-export const getAllCategories = () => {
-  //return [];
-  const catItems = tsRealm.objects('Category').sorted('name');  // + ,true for reverse sorting ...
+export const getAllCategories = (activeList = '', searchFor) => {
+  let catItems = '';
+  if (searchFor !== null && searchFor !== undefined) {
+    //ToastAndroid.show(`Matching Notes: ${queryStr}\n${foundCards}`, ToastAndroid.SHORT);
+    //ToastAndroid.show(`Getting Notes: ${searchFor}`, ToastAndroid.SHORT);
+    //catItems = tsRealm.objects('Category')
+    //  .filtered('name CONTAINS[c] $0 OR desc CONTAINS[c] $0', searchFor)
+    //  .sorted('name');
+  } else {
+    //ToastAndroid.show(`Notes: ${activeList}`, ToastAndroid.SHORT);
+    //if (activeList !== null && activeList !== undefined && activeList !== '') {
+      //ToastAndroid.show(`Get Notes: ${activeList}`, ToastAndroid.SHORT);
+      // ... MG - 22.02.2018 - filtered will retrieve "list" notes and others not yet assigned ...
+      catItems = tsRealm.objects('Category')
+        .filtered('list = $0 OR list = ""', activeList)
+        .sorted('name');  // + ,true for reverse sorting ...
+    //}      
+  }
   return catItems;
 };
 
@@ -27,18 +42,19 @@ export const getCategory = (key) => {
   return thisItem;
 };
 
-export const updateCategory = (key, name, desc, icon, selected) => {
+export const updateCatSelected = (key, isSelected) => {
   tsRealm.write(() => {
     // ... update this category based on the key ...
-    tsRealm.create('Category', { key, name, desc, icon, selected }, true);
+    tsRealm.create('Category', { key, selected: isSelected }, true);
   });
 };
 
-export const createCategory = (catName, catDesc, catIcon) => {
+export const createCategory = (catList, catName, catDesc, catIcon) => {
   tsRealm.write(() => {
     tsRealm.create('Category', {
       key: UniqueId(),
       name: catName,
+      list: catList,
       desc: catDesc,
       icon: catIcon,
       selected: false,
@@ -47,15 +63,38 @@ export const createCategory = (catName, catDesc, catIcon) => {
   });
 };
 
-export const deleteSelectedCategories = () => {
+export const updateCategory = (item) => {
   tsRealm.write(() => {
-    const allSelected = tsRealm.objects('Category').filtered('selected = true');
-    tsRealm.delete(allSelected);
+    // ... update this category based on the key ...
+    // ... update this note based on the key ...
+    tsRealm.create('Category', {
+      key: item.key,
+      name: item.name,
+      list: item.list, 
+      desc: item.desc,
+      icon: item.icon, 
+      selected: item.selected
+    }, true);
   });
 };
 
+//-----------------------------------------------------------------------------
+// ... we should really do this within a transaction so we could roll back ...
+//-----------------------------------------------------------------------------
 export const deleteCategory = (key) => {
   tsRealm.write(() => {
-    tsRealm.delete(key);  // ... check on the correct syntax for this ...
+    const queryResult = tsRealm.objectForPrimaryKey('Category', key);
+    if (queryResult !== undefined) {
+      tsRealm.delete(queryResult);
+    }
+  });
+};
+
+export const deleteSelectedCategories = (list) => {
+  tsRealm.write(() => {
+    const allSelected = tsRealm.objects('Note').filtered('list = $0 and selected = true', list);
+    if (allSelected !== undefined) {
+      tsRealm.delete(allSelected);
+    }
   });
 };

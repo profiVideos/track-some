@@ -8,7 +8,7 @@ import {
   Picker,
   StyleSheet, 
   ScrollView,
-  //ToastAndroid,
+  ToastAndroid,
   TouchableOpacity,
   TouchableNativeFeedback 
 } from 'react-native';
@@ -39,10 +39,9 @@ import {
   deleteCardTag,
   openNotesModal,
   closeTagsModal,
-  loadCategories,
   itemCardChanged,
-  propertyListChanged,
 } from '../store/actions';
+import store from '../store';
 
 /*
 const AppColors = {
@@ -53,10 +52,11 @@ const AppColors = {
   mainDarkColor: '#590d0b',   // ... dark red (burgundy) ...
   darkerColor: '#325a66'      // ... dark cyan ....
 */
+let categoryLiveResults = store.getAllCategories('');  // ... Realm updates this in real time ...
 
 const whatDoYouNeed = state => {
   return {
-    catList: state.categories.itemList,
+    catList: categoryLiveResults,
     emojiCode: state.emojis.emojiCode,     // ... current emoji selected in PickEmojis ...
     thisCard: state.cards.thisCard,
     activeList: state.lists.activeList,
@@ -84,7 +84,7 @@ class BuildCard extends PureComponent {
     this.state = {
       image: null,
       images: null,
-      catList: [],
+      //catList: [],
       pickerItems: [],
       getIcon4Card: false,
       //tagsModalOpen: false,
@@ -120,26 +120,25 @@ class BuildCard extends PureComponent {
     console.log('inside build cards ...');
     this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     this.cleanTempSpace();  // ... cleans up images in tmp directory ...
-    if (this.props.catlist === undefined) {
-      this.props.dispatch(loadCategories());
+    ToastAndroid.show(`Will Mount - catList dudes is ${this.props.catList.length}`, 
+      ToastAndroid.SHORT);
+    if (this.props.catList.length !== null) {
+      this.buildPickerItems(this.props.catList);
     }
-    //const categoryResults = store.categoryList();
-    //const categories = store.getAllCategories();
-    //console.log('Categories: ', categoryResults, ' Length = ', categoryResults.length);
-    //if (categoryResults.length > 0) {
-    //  this.buildPickerItems(categoryResults);
+    //if (this.props.catlist === undefined) {
+    //  this.props.dispatch(loadCategories());
     //}
   }
 
   componentWillReceiveProps(nextProps) {
-    //console.log(nextProps);
-    //console.log(this.state);
-    //const categoryResults = store.categoryList();
-    //if (categoryResults.length > 0) {
-    //  this.buildPickerItems(categoryResults);
-    //}
-    if (nextProps.catList.length !== null) {
-      this.buildPickerItems(nextProps.catList);
+    if (this.props.activeList.key !== nextProps.activeList.key) {
+      categoryLiveResults = store.getAllCategories(nextProps.activeList.key);
+      // ... this next line is VERY IMPORTANT - otherwise the flatlist would never update ...
+      this.props.dispatch(itemCardChanged('list', nextProps.activeList.key));
+      ToastAndroid.show(`Got Props - catList is ${nextProps.catList.length}`, ToastAndroid.SHORT);
+      if (nextProps.catList.length !== null) {
+        this.buildPickerItems(nextProps.catList);
+      }
     }
     if (this.props.emojiCode !== nextProps.emojiCode) {
       if (this.state.getIcon4Card) {
@@ -149,13 +148,7 @@ class BuildCard extends PureComponent {
       this.setState({ getIcon4Card: false });
       //console.log('A new Emoji Code was selected');
     }
-    // ... if the cards list is dirty (used) then we should save it ...
-    // ... this disappears once we move this module over to Realm ...
-    //if (nextProps.listUpdated) {
-    //  const myCards = nextProps.itemList;
-    //  this.props.dispatch(saveMyCards(myCards));
-    //  this.displaySnackBarMsg('Your details have been saved.', 'Great Job');
-    //}
+    //this.displaySnackBarMsg('Your details have been saved.', 'Great Job');
   }
 
   onNavigatorEvent(event) {
@@ -327,7 +320,8 @@ class BuildCard extends PureComponent {
       if (this.props.thisCard.key === '') {
         // ... we are adding a new card ...
         this.props.dispatch(addCard(
-          this.props.activeList.key,  // ... we must add the active list key here ...
+          // ... our card's unique key is assigned in Realm - createCard ...
+          this.props.activeList.key,  // ... link this card to our active list ...
           this.props.thisCard.name,
           this.props.thisCard.desc,
           this.props.thisCard.icon,
@@ -340,7 +334,6 @@ class BuildCard extends PureComponent {
           this.props.thisCard.tags,
           this.props.thisCard.notes
         ));
-        this.props.dispatch(propertyListChanged('numCards', 1));
       } else {
         // ... we should update this card ...
         this.props.dispatch(updateCard(
@@ -684,8 +677,6 @@ const styles = StyleSheet.create({
   headerContainer: {
     width: '100%',
     backgroundColor: AppColors.mainDarkColor,
-    //borderTopLeftRadius: 8,
-    //borderTopRightRadius: 8,
     padding: 12,
     paddingTop: 8,
     paddingBottom: 8,

@@ -4,11 +4,23 @@ import {
   UPDATE_CATEGORY,
   REMOVE_CATEGORY,
   CURRENT_CATEGORY,
+  HIGHLIGHT_CATEGORY,
+  UPDATE_CAT_SELECTED,
   DELETE_SELECTED_CATS,
   CATEGORY_EDIT_CHANGE,
-  LOAD_CATEGORIES_SUCCESS,
 } from './actionTypes';
 import store from '../../store';   // ... Realm DB Routines ...
+
+/*
+
+NEW:***********************************************************************
+
+My First Realm Cloud Instance;
+https://tracksome-live.us1.cloud.realm.io/
+
+NEW:***********************************************************************
+
+*/
 
 export const itemTextChanged = (prop, value) => {
   return {
@@ -17,32 +29,73 @@ export const itemTextChanged = (prop, value) => {
   };
 };
 
-export const addCategory = (catName, catDesc, catIcon) => {
-  store.createCategory(catName, catDesc, catIcon);
-  const newList = store.getAllCategories();  // ... retrieves the newly sorted list ...
+export const setCatSelected = (key, isSelected) => {
+  store.updateCatSelected(key, isSelected);
   return {
-    type: ADD_CATEGORY,
-    payload: { itemList: newList }
+    type: UPDATE_CAT_SELECTED
   };
 };
 
-export const updateCategory = (key, name, desc, icon, isSelected) => {
-  store.updateCategory(key, name, desc, icon, isSelected);
-  const newList = store.getAllCategories();  // ... retrieves the newly updated list ...
+export const addCategory = (list, name, desc, icon) => {
+  store.createCategory(list, name, desc, icon);
   return {
-    type: UPDATE_CATEGORY,
-    payload: { itemList: newList }
+    type: ADD_CATEGORY
   };
 };
 
-export const deleteCategories = () => {
-  store.deleteSelectedCategories();
-  const newList = store.getAllCategories();  // ... retrieves the newly sorted list ...
+export const updateCategory = (item) => {
+  store.updateCategory(item);
   return {
-    type: DELETE_SELECTED_CATS,
-    payload: { itemList: newList }
+    type: UPDATE_CATEGORY
   };
 };
+
+export const highlightCategory = (key) => {
+  return {
+    type: HIGHLIGHT_CATEGORY,
+    payload: { key }
+  };
+};
+
+export const currentCategory = (item) => {
+  return {
+    type: CURRENT_CATEGORY,
+    payload: { item }
+  };
+};
+
+export const clearCategory = () => {
+  return {
+    type: CLEAR_CATEGORY
+  };
+};
+
+export const deleteCategory = (key) => {
+  //-----------------------------------------------------------------------------
+  // ... we should really do this within a transaction so we could roll back ...
+  //-----------------------------------------------------------------------------
+  store.deleteCategory(key);
+  return {
+    type: REMOVE_CATEGORY
+  };
+};
+
+export const deleteCategories = (list) => {
+  store.deleteSelectedCategories(list);
+  return {
+    type: DELETE_SELECTED_CATS
+  };
+};
+
+/*
+    key: 'string',
+    name: { type: 'string', indexed: true },
+    // ... to which 'list' does this category belong or '' for all ...
+    list: { type: 'string', optional: true },   
+    desc: { type: 'string', optional: true },
+    icon: { type: 'string', optional: true },
+    selected: { type: 'bool', default: false },
+    createdTimestamp: 'date'
 
 export const categoriesLoadSuccess = (catData) => {
   return {
@@ -58,31 +111,6 @@ export const loadCategories = () => {
   };
 };
 
-//---------------------------------------------------------------
-// ... the following functions need to be adjusted for Realm ...
-//---------------------------------------------------------------
-
-export const deleteCategory = (catKey) => {
-  return {
-    type: REMOVE_CATEGORY,
-    payload: { catKey }
-  };
-};
-
-export const clearCategory = () => {
-  return {
-    type: CLEAR_CATEGORY
-  };
-};
-
-export const currentCategory = (catKey) => {
-  return {
-    type: CURRENT_CATEGORY,
-    payload: { catKey }
-  };
-};
-
-/*
 export const categoriesSaveSuccess = () => {
   //console.log('Did the bloomen SAVE! : ');
   return {

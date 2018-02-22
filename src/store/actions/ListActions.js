@@ -27,6 +27,9 @@ NEW:***********************************************************************
 
 */
 
+//-------------------------------------------------------------------------------------------
+// ... VIP action - sets the state for many other modules as everything is list specific ...
+//-------------------------------------------------------------------------------------------
 export const setActiveList = (key, name) => {
   return {
     type: SET_ACTIVE_LIST,
@@ -55,24 +58,10 @@ export const addListImage = (image) => {
   };
 };
 
-export const setListSelected = (key, isSelected) => {
-  store.updateListSelected(key, isSelected);
-  return {
-    type: UPDATE_LIST_SELECTED
-  };
-};
-
 export const updateList = (item) => {
   store.updateList(item);
   return {
     type: UPDATE_LIST
-  };
-};
-
-export const highlightList = (key) => {
-  return {
-    type: HIGHLIGHT_LIST,
-    payload: { key }
   };
 };
 
@@ -113,6 +102,29 @@ export const deleteList = (key) => {
   };
 };
 
+//------------------------------------------------------------------------
+// ... MG - 22.02.2018 - not really used as set active list does both ...
+//------------------------------------------------------------------------
+export const highlightList = (key) => {
+  return {
+    type: HIGHLIGHT_LIST,
+    payload: { key }
+  };
+};
+
+//-----------------------------------------------------------------------
+// ... not really used as I don't anticipate massive list operations ...
+//-----------------------------------------------------------------------
+export const setListSelected = (key, isSelected) => {
+  store.updateListSelected(key, isSelected);
+  return {
+    type: UPDATE_LIST_SELECTED
+  };
+};
+
+//-----------------------------------------------------------------------
+// ... not really used as I don't anticipate massive list operations ...
+//-----------------------------------------------------------------------
 export const deleteLists = () => {
   return {
     type: DELETE_SELECTED_LISTS

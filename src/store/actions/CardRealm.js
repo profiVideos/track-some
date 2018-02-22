@@ -83,10 +83,12 @@ export const createCard =
     });
     // ... increment the total cards counter in the lists object ...
     const thisListItem = tsRealm.objectForPrimaryKey('List', cList);
-    tsRealm.create('List', {
-      key: cList,
-      numCards: thisListItem.numCards + 1
-    }, true);   // ... key based update of list item ...
+    if (thisListItem !== undefined) {
+      tsRealm.create('List', {
+        key: cList,
+        numCards: thisListItem.numCards + 1
+      }, true);   // ... key based update of list item ...
+    }
   });
 };
 
@@ -141,6 +143,7 @@ export const deleteCard = (key) => {
     const queryResult = tsRealm.objectForPrimaryKey('Card', key);
     if (queryResult !== undefined) {
       tsRealm.delete(queryResult);
+      // ... decrement the total cards counter in the lists object ...
     }
   });
 };

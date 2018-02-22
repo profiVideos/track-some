@@ -17,7 +17,7 @@ NEW:***********************************************************************
 
 */
 
-export const getAllNotes = (searchFor) => {
+export const getAllNotes = (activeList = '', searchFor) => {
   let noteList = '';
   //searchFor = '';
   if (searchFor !== null && searchFor !== undefined) {
@@ -27,7 +27,14 @@ export const getAllNotes = (searchFor) => {
       .filtered('note CONTAINS[c] $0 OR title CONTAINS[c] $0', searchFor)
       .sorted('updatedTimestamp', true);
   } else {
-    noteList = tsRealm.objects('Note').sorted('updatedTimestamp', true);  
+    //ToastAndroid.show(`Notes: ${activeList}`, ToastAndroid.SHORT);
+    //if (activeList !== null && activeList !== undefined && activeList !== '') {
+      //ToastAndroid.show(`Get Notes: ${activeList}`, ToastAndroid.SHORT);
+      // ... MG - 22.02.2018 - filtered will retrieve "list" notes and others not yet assigned ...
+      noteList = tsRealm.objects('Note')
+        .filtered('list = $0 OR list = ""', activeList)
+        .sorted('updatedTimestamp', true);  
+    //}      
   }
   return noteList;
 };
@@ -48,22 +55,31 @@ export const getNote = (key) => {
   return thisItem;
 };
 
-export const createNote = (cKey, cCard, cIcon, cTitle, cNote, cColor, cPriority, cReminder) => {
+export const createNote = (cKey, cList, cCard, cIcon, cTitle, cNote, cColor, cPrior, cRemind) => {
   console.log('saving note: ', cKey);
   tsRealm.write(() => {
     tsRealm.create('Note', {
       key: cKey,
+      list: cList,
       card: cCard,
       icon: cIcon,
       title: cTitle,
       note: cNote,
       color: cColor,
-      priority: cPriority,
-      reminder: cReminder,
+      priority: cPrior,
+      reminder: cRemind,
       selected: false,
       createdTimestamp: new Date(),
       updatedTimestamp: new Date()
     });
+    // ... increment the total notes counter in the lists object ...
+    const thisListItem = tsRealm.objectForPrimaryKey('List', cList);
+    if (thisListItem !== undefined) {
+      tsRealm.create('List', {
+        key: cList,
+        numNotes: thisListItem.numNotes + 1
+      }, true);   // ... key based update of list item ...
+    }
   });
 };
 
@@ -74,7 +90,6 @@ export const updateNoteSelected = (key, isSelected) => {
   });
 };
 
-//export const updateNote = (key, card, icon, title, note, color, priority, reminder) => {
 export const updateNote = (item) => {
   tsRealm.write(() => {
     // ... update this note based on the key ...
@@ -101,6 +116,7 @@ export const deleteNote = (key) => {
     const queryResult = tsRealm.objectForPrimaryKey('Note', key);
     if (queryResult !== undefined) {
       tsRealm.delete(queryResult);
+      // ... decrement the total notes counter in the lists object ...
     }
   });
 };

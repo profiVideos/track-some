@@ -20,7 +20,7 @@ import AppColors from '../templates/appColors';
 //const uri = 'http://profigraphics.com/images/Christina-100px.jpg';
 
 //const itemWidth = 176;  // ... used to calculate column spacing ...
-const itemWidth = 180;  // ... add this to state - used to calculate column spacing ...
+const itemWidth = 170;  // ... add this to state - used to calculate column spacing ...
 const IconMenuOption = (props) => (
   <MenuOption 
     value={props.value} 
@@ -52,7 +52,7 @@ class ListItemDisplay extends PureComponent {
   onLayout() {
     const scrnWidth = Dimensions.get('window').width;
     const numColumns = Math.floor(scrnWidth / itemWidth);
-    const horizontalMargin = (((scrnWidth / numColumns) - itemWidth) / 2) - 5;
+    const horizontalMargin = (((scrnWidth / numColumns) - itemWidth) / 2) - 3;
     this.setState({
       numCols: numColumns,
       horizMargin: horizontalMargin,
@@ -107,6 +107,7 @@ class ListItemDisplay extends PureComponent {
 
             <View style={styles.statusPanel}>
               <Text style={styles.numberText}>Cards: {this.props.item.numCards}</Text>
+              <Text style={styles.numberText}>Notes: {this.props.item.numNotes}</Text>
               <View style={styles.menuWrapper}>
                 <TouchableNativeFeedback>
                   { this.renderOptionMenu() }
@@ -188,7 +189,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 5,
   },
   outerWrapper: {
-    marginVertical: 7,
+    marginVertical: 5,
     justifyContent: 'center',
     alignItems: 'stretch',
     shadowColor: '#121212',
