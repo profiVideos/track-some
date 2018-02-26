@@ -5,8 +5,9 @@
  */
 
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import TextField from 'react-native-material-textinput';
+import { View, TextInput, StyleSheet } from 'react-native';
+// - old one - import TextField from 'react-native-material-textinput';
+//import { TextField } from 'react-native-material-textfield';
 import AppColors from '../../templates/appColors';
 
 // ... make a component ...
@@ -55,6 +56,38 @@ Padding below text input line: 4dp
           [styles.darkContainerStyle, this.props.style] : 
           [styles.lightContainerStyle, this.props.style]}
       >
+        <TextInput 
+          //style={this.props.style}  // ... doesn't appear to work ...
+          //containerStyle={{ justifyContent: 'center', alignItems: 'center' }}
+          //inputContainerStyle={{ padding: 24, margin: 24 }}
+          //labelColor={this.props.darkInput ? AppColors.accentColor : AppColors.mainLiteColor}
+          //color={this.props.darkInput ? AppColors.hiliteColor : AppColors.darkerColor}
+          fontSize={16}
+          //marginLeft={2}
+          //marginRight={2}
+          //paddingBottom={this.props.dense ? 2 : 4}
+          //paddingTop={this.props.dense ? 20 : 40}
+          //labelPadding={16}
+          //inputContainerPadding={this.props.dense ? 8 : 16}
+          //labelActiveColor={this.props.darkInput ? AppColors.accentColor : AppColors.darkerColor}
+          //labelActiveScale={0.70}
+          autoCorrect={false}
+          disableFullscreenUI
+          //underlineColor={this.props.dense ? 'transparent' : ulineColor}
+          //underlineActiveColor={this.props.dense ? 'transparent' : ulineActiveColor} 
+          //underlineColorAndroid='transparent'
+          multiline={this.props.multiline}
+          ref={this.props.ref}
+          {...this.props}
+        />
+      </View>
+    );
+  }
+}
+
+export default mdInput;
+
+/*
         <TextField 
           //style={this.props.style}  // ... doesn't appear to work ...
           //containerStyle={{ justifyContent: 'center', alignItems: 'center' }}
@@ -76,16 +109,14 @@ Padding below text input line: 4dp
           underlineActiveColor={this.props.dense ? 'transparent' : ulineActiveColor} 
           underlineColorAndroid='transparent'
           multiline={this.props.multiline}
+          ref={this.props.ref}
           {...this.props}
         />
-      </View>
-    );
-  }
-}
-/*
+
           style={[this.props.darkInput ? styles.darkInputStyle 
                                        : styles.lightInputStyle, this.props.style]}
 */
+
 const styles = StyleSheet.create({
   darkContainerStyle: {
     //width: '80%',
@@ -141,8 +172,6 @@ const styles = StyleSheet.create({
     opacity: 1.0
   }
 });
-
-export default mdInput;
 
 /*
 const AppColors = {

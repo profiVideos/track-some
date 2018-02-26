@@ -81,25 +81,6 @@ class TrackSomeConfig extends Component {
     //});
   }
 
-  onClearEmojisHandler = () => {
-    //this.props.dispatch(actionCreators.emojiLoadSuccess('ABC'));
-    //Alert.alert('Will be removing your favourite Emojis from Disk!');
-    //Alert.alert('Screen Height:' + this.state.scrHeight + '  Orientation: ' + 
-    //  this.state.viewMode);
-  }
-
-  onSaveEmojisHandler = () => {
-    const myEmojis = this.props.myEmojis;
-    this.props.dispatch(saveMyEmojis(myEmojis));
-    this.props.navigator.toggleDrawer({ side: 'left', animated: true });
-  }
-
-  onLoadEmojisHandler = () => {
-    //console.log('About to try loading Emojis ... ');
-    this.props.dispatch(loadMyEmojis());
-    this.props.navigator.toggleDrawer({ side: 'left', animated: true });
-  }
-
   handleSaveMode(newMode) {
     console.log(newMode);
     //this.props.setNewSaveMode((newMode ? 'local' : 'none'));
@@ -140,18 +121,7 @@ class TrackSomeConfig extends Component {
               /> 
             </View>
             <View style={styles.optionRow}>
-              <Button
-                title='Save Emojis'
-                onPress={this.onSaveEmojisHandler}
-              />
-              <Button
-                title='Clear'
-                onPress={this.onClearEmojisHandler}
-              />
-              <Button
-                title='Load Emojis'
-                onPress={this.onLoadEmojisHandler}
-              />
+              <Text>More config options here!</Text>
             </View>
           </View>
         </ScrollView>

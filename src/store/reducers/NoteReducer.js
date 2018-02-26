@@ -10,6 +10,7 @@ import {
   NOTE_EDIT_CHANGE,
   OPEN_NOTES_MODAL,
   CLOSE_NOTES_MODAL,
+  DELETE_CARD_NOTES,
   TOGGLE_COLOR_PICKER,
   TOGGLE_PHOTO_VIEWER,
   SEARCH_NOTES_CHANGED,
@@ -217,9 +218,7 @@ const NoteReducer = (state = initialState, action) => {
         editChange: false
       };
 
-//----------------------------------------------------
-// ... these functions need to be fixed for Realm ...
-//----------------------------------------------------
+    case DELETE_CARD_NOTES:
     case DELETE_SELECTED_NOTES:
       return {
         ...state,

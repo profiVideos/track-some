@@ -73,7 +73,7 @@ class NoteEdit extends PureComponent {
 
   constructor(props) {
     super(props);
-    this.focusNextField = this.focusNextField.bind(this);
+    //this.focusNextField = this.focusNextField.bind(this);
     this.inputs = {};
     this.state = { 
       didSave: false,
@@ -105,7 +105,6 @@ class NoteEdit extends PureComponent {
         this.props.dispatch(updateCardNotes(this.props.thisCard.key, nextProps.thisCard.notes));
       }
       this.props.dispatch(clearNote());  // ... removes the card link from note record ...
-      //this.props.dispatch(clearCard());
     }
   }
 
@@ -130,9 +129,11 @@ class NoteEdit extends PureComponent {
     this.props.onClosePress();
   }
 
+/*
   focusNextField(id) {
     this.inputs[id].focus();
   }
+*/
 
   pressedButton(whichOne) {
     switch (whichOne) {
@@ -173,14 +174,13 @@ class NoteEdit extends PureComponent {
       } else {
         // ... update this note ...
         this.props.dispatch(updateNote(this.props.thisNote));
-        // ... the key is not being added or deleted from the card so all's good ...
+        // ... the no note key is being added or deleted from the card so all's good ...
       }
     }
     // ... close the window if the user requested it ...
-    //if (canClose) {
-    //  this.props.dispatch(closeNotesModal(''));
-    //  //ToastAndroid.show(`Link with Card is: ${card}`, ToastAndroid.SHORT);
-    //}
+    if (canClose) {
+      this.props.onClosePress();
+    }
   }
 
   addNote2Card(card, canClose) {
@@ -304,7 +304,9 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
               />
             </View>
             { this.renderAddButton(this.props.id) }
-            <TouchableNativeFeedback onPress={() => this.onClosePress(this.props.thisNote.card)}>
+            <TouchableNativeFeedback 
+              onPress={() => this.addNote2Card(this.props.thisNote.card, true)}
+            >
               <View style={styles.buttonFinish}> 
                 <IonIcon 
                   name='md-checkmark-circle-outline' 
@@ -476,7 +478,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderBottomWidth: 0.75,
     borderBottomColor: 'rgba(0,0,0,0.25)',
-    backgroundColor: '#525252'  //AppColors.paperColor
+    backgroundColor: '#727272'  //AppColors.paperColor
   },
   noteContainer: {
     backgroundColor: '#f8f8f8',

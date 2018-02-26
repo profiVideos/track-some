@@ -4,11 +4,10 @@ import {
   Text, 
   Image, 
   Alert,
-  //Modal,
   Picker,
   StyleSheet, 
   ScrollView,
-  ToastAndroid,
+  //ToastAndroid,
   TouchableOpacity,
   TouchableNativeFeedback 
 } from 'react-native';
@@ -16,19 +15,18 @@ import { connect } from 'react-redux';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import ImagePicker from 'react-native-image-crop-picker';
 import { MenuProvider } from 'react-native-popup-menu';
-
-//import { UniqueId } from '../components/common/UniqueId';
-import MDInput from '../components/common/mdInput';
+import { ScreenVisibilityListener as RNNScreenVisibilityListener } from 'react-native-navigation';
+//import MDInput from '../components/common/mdInput';
+import { TextField } from 'react-native-material-textfield';
 import AppColors from '../templates/appColors';
 import CardDisplay from '../components/CardDisplay';
-//import TagEdit from '../components/TagEdit';
 import RenderTags from '../components/RenderTags';
-
 import PictureFrame from '../images/PictureFrame.png';
 import ItemTags from '../images/ItemTags.png';
 import ItemNotes from '../images/ItemNotes.png';
 import SmileyFace from '../images/SmileyGlasses.png';
 import PhotoAdd from '../images/PhotoAdd.png';
+import ListEdits from '../images/ListEdit.png';
 
 import { 
   addCard,
@@ -43,20 +41,12 @@ import {
 } from '../store/actions';
 import store from '../store';
 
-/*
-const AppColors = {
-  paperColor: '#e2e2e2',      // ... off white ...
-  hiliteColor: '#fff8b2',     // ... light yellow ...
-  accentColor: '#dea140',     // ... medium orange ...
-  mainLiteColor: '#a32b26',   // ... medium red ...
-  mainDarkColor: '#590d0b',   // ... dark red (burgundy) ...
-  darkerColor: '#325a66'      // ... dark cyan ....
-*/
-let categoryLiveResults = store.getAllCategories('');  // ... Realm updates this in real time ...
+let catListLive = store.getAllCategories('');
+
+// location of Java runtime - U:\AppDev\Android\Android Studio\jre
 
 const whatDoYouNeed = state => {
   return {
-    catList: categoryLiveResults,
     emojiCode: state.emojis.emojiCode,     // ... current emoji selected in PickEmojis ...
     thisCard: state.cards.thisCard,
     activeList: state.lists.activeList,
@@ -77,19 +67,29 @@ class BuildCard extends PureComponent {
 
   constructor(props) {
     super(props);
+    this.inputs = {};
     this.onSelectEmoji = this.onSelectEmoji.bind(this);
     this.doSomeFunction = this.doSomeFunction.bind(this);
     this.openTagsEditModal = this.openTagsEditModal.bind(this);
     this.openNotesEditModal = this.openNotesEditModal.bind(this);
+    this.listener = new RNNScreenVisibilityListener({
+      didDisappear: ({ screen /*, startTime, endTime, commandType*/ }) => {
+        if (screen === 'tracksome.EditCategories') {
+          // ... in case a new category was added or removed, rebuild the picker list ...
+          this.buildPickerItems(catListLive);
+          //ToastAndroid.show( 
+          //  `Screen ${screen} was open for ${endTime - startTime} ms after [${commandType}]`,
+          //   ToastAndroid.LONG);
+        }
+      }
+    });    
     this.state = {
       image: null,
       images: null,
-      //catList: [],
       pickerItems: [],
       getIcon4Card: false,
-      //tagsModalOpen: false,
       // ... these should go in redux / options panel & config file ...
-      compress: 0.25,   // ... could cause huge files if above 50% ...
+      compress: 0.30,   // ... could cause huge files if above 50% ...
       showIcon: true,
       showName: true,
       showCategory: true,
@@ -118,28 +118,17 @@ class BuildCard extends PureComponent {
 
   componentWillMount() {
     console.log('inside build cards ...');
-    this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
+    this.listener.register();
+    //this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     this.cleanTempSpace();  // ... cleans up images in tmp directory ...
-    ToastAndroid.show(`Will Mount - catList dudes is ${this.props.catList.length}`, 
-      ToastAndroid.SHORT);
-    if (this.props.catList.length !== null) {
-      this.buildPickerItems(this.props.catList);
+    catListLive = store.getAllCategories(this.props.activeList.key);
+    if (catListLive !== undefined) {
+      //ToastAndroid.show('catList has been loaded', ToastAndroid.SHORT);
+      this.buildPickerItems(catListLive);
     }
-    //if (this.props.catlist === undefined) {
-    //  this.props.dispatch(loadCategories());
-    //}
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.props.activeList.key !== nextProps.activeList.key) {
-      categoryLiveResults = store.getAllCategories(nextProps.activeList.key);
-      // ... this next line is VERY IMPORTANT - otherwise the flatlist would never update ...
-      this.props.dispatch(itemCardChanged('list', nextProps.activeList.key));
-      ToastAndroid.show(`Got Props - catList is ${nextProps.catList.length}`, ToastAndroid.SHORT);
-      if (nextProps.catList.length !== null) {
-        this.buildPickerItems(nextProps.catList);
-      }
-    }
     if (this.props.emojiCode !== nextProps.emojiCode) {
       if (this.state.getIcon4Card) {
         this.props.dispatch(itemCardChanged('icon', nextProps.emojiCode));
@@ -151,7 +140,19 @@ class BuildCard extends PureComponent {
     //this.displaySnackBarMsg('Your details have been saved.', 'Great Job');
   }
 
+  componentWillUnmount() {
+    if (this.listener) {
+      this.listener.unregister();
+      this.listener = null;
+    }
+  }
+
+/*
   onNavigatorEvent(event) {
+    ToastAndroid.show(`New Navigator Event: ${event.type}`, ToastAndroid.SHORT);
+    if (event.type === 'ScreenChangedEvent') {
+      ToastAndroid.show(`Screen Changed: ${event.id}`, ToastAndroid.SHORT);
+    }
     if (event.type === 'NavBarButtonPress') {
       switch (event.id) {
         case 'menu': {
@@ -166,6 +167,7 @@ class BuildCard extends PureComponent {
       }
     }
   }
+*/
 
   onChangeSelection(selection) {
     if (selection === 'addCategory') {
@@ -175,6 +177,7 @@ class BuildCard extends PureComponent {
         screen: 'tracksome.EditCategories'
       });
     } else /*if (selection !== '') */ {
+      //ToastAndroid.show(`New Category: ${selection}`, ToastAndroid.LONG);
       this.props.dispatch(itemCardChanged('category', selection));
     }
   }
@@ -334,6 +337,7 @@ class BuildCard extends PureComponent {
           this.props.thisCard.tags,
           this.props.thisCard.notes
         ));
+        this.inputs.name.focus();
       } else {
         // ... we should update this card ...
         this.props.dispatch(updateCard(
@@ -378,26 +382,34 @@ class BuildCard extends PureComponent {
 
   buildPickerItems(items) {
     const catsList = items.map((item, index) => {
-      return <Picker.Item key={index} label={`${item.icon}  ${item.name}`} value={item.key} />;
+      return (
+        <Picker.Item 
+          key={index} 
+          label={`${item.icon}  ${item.name}`} 
+          value={`${item.icon}  ${item.name}`} 
+        />
+      );
     });
     this.setState({ pickerItems: catsList }); 
   }
 
-  findCategoryByKey(key) {
-    return this.props.catList.findIndex((item) => { return item.key === key; });
-  }
+  //findCategoryByKey(key) {
+    //return this.props.catList.findIndex((item) => { return item.key === key; });
+  //}
 
   countTags(tags) {
     return tags.length;
   }
 
+  /*
   buildCatDescription(category) {
-    const indexPos = this.findCategoryByKey(category);
+    //const indexPos = this.findCategoryByKey(category);
     if (indexPos >= 0) {
-      return `${this.props.catList[indexPos].icon} ${this.props.catList[indexPos].name}`;
+      //return `${this.props.catList[indexPos].icon} ${this.props.catList[indexPos].name}`;
     }
     return category;
   }
+*/
 
   renderImage(image, mimeType) {
     //return <Image style={styles.imageStyle} source={image} />;
@@ -442,31 +454,63 @@ class BuildCard extends PureComponent {
   renderNameInput() {
     if (this.state.showName === false) return;
     return (
-      <MDInput
-        style={styles.nameWidth}
-        label='Item Name*'
-        placeholder='Please enter a name for this item ... '
-        value={this.props.thisCard.name}
-        onChangeText={text => this.itemNameChanged(text)}
-      />
+      <View style={styles.nameWidth}>
+        <TextField
+          //style={styles.nameInput}
+          autoFocus
+          label='Card Name*'
+          title='Please enter a name for this card.'
+          lineWidth={0.75}
+          labelHeight={20}
+          animationDuration={375}
+          inputContainerPadding={6}
+          ref={input => { this.inputs.name = input; }}
+          titleTextStyle={{ fontStyle: 'italic', marginTop: -2 }}
+          //enablesReturnKeyAutomatically
+          //characterRestriction={32}
+          returnKeyType='next'
+          disableFullscreenUI
+          onSubmitEditing={() => { this.inputs.desc.focus(); }}
+          value={this.props.thisCard.name}
+          onChangeText={text => this.itemNameChanged(text)}
+        />
+      </View>
     );
   }
 
   renderDescription() {
     if (this.state.showDesc === false) return;
     return (
-      <View style={styles.editFieldStyle}>
-        <MDInput
-          style={styles.inputStyle}
+      <View style={styles.inputStyle}>
+        <TextField
+          //style={styles.descInput}
           multiline
           label='Description (optional)'
-          placeholder='Briefly describe this item ... '
+          title='Briefly describe what this card is about ... '
+          lineWidth={0.75}
+          labelHeight={14}
+          animationDuration={375}
+          inputContainerPadding={6}
+          multiline
+          ref={input => { this.inputs.desc = input; }}
+          titleTextStyle={{ fontStyle: 'italic', marginTop: -2 }}
+          disableFullscreenUI
+          returnKeyType='next'
+          //onSubmitEditing={() => { this.inputs.cat.focus(); }}
           value={this.props.thisCard.desc}
           onChangeText={text => this.itemDescChanged(text)}
         />
       </View>
     );
   }
+
+  /*
+
+  this should help deal with some keybpoard issues;
+  https://medium.freecodecamp.org/how-to-make-your-react-native-app-respond-gracefully
+  -when-the-keyboard-pops-up-7442c1535580
+
+  */
 
   renderCategory() {
     if (this.state.showCategory === false) return;
@@ -476,6 +520,7 @@ class BuildCard extends PureComponent {
           <Text style={styles.labelText}>Category</Text>
           <Picker 
             style={styles.pickerElements}
+            ref={input => { this.inputs.cat = input; }}
             selectedValue={this.props.thisCard.category}
             onValueChange={(value) => this.onChangeSelection(value)}
           >
@@ -517,7 +562,7 @@ class BuildCard extends PureComponent {
           selected={false}
           marked={false}
           numTags={this.countTags(this.props.thisCard.tags)}
-          catDesc={this.buildCatDescription(this.props.thisCard.category)}
+          catDesc={this.props.thisCard.category}
           checkIcon={this.props.thisCard.selected ? 'check-square-o' : 'square-o'}
           hilite={'white'}
           onPressMenu={this.doSomeFunction}
@@ -614,7 +659,7 @@ class BuildCard extends PureComponent {
   
           <View style={styles.headerContainer}>
             <View style={{ flexDirection: 'row' }}>
-              <Image style={styles.imageIconStyle} source={ItemNotes} />
+              <Image style={styles.imageIconStyle} source={ListEdits} />
               <Text style={styles.headline}>{title}</Text>
             </View>
             <TouchableOpacity onPress={this.props.onClosePress}>
@@ -623,21 +668,20 @@ class BuildCard extends PureComponent {
               </View>
             </TouchableOpacity>
           </View>
-  
+          { this.renderActionIcons() }
           <View style={styles.textContainer}>
             <View style={styles.topRowStyle}>
               { this.renderIcon() }
               { this.renderNameInput() }
             </View>
-            { this.renderCategory() }
             { this.renderDescription() }
+            { this.renderCategory() }
           </View>
           { this.renderTags() }
   
         </View>
   
         { this.renderItemExtras() }
-        { this.renderActionIcons() }
         { this.renderPreview() }
   
       </ScrollView>
@@ -742,7 +786,7 @@ const styles = StyleSheet.create({
   statusBar: {
     width: '100%',
     height: 50,
-    marginTop: -4,
+    marginTop: -6,
     marginLeft: -11,
     flexDirection: 'row',
     padding: 2,
@@ -796,21 +840,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between'
   },
-  imageIconStyle: {
-    height: 52,
-    width: 52,
-    resizeMode: 'contain'
-  },
   actionBar: {
-    height: 62,
+    height: 46,
     flexDirection: 'row',
-    marginTop: -4,
+    paddingTop: 2,
+    borderTopWidth: 0.5,
+    borderTopColor: 'rgba(255,255,255,0.15)',
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0,0,0,0.25)',
     width: '100%',
     alignItems: 'center',
-    backgroundColor: AppColors.paperColor,  // ... light grey ...
+    backgroundColor: '#727272',
     justifyContent: 'space-around'
+  },
+  imageIconStyle: {
+    height: 42,  //...38,
+    width: 42, //...38,
+    resizeMode: 'contain'
   },
   tagsBar: {
     flexDirection: 'row',
@@ -832,20 +878,17 @@ const styles = StyleSheet.create({
   },
   labelText: {
     fontSize: 11,
-    color: AppColors.mainLiteColor
+    color: 'rgba(0, 0, 0, .38)',
+    //color: AppColors.mainLiteColor
   },
   pickerText: {
     fontSize: 16,
     color: 'rgba(255, 255, 255, .5)',
   },
-  editFieldStyle: {   // ... not really used ...
-    paddingBottom: 0,
-    //backgroundColor: 'blue'
-  },
   pickerStyle: {
     borderColor: '#c3c3c3',
     borderBottomWidth: 0.75,
-    paddingBottom: 5
+    paddingBottom: 7
   },
   popupContainer: {
     //flex: 1,
@@ -886,7 +929,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   nameWidth: {     // ... used to define the item name input width ...
-    width: '72%'
+    width: '72%',
+    paddingTop: 3,
   },
   inputStyle: {   // ... used to define the item desc input width ...
     width: '100%'

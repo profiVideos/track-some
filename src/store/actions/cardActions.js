@@ -168,12 +168,12 @@ export const closeTagsModal = (key) => {
   };
 };
 
-export const deleteCard = (key) => {
+export const deleteCard = (cardKey, listKey) => {
   //-----------------------------------------------------------------------------
   // ... we should really do this within a transaction so we could roll back ...
   // ... we may now be leaving some notes as orphans - just be aware of this ...
   //-----------------------------------------------------------------------------
-  store.deleteCard(key);
+  store.deleteCard(cardKey, listKey);
   return {
     type: REMOVE_CARD
   };
@@ -189,7 +189,6 @@ export const highlightCard = (key) => {
 //----------------------------------------------------
 // ... these functions need to be fixed for Realm ...
 //----------------------------------------------------
-
 export const deleteCards = () => {
   return {
     type: DELETE_SELECTED_CARDS

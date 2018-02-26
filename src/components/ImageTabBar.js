@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
   tabs: {
     height: 32,
     flexDirection: 'row',
-    backgroundColor: '#525252',
+    backgroundColor: '#727272',
     paddingTop: 3,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0,0,0,0.25)',

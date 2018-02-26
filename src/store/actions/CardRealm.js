@@ -86,7 +86,8 @@ export const createCard =
     if (thisListItem !== undefined) {
       tsRealm.create('List', {
         key: cList,
-        numCards: thisListItem.numCards + 1
+        numCards: thisListItem.numCards + 1,
+        updatedTimestamp: new Date()
       }, true);   // ... key based update of list item ...
     }
   });
@@ -138,12 +139,20 @@ export const updateCard =
 //-----------------------------------------------------------------------------
 // ... we should really do this within a transaction so we could roll back ...
 //-----------------------------------------------------------------------------
-export const deleteCard = (key) => {
+export const deleteCard = (cardKey, listKey = '') => {
   tsRealm.write(() => {
-    const queryResult = tsRealm.objectForPrimaryKey('Card', key);
+    const queryResult = tsRealm.objectForPrimaryKey('Card', cardKey);
     if (queryResult !== undefined) {
       tsRealm.delete(queryResult);
       // ... decrement the total cards counter in the lists object ...
+      const thisListItem = tsRealm.objectForPrimaryKey('List', listKey);
+      if (thisListItem !== undefined) {
+        tsRealm.create('List', {
+          key: listKey,
+          numCards: thisListItem.numCards - 1,
+          updatedTimestamp: new Date()
+        }, true);   // ... key based update of list item ...
+      }
     }
   });
 };

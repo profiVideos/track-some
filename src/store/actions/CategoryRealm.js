@@ -1,5 +1,6 @@
 import { tsRealm } from '../data/tsObjects';
 import { UniqueId } from '../../components/common/UniqueId';
+import { ToastAndroid } from 'react-native';
 
 // ... Realm supports the following basic types: bool, int, float, double, string, data, and date.
 // ... Each property has a name and is described by either a string containing the property’s type, 
@@ -91,9 +92,12 @@ export const deleteCategory = (key) => {
 };
 
 export const deleteSelectedCategories = (list) => {
+  //ToastAndroid.show(`Deleting Categories: ${list}`, ToastAndroid.SHORT);
   tsRealm.write(() => {
-    const allSelected = tsRealm.objects('Note').filtered('list = $0 and selected = true', list);
+    const allSelected = tsRealm.objects('Category')
+      .filtered('(list = $0 OR list = "") AND selected = true', list);
     if (allSelected !== undefined) {
+      //ToastAndroid.show(`Now Deleting ... ${list}`, ToastAndroid.SHORT);
       tsRealm.delete(allSelected);
     }
   });

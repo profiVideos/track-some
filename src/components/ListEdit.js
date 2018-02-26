@@ -13,8 +13,9 @@ import {
 import { connect } from 'react-redux';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import ImagePicker from 'react-native-image-crop-picker';
+import { TextField } from 'react-native-material-textfield';
+//import TextField from 'react-native-material-textinput (PLEASE REMOVE FROM PROJECT)';
 import { UniqueId } from '../components/common/UniqueId';
-import MDInput from '../components/common/mdInput';
 import AppColors from '../templates/appColors';
 import PictureFrame from '../images/PictureFrame.png';
 import SmileyFace from '../images/SmileyGlasses.png';
@@ -58,7 +59,7 @@ class ListEdit extends PureComponent {
 
   /*
   this.props.navigator.setSubTitle({
-    subtitle: 'Connecting...'
+      subtitle: 'Connecting...'
   });
   this.props.navigator.toggleTabs({
     to: 'hidden',
@@ -71,13 +72,14 @@ class ListEdit extends PureComponent {
 
   constructor(props) {
     super(props);
+    this.inputs = {};
     this.onSelectEmoji = this.onSelectEmoji.bind(this);
     this.state = {
       image: null,
       images: null,
       getIcon4List: false,
       // ... these should go in redux / options panel & config file ...
-      compress: 0.35,   // ... could cause huge files if above 50% ...
+      compress: 0.50,   // ... could cause huge files if above 50% ...
       showIcon: true,
       showName: true,
       showDesc: true
@@ -260,32 +262,90 @@ class ListEdit extends PureComponent {
     </View>
   );
 
-  renderNameInput() {
-    if (this.state.showName === false) return;
-    return (
-      <MDInput
+/*
+      <TextField
         style={styles.nameWidth}
         label='List Name*'
         //autoFocus
         returnKeyType='next'
+        ref={input => { this.inputs.name = input; }}
+        blurOnSubmit={false}
+        onSubmitEditing={() => { this.inputs.desc.focus(); }}
+        disableFullscreenUI
         placeholder='Please enter a short list name '
         value={this.props.thisList.name}
         onChangeText={text => this.itemNameChanged(text)}
       />
+
+        <TextField 
+          //style={styles.nameWidth}
+          label='List Name*'
+          //autoFocus
+          returnKeyType='next'
+          ref={input => { this.inputs.name = input; }}
+          blurOnSubmit={false}
+          //onSubmitEditing={() => { this.inputs.desc.focus(); }}
+          //onSubmitEditing={() => { this.desc.focus(); }}
+          disableFullscreenUI
+          placeholder='Please enter a short list name '
+          value={this.props.thisList.name}
+          onChangeText={text => this.itemNameChanged(text)}
+        />
+Dense spacing
+Padding above label: 8dp
+Padding below label: 4dp
+Padding above text input line: 8dp
+Padding below text input line: 4dp
+
+*/
+
+  renderNameInput() {
+    if (this.state.showName === false) return;
+    return (
+      <View style={styles.nameWidth}>
+        <TextField
+          //style={styles.nameInput}
+          label='List Name*'
+          title='Please enter a short list name.'
+          lineWidth={0.75}
+          labelHeight={20}
+          animationDuration={375}
+          inputContainerPadding={6}
+          ref={input => { this.inputs.name = input; }}
+          onSubmitEditing={() => { this.inputs.desc.focus(); }}
+          titleTextStyle={{ fontStyle: 'italic', marginTop: -2 }}
+          //enablesReturnKeyAutomatically
+          //characterRestriction={32}
+          returnKeyType='next'
+          disableFullscreenUI
+          value={this.props.thisList.name}
+          onChangeText={text => this.itemNameChanged(text)}
+        />      
+      </View>
     );
   }
 
   renderDescription() {
     if (this.state.showDesc === false) return;
     return (
-      <MDInput
-        style={styles.descWidth}
-        multiline
-        label='Description (optional)'
-        placeholder='Briefly describe what the list will contain ... '
-        value={this.props.thisList.desc}
-        onChangeText={text => this.itemDescChanged(text)}
-      />
+      <View style={styles.descWidth}>
+        <TextField
+          //style={styles.descInput}
+          label='Description (optional)'
+          title='Briefly describe what the list will contain ... '
+          lineWidth={0.75}
+          labelHeight={16}
+          animationDuration={375}
+          inputContainerPadding={6}
+          multiline
+          ref={input => { this.inputs.desc = input; }}
+          titleTextStyle={{ fontStyle: 'italic', marginTop: -2 }}
+          disableFullscreenUI
+          returnKeyType='done'
+          value={this.props.thisList.desc}
+          onChangeText={text => this.itemDescChanged(text)}
+        />
+      </View>
     );
   }
 
@@ -397,7 +457,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between'
   },
   actionBar: {
-    height: 42,
+    height: 46,
     flexDirection: 'row',
     paddingTop: 2,
     borderTopWidth: 0.5,
@@ -406,12 +466,12 @@ const styles = StyleSheet.create({
     borderBottomColor: 'rgba(0,0,0,0.25)',
     width: '100%',
     alignItems: 'center',
-    backgroundColor: '#525252',
+    backgroundColor: '#727272',
     justifyContent: 'space-around'
   },
   imageIconStyle: {
-    height: 38,
-    width: 38,
+    height: 42,
+    width: 42,
     resizeMode: 'contain'
   },
   iconsPadding: {

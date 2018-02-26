@@ -1,11 +1,13 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import { 
   View, 
-  Text, 
+  Text,
+  Alert,
   Image,
+  FlatList,
   StyleSheet, 
   Dimensions,
-  //ScrollView,
   //ToastAndroid,
   TouchableOpacity,
   TouchableNativeFeedback 
@@ -22,6 +24,16 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import ImageTabBar from './ImageTabBar';
 import AppColors from '../templates/appColors';
 import RenderTags from '../components/RenderTags';
+import NoteDisplay from '../components/NoteDisplay';
+import {
+  getCard,
+  deleteNote,
+  currentNote,
+  highlightNote,
+  deleteCardNote,
+  setNoteSelected,
+} from '../store/actions';
+import store from '../store';
 
 const IconMenuOption = (props) => (
   <MenuOption 
@@ -44,12 +56,23 @@ const menuOptionsStyles = {
 Cast: Cathy Heaven, Barbara Bieber, Ashley Woods, Jennifer James
 Genres: All Sex, Big Boobs
 */
+const whatDoYouNeed = state => {
+  return {
+    saveMode: state.login.saveMode,
+    thisNote: state.notes.thisNote,
+    activeList: state.lists.activeList,
+    highlighted: state.notes.highlighted,
+    notesUpdated: state.notes.lastUpdated,
+  };
+};
 
 class CardDisplay extends React.Component {
   constructor(props) {
     super(props);
+    this.onNoteItemPress = this.onNoteItemPress.bind(this);
+    this.onNoteItemToggle = this.onNoteItemToggle.bind(this);
+    this.onNoteItemMenuPress = this.onNoteItemMenuPress.bind(this);
     Dimensions.addEventListener('change', this.onDeviceChange);
-    //this.renderMyTags = this.renderMyTags.bind(this);
     this.state = {
       didSave: false,
       isVisible: false,
@@ -59,10 +82,6 @@ class CardDisplay extends React.Component {
 
   componentWillMount() {
     console.log('inside card item ...');
-    //console.log('number of tags = ', this.props.numTags);
-    //console.log('number of notes = ', this.props.numNotes);
-    //console.log('This Card Details are: ', this.props.item);
-    //console.log('This Card Details are: ', JSON.stringify(this.props.item));
   }
 
   componentWillUnmount() {
@@ -87,47 +106,87 @@ class CardDisplay extends React.Component {
     this.props.onMenuPress(value, item);
   }
 
+  onNoteDelete(note) {
+    // ... if attached to a card - remove the note link from card and update card ...
+    if (note.card !== '') {
+      //ToastAndroid.show(`Update Card: ${note.card}`, ToastAndroid.SHORT);
+      // ... get notes into the current card object and remove note link ...
+      this.props.dispatch(getCard(note.card));
+      this.props.dispatch(deleteCardNote(note.key));
+      // ... update of card will happen in WillReceiveProps ...
+    }
+    // ... remove the note itself and if attached to a list - decrement list notes counter ...
+    //ToastAndroid.show(`Delete Note & List Link: ${note.list}`, ToastAndroid.SHORT);
+    this.props.dispatch(deleteNote(note.key, note.list));
+  }
+
+  onNoteItemMenuPress(option, note) {
+    switch (option) {
+      case 'edit': {
+        this.props.dispatch(currentNote(note));
+        this.props.openNoteEditModal(note, this.props.item); 
+        break;
+      }
+      case 'delete': {
+        Alert.alert('Delete Note', 
+          'You are about to remove this item.\nDo you really want to do this?',
+          [{ text: 'Cancel', style: 'cancel' },
+           { text: 'OK', onPress: () => this.onNoteDelete(note) }]);
+        break;
+      }
+      default: break;
+    }  // ... switch ...
+  }
+
+  onNoteItemPress(key) {
+    // ... if item was already selected - and user presses again - deselect ...
+    if (this.props.highlighted === key) {
+      this.props.dispatch(highlightNote(''));
+    } else this.props.dispatch(highlightNote(key));
+  }
+
+  onNoteItemToggle(key, selected) {
+    this.props.dispatch(setNoteSelected(key, selected));
+  }
+
   itemTagRemove() {
     //this.props.dispatch(deleteCardTag(tag));
   }
 
-/*
-      <View style={styles.fullCard}>
-import PictureFrame from '../images/PictureFrameBare.png';
-import ItemInfo from '../images/ItemInfo.png';
-import ItemNote from       
+  itemSeparator = () => {
+    return (<View style={{ marginTop: 1 }} />);
+  };
 
-        <View tabLabel="PictureFrame" style={styles.tabView}>
-        <View tabLabel="ItemInfo" style={styles.tabView}>
-        <View tabLabel="ItemNote" style={styles.tabView}>
+  renderNoteDisplay = ({ item }) => {
+    const noteColor = (item.color !== '' ? item.color : '#f8f8f8');
+    return (
+      <NoteDisplay
+        item={item}
+        paperColor={noteColor}
+        marked={item.key === this.props.highlighted}
+        checkIcon={item.selected ? 'check-square-o' : 'square-o'}
+        hilite={item.key === this.props.highlighted ? noteColor : noteColor} 
+        onPressItem={this.onNoteItemPress}      // ... used to highlight an item ...
+        onToggleItem={this.onNoteItemToggle}    // ... turns the checked status on/off ...
+        onMenuPress={this.onNoteItemMenuPress}
+      />
+    );
+  }
 
-      <ScrollableTabView
-        style={{ backgroundColor: AppColors.paperColor, height: 345 }}
-        initialPage={0}
-        //tabBarPosition='overlayTop'
-        renderTabBar={() => <ImageTabBar optionMenu={this.renderOptionMenu} />}
-      >
-        <ScrollView style={{ height: 200 }} contentContainerStyle={{ height: 200 }}>
-          <View style={styles.responsiveContainer}>
-            <Image 
-             style={styles.fullWidthImage}
-             //style={styles.responsiveImg} 
-             source={{ uri: 
-              `data:${this.props.item.mimeType};base64,${this.props.item.imageThumb}` }} 
-            />
-          </View>
-        </ScrollView>
-        <ScrollView>
-          { this.renderInfoPanel() }
-        </ScrollView>
-        <ScrollView>
-          <Text>And the notes go here</Text>
-        </ScrollView>
-      </ScrollableTabView>
-      <View style={{ flex: 1, backgroundColor: AppColors.paperColor }}>
-      </View>
-
-*/
+  renderCardNotes() {
+    //const cardNotesResults = store.getAllNotes('ABCD');
+    //const cardNotesResults = store.getAllNotes(this.props.activeList.key);
+    const cardNotesResults = store.getCardNotes(this.props.item.key);
+    return (
+      <FlatList
+        style={{ marginTop: 2, backgroundColor: AppColors.paperColor }}
+        data={cardNotesResults}
+        extraData={this.props.notesUpdated}
+        renderItem={this.renderNoteDisplay}
+        ItemSeparatorComponent={this.itemSeparator}
+      />
+    );
+  }
 
   renderFullCard() {
     return (
@@ -146,7 +205,7 @@ import ItemNote from
           { this.renderInfoPanel() }
         </Tab>
         <Tab heading="Tab3" style={styles.tabView}>
-          <Text>And the notes go here</Text>
+          { this.renderCardNotes() }
         </Tab>
       </Tabs>
     );
@@ -203,14 +262,6 @@ import ItemNote from
       </View>
     );
   }
-
-/*
-
-         <Text style={styles.tagsTextStyle}>{this.props.numTags}</Text>
-         <View style={styles.tagsBadge}>
-         <View style={styles.notesBadge}>
-
-*/
 
   render() {
     const infoWidth = this.state.infoWidth;
@@ -284,16 +335,9 @@ import ItemNote from
       </View>
     );
   }
-/*
-            <View>
-              { this.renderRating() }
-              { this.renderCategory() }
-            </View>
-*/
-
 }
 
-export default CardDisplay;
+export default connect(whatDoYouNeed)(CardDisplay);
 
 const styles = StyleSheet.create({
   tagsBar: {
@@ -369,8 +413,11 @@ const styles = StyleSheet.create({
     //marginRight: 'auto',
     resizeMode: 'contain',    
   },
+  notesView: {
+    backgroundColor: AppColors.paperColor, 
+  },
   tabView: {
-    backgroundColor: '#727272', 
+    backgroundColor: '#525252', 
   },
   menuTitle: {
     fontWeight: '500', 

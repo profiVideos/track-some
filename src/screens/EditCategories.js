@@ -93,7 +93,7 @@ class EditCategories extends PureComponent {
         'Categories' : nextProps.activeList.name);
       this.props.navigator.setTitle({ title: scrTitle });
       categoryLiveResults = store.getAllCategories(nextProps.activeList.key);
-      // ... this next line is VERY IMPORTANT - otherwise the flatlist would update much later ...
+      // ... this next line is VERY IMPORTANT - otherwise the flatlist would not update ...
       this.props.dispatch(itemTextChanged('list', nextProps.activeList.key));
     }
   }
@@ -184,14 +184,21 @@ class EditCategories extends PureComponent {
     this.setState({ itemIcon: icon });
   }
 
-  addThisItem = () => {
+  addThisItem = (canClose) => {
     if (this.props.currentCat.name !== '') {
-      this.props.dispatch(addCategory(
-        this.props.activeList.key,
+      this.props.dispatch(addCategory(  // ... category unique key assigned in Realm ...
+        this.props.activeList.key,      // ... this category belongs to the current list ...
         this.props.currentCat.name,
         this.props.currentCat.desc,
         this.props.emojiCode)
       );
+    }
+    if (canClose) {
+      // ... we would like to exit this screen ...
+      //this.props.navigator.dismissLightBox();
+      this.props.navigator.dismissModal({
+        animationType: 'slide-down'
+      });      
     }
   }
 
@@ -271,7 +278,7 @@ class EditCategories extends PureComponent {
 
             <TouchableOpacity 
               disabled={this.props.currentCat.name === ''} 
-              onPress={() => this.addThisItem()} 
+              onPress={() => this.addThisItem(false)} 
             >
               <View style={{ alignItems: 'center' }}>
                 <Icon size={28} name='plus' color={AppColors.darkerColor} />
@@ -280,7 +287,7 @@ class EditCategories extends PureComponent {
             <View style={styles.menuTrigger}>
               { this.renderOptionMenu() }
             </View>
-            <TouchableNativeFeedback onPress={() => console.log('HI')}>
+            <TouchableNativeFeedback onPress={() => this.addThisItem(true)}>
               <View style={styles.buttonFinish}> 
                 <IconIon 
                   name='md-checkmark-circle-outline' 

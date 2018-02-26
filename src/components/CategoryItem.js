@@ -45,8 +45,11 @@ class CategoryItem extends React.PureComponent {
       selected={item.selected}
       onPressItem={this.onCatItemPress}
     />
+
+    *{this.props.list}*    
 */
     const backColor = this.props.hilite;   // ... AppColors.hiliteColor, otherwise white ...
+    const generalCat = (this.props.list === '' ? '*' : '');
     return (
       <View style={[styles.outerWrapper, { backgroundColor: backColor }]}>
         <View style={styles.iconWrapper}>
@@ -61,7 +64,7 @@ class CategoryItem extends React.PureComponent {
               numberOfLines={1} 
               style={styles.catName}
             >
-              {this.props.name}*{this.props.list}*
+              {generalCat}{this.props.name}
             </Text>
           </View>
         </TouchableNativeFeedback>

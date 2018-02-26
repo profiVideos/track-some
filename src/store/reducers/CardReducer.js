@@ -187,7 +187,7 @@ const CardReducer = (state = initialState, action) => {
 */
 
     case DELETE_CARD_NOTE:
-      // ... add this item to this card's tag list ...
+      // ... remove this item from the card's note list ...
       return { 
         ...state,
         thisCard: { ...state.thisCard, 

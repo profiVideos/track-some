@@ -1,10 +1,5 @@
 import { ToastAndroid } from 'react-native';
 import { tsRealm } from '../data/tsObjects';
-//import { UniqueId } from '../../components/common/UniqueId';
-
-// ... Realm supports the following basic types: bool, int, float, double, string, data, and date.
-// ... Each property has a name and is described by either a string containing the property’s type, 
-// ... or an object with name, type, objectType, optional, default, and indexed fields.
 
 /*
 
@@ -36,6 +31,13 @@ export const getAllNotes = (activeList = '', searchFor) => {
         .sorted('updatedTimestamp', true);  
     //}      
   }
+  return noteList;
+};
+
+export const getCardNotes = (cardKey) => {
+  const noteList = tsRealm.objects('Note')
+    .filtered('card = $0', cardKey)
+    .sorted('updatedTimestamp', true);  
   return noteList;
 };
 
@@ -77,7 +79,8 @@ export const createNote = (cKey, cList, cCard, cIcon, cTitle, cNote, cColor, cPr
     if (thisListItem !== undefined) {
       tsRealm.create('List', {
         key: cList,
-        numNotes: thisListItem.numNotes + 1
+        numNotes: thisListItem.numNotes + 1,
+        updatedTimestamp: new Date()
       }, true);   // ... key based update of list item ...
     }
   });
@@ -111,16 +114,52 @@ export const updateNote = (item) => {
 //-----------------------------------------------------------------------------
 // ... we should really do this within a transaction so we could roll back ...
 //-----------------------------------------------------------------------------
-export const deleteNote = (key) => {
+export const deleteNote = (noteKey, listKey = '') => {
   tsRealm.write(() => {
-    const queryResult = tsRealm.objectForPrimaryKey('Note', key);
+    const queryResult = tsRealm.objectForPrimaryKey('Note', noteKey);
     if (queryResult !== undefined) {
+      // ... delete the note itself ...
       tsRealm.delete(queryResult);
       // ... decrement the total notes counter in the lists object ...
+      if (listKey !== '') {
+        const thisListItem = tsRealm.objectForPrimaryKey('List', listKey);
+        if (thisListItem !== undefined) {
+          tsRealm.create('List', {
+            key: listKey,
+            numNotes: thisListItem.numNotes - 1,
+            updatedTimestamp: new Date()
+          }, true);   // ... key based update of list item ...
+        }
+      }
     }
   });
 };
 
+export const deleteCardNotes = (cardKey, listKey = '') => {
+  tsRealm.write(() => {
+    const allCardNotes = tsRealm.objects('Note')
+      .filtered('card = $0 AND list = $1', cardKey, listKey);
+    if (allCardNotes !== undefined) {
+      //ToastAndroid.show(`Notes: ${allCardNotes.length}`, ToastAndroid.SHORT);
+      const numNotes = allCardNotes.length;
+      tsRealm.delete(allCardNotes);
+      // ... decrement the total notes counter in the lists object ...
+      if (listKey !== '') {
+        const thisListItem = tsRealm.objectForPrimaryKey('List', listKey);
+        if (thisListItem !== undefined) {
+          tsRealm.create('List', {
+            key: listKey,
+            numNotes: thisListItem.numNotes - numNotes,
+            updatedTimestamp: new Date()
+          }, true);   // ... key based update of list item ...
+        }
+      }
+    }
+  });
+};
+
+// ... fix this function to work with lists (i.e. selected cards within a list) ...
+// ... and to update the list item with the reduced number of cards ...
 export const deleteSelectedNotes = () => {
   tsRealm.write(() => {
     const allSelected = tsRealm.objects('Note').filtered('selected = true');

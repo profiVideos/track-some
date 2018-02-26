@@ -113,9 +113,11 @@ class NoteDisplay extends React.PureComponent {
 
   renderNoteTitle() {
     if (this.props.item.title === '') return;
+    /**{this.props.item.list}**/
+    const generalNote = (this.props.item.list === '' ? '*' : '');
     return (
       <Text ellipsizeMode='tail' numberOfLines={1} style={styles.itemTitle}>
-        {this.props.item.title}*{this.props.item.list}*
+        {generalNote}{this.props.item.title}
       </Text>
     );
   }
@@ -125,7 +127,7 @@ class NoteDisplay extends React.PureComponent {
     const descLines = this.props.item.title === '' ? 2 : 1;
     return (
       <Text ellipsizeMode='tail' numberOfLines={descLines} style={styles.itemNote}>
-       {this.props.item.note}
+        {this.props.item.note}
       </Text>
     );
   }
@@ -210,6 +212,7 @@ const styles = StyleSheet.create({
     //width: '33.33333333%',
     //maxWidth: 70,
     //height: 100,
+    marginBottom: 3,
     marginLeft: 2,
     marginRight: 16,
     flexDirection: 'row',

@@ -35,6 +35,7 @@ import {
   closeNotesModal,
   setCardSelected,
   itemCardChanged,
+  deleteCardNotes,
   searchCardsChanged,        // ... brand, spanking NEW ...
   searchNotesChanged,        // ... brand, spanking NEW ...
   propertyNoteChanged
@@ -42,32 +43,18 @@ import {
 import store from '../store';
 
 /*
-const AppColors = {
-  paperColor: '#e2e2e2',      // ... off white ...
-  hiliteColor: '#fff8b2',     // ... light yellow ...
-  accentColor: '#dea140',     // ... medium orange ...
-  mainLiteColor: '#a32b26',   // ... medium red ...
-  mainDarkColor: '#590d0b',   // ... dark red (burgundy) ...
-  darkerColor: '#325a66'      // ... dark cyan ....
-*/
-
-/*
 To Restart the currently running App;
 adb shell am broadcast -a react.native.RELOAD
 */
 
-// ... Realm updates this in real time ...
-let cardsLiveResults = store.getAllCards('');
-let categoryLiveResults = store.getAllCategories('');  // ... Realm updates this in real time ...
+let cardsLiveResults = store.getAllCards('');     // ... Realm updates this in real time ...
 
 const whatDoYouNeed = state => {
   return {
     //saveMode: state.login.saveMode,
     //emojiCode: state.emojis.emojiCode,
-    catList: categoryLiveResults,
     cardList: (state.cards.searchFor === '' ? cardsLiveResults : 
       store.getAllCards(state.cards.searchFor)),
-    // ... was a bad idea - cardList: store.getAllCards(state.lists.activeList),
     thisCard: state.cards.thisCard,
     activeList: state.lists.activeList,
     highlighted: state.cards.highlighted, 
@@ -95,6 +82,7 @@ class ShowCards extends React.PureComponent {
     this.onCardItemMenuPress = this.onCardItemMenuPress.bind(this);
     this.onNavigatorEvent = this.onNavigatorEvent.bind(this);
     this.closeBuildCardModal = this.closeBuildCardModal.bind(this);
+    this.openNoteEditModal = this.openNoteEditModal.bind(this);
     this.closeNoteEditModal = this.closeNoteEditModal.bind(this);
     this.onSearchChanged = this.onSearchChanged.bind(this);
     this.onSearchFocusChange = this.onSearchFocusChange.bind(this);
@@ -132,13 +120,13 @@ class ShowCards extends React.PureComponent {
         'Show Cards' : nextProps.activeList.name);
       this.props.navigator.setTitle({ title: scrTitle });
       cardsLiveResults = store.getAllCards(nextProps.activeList.key);
-      categoryLiveResults = store.getAllCategories(nextProps.activeList.key);
-      // ... this next line is VERY IMPORTANT - otherwise the flatlist would update much later ...
+      // ... this next line is VERY IMPORTANT - otherwise the flatlist would never update ...
       this.props.dispatch(itemCardChanged('list', nextProps.activeList.key));
     }
   }
 
   onNavigatorEvent(event) {
+    //ToastAndroid.show(`New Navigator Event: ${event.type}`, ToastAndroid.SHORT);
     if (event.type === 'NavBarButtonPress') { // this is the event type for button presses
       switch (event.id) {
         case 'menu': {
@@ -175,6 +163,11 @@ class ShowCards extends React.PureComponent {
     this.props.dispatch(setCardSelected(key, selected));
   }
 
+  onDeleteCardAndNotes(cardKey, listKey) {
+    this.props.dispatch(deleteCardNotes(cardKey, listKey));
+    this.props.dispatch(deleteCard(cardKey, listKey));
+  }
+
   onCardItemMenuPress(option, card) {
     switch (option) {
       case 'edit': {
@@ -194,11 +187,13 @@ class ShowCards extends React.PureComponent {
         break;
       }
       case 'delete': {
-        // ... mae this message more severe and also delete all notes & tags ...
+        // ... make this message more severe and also delete all notes & tags ...
         Alert.alert('Delete Card', 
-          'You are about to remove this card.\nDo you really what to do this?',
+          `You are about to permanently remove this card.\n
+You will also be deleting all tags and notes associated with this card!  
+Do you really what to do this?`,
           [{ text: 'Cancel', style: 'cancel' },
-           { text: 'OK', onPress: () => this.props.dispatch(deleteCard(card.key)) }]);
+           { text: 'OK', onPress: () => this.onDeleteCardAndNotes(card.key, card.list) }]);
         break;
       }
       default: break;
@@ -238,10 +233,6 @@ class ShowCards extends React.PureComponent {
   hideSearchBar() {
     this.props.dispatch(searchCardsChanged(''));   // ... so we use the live results again ...
     this.props.navigator.setStyle({ navBarCustomView: '' });
-  }
-
-  findCategoryByKey(key) {
-    return this.props.catList.findIndex((item) => { return item.key === key; });
   }
 
   countItems(items) {
@@ -307,10 +298,16 @@ class ShowCards extends React.PureComponent {
   }
 
   openNoteEditModal(note = '', card) {
-    //ToastAndroid.show(`Open Note: ${note.key}`, ToastAndroid.SHORT);
-    if (note.key === '' || note.key === undefined) this.props.dispatch(clearNote());
+    if (note.key === '' || note.key === undefined) {
+      this.props.dispatch(clearNote());
+    } 
     this.props.dispatch(openNotesModal(note.key));
-    this.props.dispatch(propertyNoteChanged('card', card.key));  // ... link note with card ...
+    // ... link a new note with the current card ...
+    if (note.card === '' || note.card === undefined) {
+      this.props.dispatch(propertyNoteChanged('card', card.key));
+    }
+    //ToastAndroid.show(`Open Note: ${note.key}`, ToastAndroid.SHORT);
+    //ToastAndroid.show(`Link to Card: ${card.key}`, ToastAndroid.SHORT);
     this.showNoteEditScreen(note, card);
   }
 
@@ -320,10 +317,18 @@ class ShowCards extends React.PureComponent {
   }
 
   openBuildCardModal(card = '') {
-    ToastAndroid.show(`Card: ${card}`, ToastAndroid.SHORT);
-    if (card === '') this.props.dispatch(clearCard());
-    this.props.dispatch(openCardsModal(card));
-    this.showBuildCardScreen(card);
+    //ToastAndroid.show(`Card: ${card}`, ToastAndroid.SHORT);
+    if (this.props.activeList.key === '') {
+      Alert.alert('Create Card', 
+        `Please create / select a list in order to add cards to that list.\n
+There are some excellent benefits in keeping your cards within a list!`,
+          [{ text: 'Got It' }]);
+      this.props.navigator.switchToTab({ tabIndex: 2 });
+    } else {
+      if (card === '') this.props.dispatch(clearCard());
+      this.props.dispatch(openCardsModal(card));
+      this.showBuildCardScreen(card);
+    }
   }
 
   closeBuildCardModal() {
@@ -416,17 +421,11 @@ class ShowCards extends React.PureComponent {
     );
   }
 
-  renderCatDescription(category) {
-    const indexPos = this.findCategoryByKey(category);
-    if (indexPos >= 0) {
-      return `${this.props.catList[indexPos].icon} ${this.props.catList[indexPos].name}`;
-    }
-    return category;
-  }
-
   renderMainScreen() {
     // ... if no active list (from user defaults record) - ask user to select a list ...
-    if (this.props.activeList.name === '') this.props.navigator.switchToTab({ tabIndex: 2 });
+    if (this.props.activeList.key === '') {
+      this.props.navigator.switchToTab({ tabIndex: 2 });
+    }
     return (this.props.cardList.length === 0 ? this.showWelcome() : this.showMainList());
   }
 
@@ -437,12 +436,13 @@ class ShowCards extends React.PureComponent {
         marked={item.key === this.props.highlighted}
         numTags={this.countItems(JSON.parse(item.tags))}
         numNotes={this.countItems(item.notes)}
-        catDesc={this.renderCatDescription(item.category)}
+        catDesc={item.category}
         checkIcon={item.selected ? 'check-square-o' : 'square-o'}
         hilite={item.key === this.props.highlighted ? AppColors.hiliteColor : 'white'}
         onPressItem={this.onCardItemPress}      // ... used to highlight an item ...
         onToggleItem={this.onCardItemToggle}    // ... turns the checked status on/off ...
         onMenuPress={this.onCardItemMenuPress}
+        openNoteEditModal={this.openNoteEditModal}
       />
     );
   }

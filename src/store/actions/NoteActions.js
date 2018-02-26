@@ -9,6 +9,7 @@ import {
   OPEN_NOTES_MODAL,           // ... NEW ...
   CLOSE_NOTES_MODAL,          // ... NEW ...
   NOTE_EDIT_CHANGE,
+  DELETE_CARD_NOTES,
   TOGGLE_COLOR_PICKER,        // ... NEW ...
   TOGGLE_PHOTO_VIEWER,        // ... super brand spanking NEW ...
   SEARCH_NOTES_CHANGED,       // ... brand, spanking NEW ...
@@ -112,13 +113,20 @@ export const closeNotesModal = (key) => {
   };
 };
 
-export const deleteNote = (key) => {
+export const deleteNote = (noteKey, listKey) => {
   //-----------------------------------------------------------------------------
   // ... we should really do this within a transaction so we could roll back ...
   //-----------------------------------------------------------------------------
-  store.deleteNote(key);
+  store.deleteNote(noteKey, listKey);
   return {
     type: REMOVE_NOTE
+  };
+};
+
+export const deleteCardNotes = (cardKey, listKey) => {
+  store.deleteCardNotes(cardKey, listKey);
+  return {
+    type: DELETE_CARD_NOTES
   };
 };
 

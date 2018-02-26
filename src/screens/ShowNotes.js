@@ -16,13 +16,16 @@ import AppColors from '../templates/appColors';
 import NoteSplash from '../images/Note-Splash.png';
 import NoteDisplay from '../components/NoteDisplay';
 import {
+  getCard,
   clearNote,
   deleteNote,
   currentNote,
   highlightNote,
   openNotesModal,
+  deleteCardNote,
   closeNotesModal,
   setNoteSelected,
+  updateCardNotes,
   searchCardsChanged,        // ... brand, spanking NEW ...
   searchNotesChanged,        // ... brand, spanking NEW ...
   propertyNoteChanged
@@ -65,11 +68,13 @@ const whatDoYouNeed = state => {
   return {
     saveMode: state.login.saveMode,
     thisNote: state.notes.thisNote,
+    thisCard: state.cards.thisCard,
     activeList: state.lists.activeList,
     noteList: (state.notes.searchFor === '' ? 
       notesLiveResults : store.getAllNotes(state.notes.searchFor)),
     highlighted: state.notes.highlighted,
     notesUpdated: state.notes.lastUpdated,
+    cardNoteLinksChanged: state.cards.notesChanged,
   };
 };
 
@@ -128,6 +133,10 @@ class ShowNotes extends React.PureComponent {
       // ... this next line is VERY IMPORTANT - otherwise the flatlist would update much later ...
       this.props.dispatch(propertyNoteChanged('list', nextProps.activeList.key));
     }
+    // ... if we remove a note link from card, make sure we update the card in DB ...
+    if (nextProps.cardNoteLinksChanged && this.props.thisCard.key !== '') {   
+      this.props.dispatch(updateCardNotes(this.props.thisCard.key, nextProps.thisCard.notes));
+    }
   }
 
   onNavigatorEvent(event) {
@@ -167,6 +176,20 @@ class ShowNotes extends React.PureComponent {
     this.props.dispatch(setNoteSelected(key, selected));
   }
 
+  onNoteDelete(note) {
+    // ... if attached to a card - remove the note link from card and update card ...
+    if (note.card !== '') {
+      //ToastAndroid.show(`Update Card: ${note.card}`, ToastAndroid.SHORT);
+      // ... get notes into the current card object and remove note link ...
+      this.props.dispatch(getCard(note.card));
+      this.props.dispatch(deleteCardNote(note.key));
+      // ... update of card will happen in WillReceiveProps ...
+    }
+    // ... remove the note itself and if attached to a list - decrement list notes counter ...
+    //ToastAndroid.show(`Delete Note & List Link: ${note.list}`, ToastAndroid.SHORT);
+    this.props.dispatch(deleteNote(note.key, note.list));
+  }
+
   onNoteItemMenuPress(option, note) {
     switch (option) {
       case 'edit': {
@@ -178,7 +201,7 @@ class ShowNotes extends React.PureComponent {
         Alert.alert('Delete Note', 
           'You are about to remove this item.\nDo you really want to do this?',
           [{ text: 'Cancel', style: 'cancel' },
-           { text: 'OK', onPress: () => this.props.dispatch(deleteNote(note.key)) }]);
+           { text: 'OK', onPress: () => this.onNoteDelete(note) }]);
         break;
       }
       default: break;
@@ -281,7 +304,7 @@ class ShowNotes extends React.PureComponent {
         //keyboardShouldPersistTaps='always'
         //numColumns={3}
         //horizontal={false}
-        //style={{ flex: 1, width: '100%' }}
+        style={{ marginTop: 3 }}
         data={this.props.noteList}
         extraData={this.props.notesUpdated}
         renderItem={this.renderNoteDisplay}
@@ -424,7 +447,7 @@ const styles = StyleSheet.create({
     }
   },  
   separatorStyle: {
-    margin: 2,
+    marginTop: 1,
   },
   listContainer: {
   },
