@@ -129,12 +129,6 @@ class NoteEdit extends PureComponent {
     this.props.onClosePress();
   }
 
-/*
-  focusNextField(id) {
-    this.inputs[id].focus();
-  }
-*/
-
   pressedButton(whichOne) {
     switch (whichOne) {
       case 'color': {

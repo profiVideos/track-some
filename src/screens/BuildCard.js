@@ -26,17 +26,19 @@ import ItemTags from '../images/ItemTags.png';
 import ItemNotes from '../images/ItemNotes.png';
 import SmileyFace from '../images/SmileyGlasses.png';
 import PhotoAdd from '../images/PhotoAdd.png';
-import ListEdits from '../images/ListEdit.png';
+//import ListEdits from '../images/ListEdit.png';
 
 import { 
   addCard,
+  //clearNote,
   updateCard,
   addCardTag,
   addCardImage,
   openTagsModal,
   deleteCardTag,
-  openNotesModal,
+  //openNotesModal,
   closeTagsModal,
+  //closeNotesModal,
   itemCardChanged,
 } from '../store/actions';
 import store from '../store';
@@ -71,7 +73,7 @@ class BuildCard extends PureComponent {
     this.onSelectEmoji = this.onSelectEmoji.bind(this);
     this.doSomeFunction = this.doSomeFunction.bind(this);
     this.openTagsEditModal = this.openTagsEditModal.bind(this);
-    this.openNotesEditModal = this.openNotesEditModal.bind(this);
+    //this.openNotesEditModal = this.openNotesEditModal.bind(this);
     this.listener = new RNNScreenVisibilityListener({
       didDisappear: ({ screen /*, startTime, endTime, commandType*/ }) => {
         if (screen === 'tracksome.EditCategories') {
@@ -118,6 +120,8 @@ class BuildCard extends PureComponent {
 
   componentWillMount() {
     console.log('inside build cards ...');
+    const scrTitle = (this.props.id === '' ? 'Add a New Card' : 'Edit Card');
+    this.props.navigator.setTitle({ title: scrTitle });
     this.listener.register();
     //this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     this.cleanTempSpace();  // ... cleans up images in tmp directory ...
@@ -182,6 +186,11 @@ class BuildCard extends PureComponent {
     }
   }
 
+  onBuildCardClose() {
+    //console.log('Should close this window!');
+    this.props.onClosePress();
+  }   
+
   onSelectEmoji() {
     this.setState({ getIcon4Card: true });
     this.props.navigator.showModal({
@@ -237,11 +246,6 @@ class BuildCard extends PureComponent {
       backgroundColor: '#333', // optional
       duration: 'long' // default is `short`. Available options: short, long, indefinite
     });
-  }
-
-  openNotesEditModal() {
-    //this.props.dispatch(currentNote(item));
-    this.props.dispatch(openNotesModal(this.props.thisCard.key));
   }
 
   openTagsEditModal() {
@@ -393,23 +397,9 @@ class BuildCard extends PureComponent {
     this.setState({ pickerItems: catsList }); 
   }
 
-  //findCategoryByKey(key) {
-    //return this.props.catList.findIndex((item) => { return item.key === key; });
-  //}
-
   countTags(tags) {
     return tags.length;
   }
-
-  /*
-  buildCatDescription(category) {
-    //const indexPos = this.findCategoryByKey(category);
-    if (indexPos >= 0) {
-      //return `${this.props.catList[indexPos].icon} ${this.props.catList[indexPos].name}`;
-    }
-    return category;
-  }
-*/
 
   renderImage(image, mimeType) {
     //return <Image style={styles.imageStyle} source={image} />;
@@ -418,6 +408,19 @@ class BuildCard extends PureComponent {
         style={styles.imageStyle} 
         source={{ uri: `data:${mimeType};base64,${image}` }} 
       />
+    );
+  }
+
+  renderNotesAddIcon() {
+    if (this.props.id === '') return;   // ... can't add notes during card add (no card key) ...
+    return (
+      <TouchableNativeFeedback 
+        onPress={() => this.props.openNoteEditModal('', this.props.thisCard)}
+      >
+        <View style={styles.iconsPadding}>
+          <Image style={styles.imageIconStyle} source={ItemNotes} />
+        </View>
+      </TouchableNativeFeedback>
     );
   }
 
@@ -438,11 +441,7 @@ class BuildCard extends PureComponent {
           <Image style={styles.imageIconStyle} source={PhotoAdd} />
         </View>
       </TouchableNativeFeedback>
-      <TouchableNativeFeedback onPress={this.openNotesEditModal}>
-        <View style={styles.iconsPadding}>
-          <Image style={styles.imageIconStyle} source={ItemNotes} />
-        </View>
-      </TouchableNativeFeedback>
+      { this.renderNotesAddIcon() }
       <TouchableNativeFeedback onPress={this.openTagsEditModal}>
         <View style={styles.iconsPadding}>
           <Image style={styles.imageIconStyle} source={ItemTags} />
@@ -646,17 +645,8 @@ class BuildCard extends PureComponent {
             </View>
           </TouchableOpacity>
         </View>
-*/
 
-  //----------------------------------------------------
-  // ... the main JSX render section for this class ...
-  //----------------------------------------------------
-  render() {
-    const title = (this.props.id === '' ? 'Add a New Card' : 'Edit Card');
-    return (
-      <ScrollView style={{ flex: 1 }} keyboardShouldPersistTaps='always'>
-        <View style={styles.cardContainer}>
-  
+  ... after switch BuildCard to a ShowModal instead of ShowLightbox we no longer need header ...
           <View style={styles.headerContainer}>
             <View style={{ flexDirection: 'row' }}>
               <Image style={styles.imageIconStyle} source={ListEdits} />
@@ -668,6 +658,17 @@ class BuildCard extends PureComponent {
               </View>
             </TouchableOpacity>
           </View>
+
+*/
+
+  //----------------------------------------------------
+  // ... the main JSX render section for this class ...
+  //----------------------------------------------------
+  render() {
+    return (
+      <ScrollView style={{ flex: 1 /*, marginTop: 16*/ }} keyboardShouldPersistTaps='always'>
+
+        <View style={styles.cardContainer}>
           { this.renderActionIcons() }
           <View style={styles.textContainer}>
             <View style={styles.topRowStyle}>
@@ -678,7 +679,6 @@ class BuildCard extends PureComponent {
             { this.renderCategory() }
           </View>
           { this.renderTags() }
-  
         </View>
   
         { this.renderItemExtras() }

@@ -108,9 +108,9 @@ android {
     defaultConfig {
         applicationId "com.tracksome"
         minSdkVersion 16
-        targetSdkVersion 22
-        versionCode 2
-        versionName "0.82"
+        targetSdkVersion 25
+        versionCode 4
+        versionName "0.84 pre-alpha"
         vectorDrawables.useSupportLibrary = true
         ndk {
             abiFilters "armeabi-v7a", "x86"

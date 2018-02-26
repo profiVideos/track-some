@@ -280,6 +280,7 @@ Do you really what to do this?`,
   }
 
   showNoteEditScreen(note = '', card) {
+    ToastAndroid.show(`Inside Show Note Screen: ${note.key}`, ToastAndroid.SHORT);
     this.props.navigator.showLightBox({
       screen: 'tracksome.NoteEdit',
       passProps: {
@@ -298,6 +299,7 @@ Do you really what to do this?`,
   }
 
   openNoteEditModal(note = '', card) {
+    ToastAndroid.show(`Open Note: ${note.key}`, ToastAndroid.SHORT);
     if (note.key === '' || note.key === undefined) {
       this.props.dispatch(clearNote());
     } 
@@ -320,7 +322,7 @@ Do you really what to do this?`,
     //ToastAndroid.show(`Card: ${card}`, ToastAndroid.SHORT);
     if (this.props.activeList.key === '') {
       Alert.alert('Create Card', 
-        `Please create / select a list in order to add cards to that list.\n
+        `Please select / create a list in order to add cards to that list.\n
 There are some excellent benefits in keeping your cards within a list!`,
           [{ text: 'Got It' }]);
       this.props.navigator.switchToTab({ tabIndex: 2 });
@@ -333,15 +335,19 @@ There are some excellent benefits in keeping your cards within a list!`,
 
   closeBuildCardModal() {
     this.props.dispatch(closeCardsModal(''));
-    this.props.navigator.dismissLightBox();
+    this.props.navigator.dismissModal({
+      animationType: 'slide-down'
+    });
+    //this.props.navigator.dismissLightBox();
   }
 
   showBuildCardScreen(card) {
-    this.props.navigator.showLightBox({
+    this.props.navigator.showModal({
       screen: 'tracksome.BuildCard',
       passProps: {
         id: card,
-        onClosePress: this.closeBuildCardModal
+        onClosePress: this.closeBuildCardModal,
+        openNoteEditModal: this.openNoteEditModal
       },
       style: {
        backgroundBlur: 'dark',

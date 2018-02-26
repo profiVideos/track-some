@@ -139,7 +139,7 @@ class ShowLists extends PureComponent<{}> {
     } else {
       this.props.dispatch(setActiveList(item.key, item.name));
       // ... MG - 22.02.2018 - make the following an option ...
-      //this.props.navigator.switchToTab({ tabIndex: 0 });
+      this.props.navigator.switchToTab({ tabIndex: 0 });
     }
   }
 
