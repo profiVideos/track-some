@@ -18,6 +18,7 @@ import AppColors from '../templates/appColors';
 import PaintSplash from '../images/Color-Splash.png';
 import CardDisplay from '../components/CardDisplay';
 import TagEdit from '../components/TagEdit';
+import Loader from '../components/common/Loader';
 import {
   clearCard,
   clearNote,
@@ -56,6 +57,7 @@ const whatDoYouNeed = state => {
     cardList: (state.cards.searchFor === '' ? cardsLiveResults : 
       store.getAllCards(state.cards.searchFor)),
     thisCard: state.cards.thisCard,
+    isLoading: state.lists.loading,
     activeList: state.lists.activeList,
     highlighted: state.cards.highlighted, 
     cardsUpdated: state.cards.lastUpdated,
@@ -87,6 +89,7 @@ class ShowCards extends React.PureComponent {
     this.onSearchChanged = this.onSearchChanged.bind(this);
     this.onSearchFocusChange = this.onSearchFocusChange.bind(this);
     this.state = {
+      loading: false,
       searchOpen: false,
       localSearchFor: '',
     };
@@ -94,6 +97,7 @@ class ShowCards extends React.PureComponent {
 
   componentWillMount() {
     console.log('inside show cards ...');
+    //this.setState({ loading: true });
     this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
   }
 
@@ -116,6 +120,7 @@ class ShowCards extends React.PureComponent {
     // ... make sure we are aware of a list change so we can get the right cards ...
     //-------------------------------------------------------------------------------
     if (this.props.activeList.key !== nextProps.activeList.key) {
+      this.setState({ loading: true });
       const scrTitle = (nextProps.activeList.name === '' ? 
         'Show Cards' : nextProps.activeList.name);
       this.props.navigator.setTitle({ title: scrTitle });
@@ -126,7 +131,8 @@ class ShowCards extends React.PureComponent {
   }
 
   onNavigatorEvent(event) {
-    //ToastAndroid.show(`New Navigator Event: ${event.type}`, ToastAndroid.SHORT);
+    //if (event.id === 'willAppear') this.setState({ loading: true });
+    if (event.id === 'didAppear') this.setState({ loading: false });
     if (event.type === 'NavBarButtonPress') { // this is the event type for button presses
       switch (event.id) {
         case 'menu': {
@@ -198,6 +204,10 @@ Do you really what to do this?`,
       }
       default: break;
     }  // ... switch ...
+  }
+
+  onCardsRefresh() {
+    ToastAndroid.show('Cards: Refresh', ToastAndroid.SHORT);
   }
 
   onSearchChanged(text) {
@@ -382,6 +392,8 @@ There are some excellent benefits in keeping your cards within a list!`,
       <FlatList
         keyboardShouldPersistTaps='always'
         data={this.props.cardList}
+        //refreshing={this.state.loading}   ... haven't figured out how these work yet ...
+        //onRefresh={this.onCardsRefresh}   ... MG - 27.02.2018 ...
         extraData={this.props.cardsUpdated}
         renderItem={this.renderCardItem}
         ItemSeparatorComponent={this.itemSeparator}
@@ -432,6 +444,7 @@ There are some excellent benefits in keeping your cards within a list!`,
     if (this.props.activeList.key === '') {
       this.props.navigator.switchToTab({ tabIndex: 2 });
     }
+    if (this.state.loading) return <Loader size='large' />;
     return (this.props.cardList.length === 0 ? this.showWelcome() : this.showMainList());
   }
 

@@ -82,6 +82,7 @@ const ListReducer = (state = initialState, action) => {
           key: action.payload.key,
           name: action.payload.name,
         },
+        loading: true,    // ... so the showcards module knows we are getting new cards ...
         highlighted: action.payload.key,
         lastUpdated: Date.now()
       };

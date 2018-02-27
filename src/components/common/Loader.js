@@ -9,7 +9,12 @@ import { ActivityIndicator, View } from 'react-native';
 
 const styles = {
   loader: {
-    flex: 1,
+    //flex: 1,
+    backgroundColor: 'white',
+    borderRadius: 5,
+    padding: 3,
+    elevation: 5,
+    margin: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },

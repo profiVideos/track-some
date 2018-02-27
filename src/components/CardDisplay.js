@@ -289,13 +289,14 @@ class CardDisplay extends React.Component {
         <View style={[styles.outerWrapper, { backgroundColor: backColor }]}>
           <View style={styles.imageWrapper}>
             <TouchableOpacity onPress={this.onIconChange}>
-              {this.props.item.imageThumb === '' ?  
-                 <Text style={styles.itemIcon}>{this.props.item.icon}</Text> :
-               <Image 
-                 style={styles.imageStyle} 
-                 source={{ uri: 
-                  `data:${this.props.item.mimeType};base64,${this.props.item.imageThumb}` }} 
-               />} 
+              {this.props.item.iconType === 'PHO' ?  
+                <Image 
+                  style={styles.imageStyle} 
+                  source={{ uri: 
+                    `data:${this.props.item.mimeType};base64,${this.props.item.imageThumb}` }} 
+                /> : 
+                <Text style={styles.itemIcon}>{this.props.item.icon}</Text>
+              }
             </TouchableOpacity>
           </View>
           <TouchableNativeFeedback onPress={this.onTouchablePress}>

@@ -21,6 +21,7 @@ import { TextField } from 'react-native-material-textfield';
 import AppColors from '../templates/appColors';
 import CardDisplay from '../components/CardDisplay';
 import RenderTags from '../components/RenderTags';
+import RenderCheckedBadge from '../components/DropsUtility';
 import PictureFrame from '../images/PictureFrame.png';
 import ItemTags from '../images/ItemTags.png';
 import ItemNotes from '../images/ItemNotes.png';
@@ -52,6 +53,7 @@ const whatDoYouNeed = state => {
     emojiCode: state.emojis.emojiCode,     // ... current emoji selected in PickEmojis ...
     thisCard: state.cards.thisCard,
     activeList: state.lists.activeList,
+    somethingChanged: state.cards.cardChanged,
     tagsModalOpen: state.cards.tagsWindowOpen
   };
 };
@@ -72,8 +74,8 @@ class BuildCard extends PureComponent {
     this.inputs = {};
     this.onSelectEmoji = this.onSelectEmoji.bind(this);
     this.doSomeFunction = this.doSomeFunction.bind(this);
+    this.updateThisCard = this.updateThisCard.bind(this);
     this.openTagsEditModal = this.openTagsEditModal.bind(this);
-    //this.openNotesEditModal = this.openNotesEditModal.bind(this);
     this.listener = new RNNScreenVisibilityListener({
       didDisappear: ({ screen /*, startTime, endTime, commandType*/ }) => {
         if (screen === 'tracksome.EditCategories') {
@@ -136,6 +138,7 @@ class BuildCard extends PureComponent {
     if (this.props.emojiCode !== nextProps.emojiCode) {
       if (this.state.getIcon4Card) {
         this.props.dispatch(itemCardChanged('icon', nextProps.emojiCode));
+        this.props.dispatch(itemCardChanged('iconType', 'ICO'));
       }
       // ... clean up and go home ...
       this.setState({ getIcon4Card: false });
@@ -145,6 +148,7 @@ class BuildCard extends PureComponent {
   }
 
   componentWillUnmount() {
+    if (this.props.somethingChanged) this.updateThisCard();
     if (this.listener) {
       this.listener.unregister();
       this.listener = null;
@@ -219,6 +223,10 @@ class BuildCard extends PureComponent {
     });
   }
 
+  setIconType(mode) {
+    this.props.dispatch(itemCardChanged('iconType', mode));
+  }
+  
   itemNameChanged(text) {
     this.props.dispatch(itemCardChanged('name', text));
   }
@@ -230,6 +238,7 @@ class BuildCard extends PureComponent {
   itemImageChanged(image) {
     //console.log('New Image: ', image);
     this.props.dispatch(addCardImage(image));
+    this.props.dispatch(itemCardChanged('iconType', 'PHO'));
   }
 
   itemTagRemove(tag) {
@@ -367,8 +376,7 @@ class BuildCard extends PureComponent {
 
   doSomeFunction() {
     console.log('About to do something');
-    //this.props.dispatch(closeNotesModal(''));
-    this.props.navigator.dismissLightBox();
+    //this.props.navigator.dismissLightBox();
     //Alert.alert('About to do something');
     /*
     this.props.navigator.setSubTitle({
@@ -377,9 +385,6 @@ class BuildCard extends PureComponent {
     this.props.navigator.toggleTabs({
       to: 'hidden',
       animated: true
-    });
-    this.props.navigator.setTitle({
-      title: 'Dynamic Title'
     });
     */
   }
@@ -426,14 +431,14 @@ class BuildCard extends PureComponent {
 
   renderActionIcons = () => (
     <View style={styles.actionBar}>
-      <TouchableNativeFeedback onPress={() => this.pickSingleImage(true)}>
-        <View style={styles.iconsPadding}>
-          <Image style={styles.imageIconStyle} source={PictureFrame} />
-        </View>
-      </TouchableNativeFeedback>
       <TouchableNativeFeedback onPress={this.onSelectEmoji}>
         <View style={styles.iconsPadding}>
           <Image style={styles.imageIconStyle} source={SmileyFace} />
+        </View>
+      </TouchableNativeFeedback>
+      <TouchableNativeFeedback onPress={() => this.pickSingleImage(true)}>
+        <View style={styles.iconsPadding}>
+          <Image style={styles.imageIconStyle} source={PictureFrame} />
         </View>
       </TouchableNativeFeedback>
       <TouchableNativeFeedback onPress={() => this.getCameraImage(true)}>
@@ -456,7 +461,7 @@ class BuildCard extends PureComponent {
       <View style={styles.nameWidth}>
         <TextField
           //style={styles.nameInput}
-          autoFocus
+          autoFocus={this.props.id === ''}    // ... only autofocus on add ...
           label='Card Name*'
           title='Please enter a name for this card.'
           lineWidth={0.75}
@@ -582,31 +587,47 @@ class BuildCard extends PureComponent {
                        </View>);
 */
 
-  renderItemExtras() {
-    // ... these four constants could be moved into a function ...
+  renderSmallIcon() {
+    if (this.props.thisCard.icon === '') return;
+    return (
+      <TouchableNativeFeedback onPress={() => this.setIconType('ICO')}>
+        <View style={styles.wrapperIcon}> 
+           <Text style={styles.emojiThumb}>{this.props.thisCard.icon}</Text>
+           {this.props.thisCard.iconType === 'ICO' ? 
+             <RenderCheckedBadge marginLeft={-10.5} marginTop={-20} /> : <View />}
+        </View>
+      </TouchableNativeFeedback>
+    );
+  }
+
+  renderSmallImage() {
     const image = this.props.thisCard.imageThumb;
     const mimeType = this.props.thisCard.mimeType;
-    const renderIcon = this.props.thisCard.icon !== '' ?
-                      (<View style={styles.wrapperIcon}> 
-                         <Text style={styles.emojiThumb}>{this.props.thisCard.icon}</Text>
-                       </View>) : <View />;
-    const renderImage = image === '' ?  
-                       <Text style={styles.previewText}>Preview Here!</Text> :
-                      (<View style={styles.wrapperImage}> 
-                         <Image 
-                           style={styles.imageThumb} 
-                           source={{ uri: `data:${mimeType};base64,${image}` }} 
-                         />
-                       </View>);
+    if (image === '') return <Text style={styles.previewText}>Preview Here!</Text>;
+    return (
+      <TouchableNativeFeedback onPress={() => this.setIconType('PHO')}>
+        <View style={styles.wrapperImage}> 
+          <Image 
+            style={styles.imageThumb} 
+            source={{ uri: `data:${mimeType};base64,${image}` }} 
+          />
+          {this.props.thisCard.iconType === 'PHO' ? 
+            <RenderCheckedBadge marginLeft={1} marginTop={-21} /> : <View />}
+        </View>
+      </TouchableNativeFeedback>
+    );
+  }
+
+  renderItemExtras() {
     return (
       <View style={styles.mainPanel}>
         <View style={styles.statusBar}>
-          { renderIcon }
-          { renderImage }
+          { this.renderSmallIcon() }
+          { this.renderSmallImage() }
         </View>
         <TouchableOpacity 
           disabled={this.props.thisCard.name === ''} 
-          onPress={this.updateThisCard.bind(this)}
+          onPress={() => this.updateThisCard()}
           style={styles.masterButton}
         >
           <View style={styles.innerButton}>
@@ -618,13 +639,14 @@ class BuildCard extends PureComponent {
     );
   }
 
-  renderIcon() {
+  renderMainIcon() {
     if (this.state.showIcon === false) return;
     return (
       <View style={styles.previewOutline}>
-        {this.props.thisCard.imageThumb === '' ?  
-           <Text style={styles.emojiIcon}>{this.props.thisCard.icon}</Text> :
-         this.renderImage(this.props.thisCard.imageThumb, this.props.thisCard.mimeType)} 
+        {this.props.thisCard.iconType === 'PHO' ?  
+          this.renderImage(this.props.thisCard.imageThumb, this.props.thisCard.mimeType) :
+          <Text style={styles.emojiIcon}>{this.props.thisCard.icon}</Text>
+        } 
       </View>
     );
   }
@@ -666,13 +688,13 @@ class BuildCard extends PureComponent {
   //----------------------------------------------------
   render() {
     return (
-      <ScrollView style={{ flex: 1 /*, marginTop: 16*/ }} keyboardShouldPersistTaps='always'>
+      <ScrollView style={{ flex: 1 }} keyboardShouldPersistTaps='always'>
 
         <View style={styles.cardContainer}>
           { this.renderActionIcons() }
           <View style={styles.textContainer}>
             <View style={styles.topRowStyle}>
-              { this.renderIcon() }
+              { this.renderMainIcon() }
               { this.renderNameInput() }
             </View>
             { this.renderDescription() }
@@ -751,7 +773,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white'
   },
   wrapperImage: {
-    height: 44,
+    height: 46,
     borderRadius: 3,
     borderColor: '#888',
     borderWidth: 1,
@@ -817,7 +839,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
     marginBottom: 3,
     borderColor: '#aaa',
-    borderWidth: 1
+    borderWidth: 0.75
   },
   emojiThumb: {
     color: 'black',

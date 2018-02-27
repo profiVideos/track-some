@@ -122,7 +122,8 @@ const CardReducer = (state = initialState, action) => {
         thisCard: {
           ...state.thisCard,
           [action.payload.prop]: action.payload.value
-        }
+        },
+        cardChanged: true,
       };
 
     case UPDATE_CARD_SELECTED:
@@ -147,6 +148,7 @@ const CardReducer = (state = initialState, action) => {
       ToastAndroid.show('Card Updated', ToastAndroid.SHORT);
       return {
         ...state,
+        cardChanged: false,
         tagsChanged: false,
         notesChanged: false,
         lastUpdated: Date.now()
@@ -174,6 +176,7 @@ const CardReducer = (state = initialState, action) => {
           mimeType: action.payload.image.mime
           //image: '',  // ... store this in separate Realm (do this later) ...
         },
+        cardChanged: true,
       };
 
 /*
@@ -195,6 +198,7 @@ const CardReducer = (state = initialState, action) => {
           return key !== action.payload.key; 
           })
         },
+        cardChanged: true,
         notesChanged: true,
         //lastUpdated: Date.now()   // ... this could cause redux in debugger to fail ...
       };
@@ -208,6 +212,7 @@ const CardReducer = (state = initialState, action) => {
           return tag !== action.payload.tag; 
           })
         },
+        cardChanged: true,
         tagsChanged: true,
         //lastUpdated: Date.now()
       };
@@ -223,6 +228,7 @@ const CardReducer = (state = initialState, action) => {
             action.payload.key
           ]
         },
+        cardChanged: true,
         notesChanged: true,
         //lastUpdated: Date.now()   // ... this was causing redux in debugger to hiccup ...
       };
@@ -239,6 +245,7 @@ const CardReducer = (state = initialState, action) => {
           ]
         },
         tagsChanged: true,
+        cardChanged: true,
         //lastUpdated: Date.now()
       };
 
@@ -290,7 +297,8 @@ const CardReducer = (state = initialState, action) => {
           tags: JSON.parse(action.payload.item.tags),
           notes: action.payload.item.notes
         },
-        detailView: true
+        detailView: true,
+        cardChanged: false
       };
 
     case CLEAR_CARD:
@@ -314,7 +322,8 @@ const CardReducer = (state = initialState, action) => {
           tags: [],
           notes: []
         },
-        detailView: false
+        detailView: false,
+        cardChanged: false
       };
 
 //----------------------------------------------------
