@@ -47,11 +47,12 @@ export default class App extends React.Component {
         Navigation.startSingleScreenApp({
           screen: {
             screen: 'tracksome.Login',
-            title: 'track!some',
+            title: 'photoDrops',
             navigatorStyle: {
               navBarHidden: true,
               statusBarHidden: true,
-              screenBackgroundColor: '#222222'
+              //screenBackgroundColor: '#222222'
+              screenBackgroundColor: '#e2e2e2'
             }
           },
           animationType: 'fade'

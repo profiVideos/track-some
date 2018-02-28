@@ -86,10 +86,24 @@ class TrackSomeConfig extends Component {
     //this.props.setNewSaveMode((newMode ? 'local' : 'none'));
   }
 
+//---------------------------
+//Linking.openURL('mailto:example@gmail.com&subject=example&body=example')
+//----------------------------
+/*
+  renderBackupControls() {
+    return (
+      <View>
+        <
+      </View>
+    );
+  }
+*/
+
   render() {
     return (
         <ScrollView style={{ flex: 1, backgroundColor: 'white' }}>
           <View style={styles.container}>
+
             <Text style={styles.title}>Configuration Settings</Text>
             <View style={styles.optionRow}>
               <Text style={styles.optionText}>User successfully logged in</Text>

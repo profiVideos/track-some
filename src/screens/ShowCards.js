@@ -335,7 +335,7 @@ Do you really what to do this?`,
         `Please select / create a list in order to add cards to that list.\n
 There are some excellent benefits in keeping your cards within a list!`,
           [{ text: 'Got It' }]);
-      this.props.navigator.switchToTab({ tabIndex: 2 });
+      this.props.navigator.switchToTab({ tabIndex: 0 });
     } else {
       if (card === '') this.props.dispatch(clearCard());
       this.props.dispatch(openCardsModal(card));
@@ -442,7 +442,7 @@ There are some excellent benefits in keeping your cards within a list!`,
   renderMainScreen() {
     // ... if no active list (from user defaults record) - ask user to select a list ...
     if (this.props.activeList.key === '') {
-      this.props.navigator.switchToTab({ tabIndex: 2 });
+      this.props.navigator.switchToTab({ tabIndex: 0 });
     }
     if (this.state.loading) return <Loader size='large' />;
     return (this.props.cardList.length === 0 ? this.showWelcome() : this.showMainList());
