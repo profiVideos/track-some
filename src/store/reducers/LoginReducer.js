@@ -13,7 +13,7 @@ const INITIAL_STATE = {
   error: '',
   user: null,
   loading: false,
-  saveMode: 'local',    // ... none, local, cloud ...
+  saveMode: 'local',    // ... none, local, cloud, liveSync ...
   didLogin: false
 };
 

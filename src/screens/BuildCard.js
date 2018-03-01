@@ -239,6 +239,8 @@ class BuildCard extends PureComponent {
     //console.log('New Image: ', image);
     this.props.dispatch(addCardImage(image));
     this.props.dispatch(itemCardChanged('iconType', 'PHO'));
+    // ... MG - 01-03-2018 - makes sure we don't leave junk all over the Pictures folder ...
+    ImagePicker.cleanSingle(image.path);  // ... use this to remove temp compressed file ...
   }
 
   itemTagRemove(tag) {
@@ -269,6 +271,7 @@ class BuildCard extends PureComponent {
   }
 
   cleanTempSpace() {
+    //ImagePicker.cleanSingle(path);  // ... use this to remove temp file ...
     ImagePicker.clean().then(() => {
       console.log('removed all tmp images from tmp directory');
     }).catch(e => {
@@ -283,12 +286,13 @@ class BuildCard extends PureComponent {
       height: 768,
       mediaType: 'photo',
       cropping: cropit,
-      writeTempFile: false,    // ... only works on IOS ...
+      writeTempFile: false,          // ... only works on IOS ...
+      //freeStyleCropEnabled: true,   // ... only works on Android ...
       //multiple: true,
       //circular: true,
       cropperCircleOverlay: circular,
-      //compressImageMaxWidth: 1280,
-      //compressImageMaxHeight: 720,
+      //compressImageMaxWidth: 1056,
+      //compressImageMaxHeight: 768,
       compressImageQuality: this.state.compress,
       //compressVideoPreset: 'MediumQuality',
       includeExif: false, //true,

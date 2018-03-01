@@ -40,14 +40,20 @@ const AppColors = {
   mainLiteColor: '#a32b26',   // ... medium red ...
   mainDarkColor: '#590d0b',   // ... dark red (burgundy) ...
   darkerColor: '#325a66'      // ... dark cyan ....
-*/
-
-/*
 
 NEW:***********************************************************************
 
 My First Realm Cloud Instance;
 https://tracksome-live.us1.cloud.realm.io/
+
+Andoid Keytool location:  IMPORTANT!!!
+/u/AppDev/Android/Android Studio/jre/bin
+
+To Display Signatures from Certificate;
+./keytool -exportcert -list -v -keystore c:/Users/Markie/.android/debug.keystore
+password: android
+./keytool -exportcert -list -v -alias MyPhotoDropsKey -keystore u:/Dev/KeyStore/android.jks
+
 
 NEW:***********************************************************************
 

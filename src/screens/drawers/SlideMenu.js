@@ -6,19 +6,19 @@ import {
   //Image,
   //Alert,
   Switch,
-  Button,
+  //Button,
   ScrollView,
   StyleSheet,
-  Dimensions
+  Dimensions,
   //AsyncStorage 
-  //ImageBackground 
+  ImageBackground 
 } from 'react-native';
 
 //import Icon from 'react-native-vector-icons/FontAwesome';
 //import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 //import profiGraphicsLogo from '../../images/profiGraphics-logo-257w.png';
-//import menuBackgroundImage from '../../images/menu-Background-850w.jpg';
+import menuBackgroundImage from '../../images/menu-Background-1000w.jpg';
 //import AppColors from '../../templates/appColors';
 /*
 import { 
@@ -30,8 +30,8 @@ import {
 */
 
 import {
-  loadMyEmojis,
-  saveMyEmojis
+  //loadMyEmojis,
+  //saveMyEmojis
 } from '../../store/actions';
 
 //import { EMOJIS_STORAGE_KEY } from '../../store/actions/actionTypes';
@@ -43,19 +43,22 @@ const whatDoYouNeed = state => {
   };
 };
 
+/*
+state.login = { 
+  email: '',
+  password: '',
+  error: '',
+  user: null,
+  loading: false,
+  saveMode: 'local',    // ... none, local, cloud. liveSync ...
+  didLogin: false
+};
+*/
+
 //const EMOJIS_STORAGE_KEY = '@track!some:my_emojis';
 
 //    dispatch(actionCreators.fetchPosts())
 //    loadSuccess: (jsonData) => dispatch(emojiLoadSuccess(jsonData)),
-/*
-const whatShouldIDo = dispatch => {
-  return {
-    setNewSaveMode: (newSaveMode) => dispatch(setSaveMode(newSaveMode)),
-    saveAllEmojis: (myEmojis) => saveMyEmojis(myEmojis),
-    loadAllEmojis: (msg) => loadMyEmojis(msg),
-  };
-};
-*/
 
 class TrackSomeConfig extends Component {
   constructor(props) {
@@ -100,9 +103,19 @@ class TrackSomeConfig extends Component {
 */
 
   render() {
+    const imgHeight = this.state.scrHeight / 3;
     return (
         <ScrollView style={{ flex: 1, backgroundColor: 'white' }}>
           <View style={styles.container}>
+            <ImageBackground 
+              source={menuBackgroundImage} 
+              style={[styles.backgroundImage, { height: imgHeight }]}
+              imageStyle={{ resizeMode: 'cover' }}
+            >
+              <View style={styles.loginContainer}>
+                <Text>Please log me in</Text>
+              </View>
+            </ImageBackground>
 
             <Text style={styles.title}>Configuration Settings</Text>
             <View style={styles.optionRow}>
@@ -223,15 +236,14 @@ const styles = StyleSheet.create({
 const styles = StyleSheet.create({
   backgroundImage: {
     flex: 1,
-    position: 'absolute',
-    width: null,
-    height: null
+    //position: 'absolute',
+    width: '100%',
   },
   container: {
     flex: 1,
-    marginTop: '70%',
+    //marginTop: '70%',
     marginBottom: 25,
-    padding: 12,
+    //padding: 12,
   },
   title: {
     color: '#f2f2f2',

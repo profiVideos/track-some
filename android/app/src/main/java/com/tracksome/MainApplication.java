@@ -3,6 +3,8 @@ package com.tracksome;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import io.invertase.firebase.RNFirebasePackage;
+import io.invertase.firebase.auth.RNFirebaseAuthPackage;
 import io.realm.react.RealmReactPackage;
 import com.reactnative.ivpusic.imagepicker.PickerPackage;
 import com.facebook.react.ReactNativeHost;
@@ -26,10 +28,14 @@ public class MainApplication extends NavigationApplication {
   protected List<ReactPackage> getPackages() {
      // Add additional packages you require here
      // No need to add RnnPackage and MainReactPackage
+     // Since we're using React Native Navigation
      return Arrays.<ReactPackage>asList(
-       new VectorIconsPackage(),
-       new PickerPackage(),
-       new RealmReactPackage()
+        // ... above says we don't need this - new MainReactPackage(),
+        new VectorIconsPackage(),
+        new PickerPackage(),
+        new RealmReactPackage(),
+        new RNFirebasePackage(),
+        new RNFirebaseAuthPackage()
      );
   }
 
@@ -58,6 +64,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new RNFirebasePackage(),
             new RealmReactPackage(),
             new PickerPackage()
       );
