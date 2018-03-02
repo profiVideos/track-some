@@ -1,4 +1,4 @@
-//import firebase from 'firebase';
+//import firebase from 'react-native-firebase';
 
 import { 
   ROOT_CHANGED,
@@ -10,20 +10,13 @@ import {
   SET_SAVE_MODE
 } from './actionTypes';
 
-export const changeAppRoot = (root) => {
+export const changeAppRoot = (nextModule) => {
   return {
     type: ROOT_CHANGED, 
-    root
+    root: nextModule
   };
 };
 
-/*
-dispatch(async (dispatch, getState) => {
-  const data = await networkReq();
-  return { type: 'NEW_DATA', payload: data }
-});
-*/
-/*
 export const appInitialized = () => {
   return async = (dispatch, getState) => {
     // since all business logic should be inside redux actions
@@ -31,22 +24,39 @@ export const appInitialized = () => {
     dispatch(changeAppRoot('login'));
   };
 };
-*/
-/*
-export function login() {
+
+export const login = () => {
   return async function(dispatch, getState) {
     // login logic would go here, and when it's done, we switch app roots
     dispatch(changeAppRoot('mainApp'));
   };
 }
-*/
 
+/*
 export const emailChanged = (text) => {
   return {
     type: EMAIL_CHANGED,
     payload: text
   };
 };
+
+
+
+export function login() {
+  return async function(dispatch, getState) {
+    // login logic would go here, and when it's done, we switch app roots
+    dispatch(changeAppRoot('after-login'));
+  };
+}
+
+
+
+
+
+
+
+
+
 
 export const passwordChanged = (text) => {
   return {
@@ -61,6 +71,8 @@ export const setSaveMode = (mode) => {
     payload: mode
   };
 };
+*/
+
 
 /*
 

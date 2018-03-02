@@ -3,23 +3,26 @@ import { connect } from 'react-redux';
 import { 
   View, 
   Text,
-  //Image,
+  Image,
   //Alert,
   Switch,
   //Button,
   ScrollView,
   StyleSheet,
   Dimensions,
-  //AsyncStorage 
-  ImageBackground 
+  ToastAndroid,
+  ImageBackground,
+  TouchableNativeFeedback
 } from 'react-native';
 
 //import Icon from 'react-native-vector-icons/FontAwesome';
 //import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 //import profiGraphicsLogo from '../../images/profiGraphics-logo-257w.png';
+import photoDropsLogo from '../../images/photo-drops.png';
 import menuBackgroundImage from '../../images/menu-Background-1000w.jpg';
-//import AppColors from '../../templates/appColors';
+import AppColors from '../../templates/appColors';
+
 /*
 import { 
   setSaveMode, 
@@ -84,72 +87,92 @@ class TrackSomeConfig extends Component {
     //});
   }
 
+  onPressBackup() {
+    //ToastAndroid.show(`Inside Show Note Screen: ${note.key}`, ToastAndroid.SHORT);
+    ToastAndroid.show('Do the Backup ...', ToastAndroid.SHORT);
+  }
+
+  onPressLogin() {
+    ToastAndroid.show('Login / Logout the user ...', ToastAndroid.SHORT);
+  }
+
   handleSaveMode(newMode) {
     console.log(newMode);
     //this.props.setNewSaveMode((newMode ? 'local' : 'none'));
   }
-
-//---------------------------
-//Linking.openURL('mailto:example@gmail.com&subject=example&body=example')
-//----------------------------
-/*
-  renderBackupControls() {
-    return (
-      <View>
-        <
-      </View>
-    );
-  }
-*/
 
   render() {
     const imgHeight = this.state.scrHeight / 3;
     return (
         <ScrollView style={{ flex: 1, backgroundColor: 'white' }}>
           <View style={styles.container}>
+
             <ImageBackground 
               source={menuBackgroundImage} 
               style={[styles.backgroundImage, { height: imgHeight }]}
               imageStyle={{ resizeMode: 'cover' }}
             >
-              <View style={styles.loginContainer}>
-                <Text>Please log me in</Text>
-              </View>
+              <View style={styles.buttonContainer}>
+                <View style={styles.identityContainer}>
+                  <Image 
+                    source={photoDropsLogo} 
+                    style={styles.logoContainer} 
+                    imageStyle={styles.logoStyle} 
+                  />
+                </View>
+                <TouchableNativeFeedback onPress={this.onPressBackup}>
+                  <View style={styles.warmButton}>
+                    <Text style={styles.warmText}>Sync / Backup</Text>
+                  </View>
+                </TouchableNativeFeedback> 
+                <TouchableNativeFeedback onPress={this.onPressLogin}>
+                  <View style={styles.warmButton}>
+                    <Text style={styles.warmText}>Logout</Text>
+                  </View>
+                </TouchableNativeFeedback>
+              </View> 
             </ImageBackground>
 
-            <Text style={styles.title}>Configuration Settings</Text>
-            <View style={styles.optionRow}>
-              <Text style={styles.optionText}>User successfully logged in</Text>
-              <Switch 
-                onValueChange={(value) => this.setState({ loggedIn: value })}
-                value={this.state.loggedIn} 
-              /> 
-            </View>
-            <View style={styles.optionRow}>
-              <Text style={styles.optionText}>Save information locally</Text>
-              <Switch 
-                onValueChange={(value) => this.handleSaveMode(value)} 
-                value={(this.props.login.saveMode === 'local' || 
-                        this.props.login.saveMode === 'cloud')} 
-              /> 
-            </View>
-            <View style={styles.optionRow}>
-              <View style={styles.infoColumns}>
-                <Text style={styles.optionText}>Save information in Cloud</Text>
-                <Text style={styles.explainText}>
-                  An active internet connection is required for this functionality.
-                  (also a paid customer)
-                </Text>
+            <View style={[styles.lineStyle, { width: '75%' }]} />
+
+            <View style={styles.configContainer}>
+
+              <Text style={styles.title}>Configuration Settings</Text>
+              <View style={styles.optionRow}>
+                <Text style={styles.optionText}>User successfully logged in</Text>
+                <Switch 
+                  onValueChange={(value) => this.setState({ loggedIn: value })}
+                  value={this.state.loggedIn} 
+                /> 
               </View>
-              <Switch 
-                onValueChange={(value) => this.setState({ toggled: value })} 
-                value={this.state.toggled} 
-                //value={(this.props.saveMode === 'none')} 
-              /> 
+              <View style={styles.optionRow}>
+                <Text style={styles.optionText}>Save information locally</Text>
+                <Switch 
+                  onValueChange={(value) => this.handleSaveMode(value)} 
+                  value={(this.props.login.saveMode === 'local' || 
+                          this.props.login.saveMode === 'cloud')} 
+                /> 
+              </View>
+              <View style={styles.optionRow}>
+                <View style={styles.infoColumns}>
+                  <Text style={styles.optionText}>Save information in Cloud</Text>
+                  <Text style={styles.explainText}>
+                    An active internet connection is required for this functionality.
+                    (also a paid customer)
+                  </Text>
+                </View>
+                <Switch 
+                  onValueChange={(value) => this.setState({ toggled: value })} 
+                  value={this.state.toggled} 
+                  //value={(this.props.saveMode === 'none')} 
+                /> 
+              </View>
+              <View style={styles.optionRow}>
+                <Text>More config options here!</Text>
+              </View>
+
             </View>
-            <View style={styles.optionRow}>
-              <Text>More config options here!</Text>
-            </View>
+
           </View>
         </ScrollView>
     );
@@ -161,6 +184,8 @@ export default connect(whatDoYouNeed)(TrackSomeConfig);
 
 //export default connect(whatDoYouNeed, whatShouldIDo)(TrackSomeConfig);
 /*
+              <View style={[styles.lineStyle, { width: '35%' }]} />
+
       <ImageBackground 
         source={menuBackgroundImage} 
         style={styles.backgroundImage}
@@ -234,10 +259,60 @@ const styles = StyleSheet.create({
 */
 
 const styles = StyleSheet.create({
+  logoContainer: {
+    width: 70,
+    height: 70,
+    //backgroundColor: 'blue'
+  },
+  logoText: {
+    fontSize: 24,
+    fontWeight: '700',
+    fontStyle: 'italic',
+    color: AppColors.darkerColor
+  },
+  logoStyle: {
+    resizeMode: 'contain' 
+  },
+  lineStyle: {
+    margin: 12,
+    borderWidth: 0.55,
+    alignSelf: 'center',
+    borderColor: '#aaa'
+  },
+  identityContainer: {
+    //flexDirection: 'row',
+    //alignItems: 'center',
+    paddingRight: 10,
+    //justifyContent: 'center'
+  },
+  warmText: {
+    color: AppColors.hiliteColor
+  },
+  warmButton: {
+    elevation: 2,
+    paddingVertical: 5,
+    paddingBottom: 6,       // ... just looks better ...
+    paddingHorizontal: 15,
+    borderRadius: 3,
+    margin: 3,              // ... so we can see shadow ...
+    marginHorizontal: 7,
+    backgroundColor: AppColors.mainDarkColor
+  },
+  configContainer: {
+    paddingHorizontal: 15,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
   backgroundImage: {
     flex: 1,
     //position: 'absolute',
     width: '100%',
+    marginBottom: 3,
+    alignItems: 'center',
+    justifyContent: 'flex-end'
   },
   container: {
     flex: 1,
@@ -246,7 +321,7 @@ const styles = StyleSheet.create({
     //padding: 12,
   },
   title: {
-    color: '#f2f2f2',
+    color: AppColors.darkerColor,
     marginBottom: 5,
     fontSize: 20,
     fontWeight: '700',
@@ -282,8 +357,5 @@ const styles = StyleSheet.create({
   landscape: {
     width: 180,
     height: 38
-  },
-  logoContainer: {
-    alignItems: 'center'
   }
 });

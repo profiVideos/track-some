@@ -1,17 +1,16 @@
 import { combineReducers } from 'redux';
 //import TagReducer from './TagReducer';
 //import RootReducer from './RootReducer';
-import { root } from './RootReducer';
+import RootReducer from './RootReducer';
 import EmojiReducer from './EmojiReducer';
-import LoginInfo from './LoginReducer';
+import LoginInfo from './AuthReducer';
 import CardReducer from './CardReducer';
 import NoteReducer from './NoteReducer';
 import ListReducer from './ListReducer';
 import CategoryReducer from './CategoryReducer';
 
 const MainReducer = combineReducers({
-  root,  
-  //tags: TagReducer,
+  root: RootReducer,  
   login: LoginInfo,
   cards: CardReducer,
   notes: NoteReducer,

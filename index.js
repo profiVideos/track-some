@@ -1,5 +1,5 @@
 //import React from 'react';
-//import { AppRegistry } from 'react-native';
+import { AppRegistry } from 'react-native';
 //import { App } from 'react-native';
 //import { Provider } from 'react-redux';
 import App from './App';
@@ -12,6 +12,6 @@ import App from './App';
 //    <App />
 //  </Provider>
 //);
-const trackSome = new App();
+const photoDrops = new App();
 //trackSome();
-//AppRegistry.registerComponent('tracksome', () => TSRedux);
+AppRegistry.registerComponent('photoDrops', () => photoDrops);
