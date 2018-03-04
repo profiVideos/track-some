@@ -19,7 +19,7 @@ import splashBackgroundImage from '../images/login-splash-screen-1080w.jpg';
 import AppColors from '../templates/appColors';
 import OpenMainTabs from './OpenMainTabs';
 
-class Login extends Component {
+class MainLogin extends Component {
   constructor(props) {
     super(props);
     Dimensions.addEventListener('change', () => {
@@ -139,6 +139,8 @@ class Login extends Component {
 
 }
 
+export default MainLogin;
+
 /*
             style={styles.input}
             label='Email'
@@ -229,5 +231,3 @@ const styles = StyleSheet.create({
             Login with Facebook
           </Icon.Button>
 */
-
-export default Login;

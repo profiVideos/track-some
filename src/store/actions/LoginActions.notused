@@ -33,13 +33,6 @@ export const login = () => {
 }
 
 /*
-export const emailChanged = (text) => {
-  return {
-    type: EMAIL_CHANGED,
-    payload: text
-  };
-};
-
 
 
 export function login() {
@@ -57,13 +50,6 @@ export function login() {
 
 
 
-
-export const passwordChanged = (text) => {
-  return {
-    type: PASSWORD_CHANGED,
-    payload: text
-  };
-};
 
 export const setSaveMode = (mode) => {
   return {

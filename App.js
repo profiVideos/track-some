@@ -1,6 +1,6 @@
 import React from 'react';
 import thunk from 'redux-thunk';
-//import { Alert, ToastAndroid } from 'react-native';
+import { ToastAndroid } from 'react-native';
 import { Navigation } from 'react-native-navigation';
 import { Provider } from 'react-redux';
 import { createStore, applyMiddleware } from 'redux';
@@ -9,6 +9,7 @@ import RegisterScreens from './src/screens/DefineMainScreens.js';
 import MainReducer from './src/store/reducers';
 import OpenMainTabs from './src/screens/OpenMainTabs';
 import {
+  appLogin,
   appInitialize
 } from './src/store/actions';
 
@@ -24,13 +25,27 @@ export default class App extends React.Component {
   constructor(props) {
     super(props);
     //this.startApp('mainApp');
-    store.subscribe(this.onStoreUpdate.bind(this));
+    //store.subscribe(this.onStoreUpdate.bind(this));
     store.dispatch(appInitialize());
+    this.startApp('mainApp');
+  }
+
+ componentDidMount() {
+    ToastAndroid.show('Inside componentDidMount', ToastAndroid.SHORT);
+    /*
+    this.authSubscription = firebase.auth().onAuthStateChanged((user) => {
+      this.setState({
+        loading: false,
+        user,
+      });
+    });
+    */
   }
 
   onStoreUpdate() {
+    ToastAndroid.show('Inside onStoreUpdate', ToastAndroid.SHORT);
     const nextApp = store.getState().root.currentApp;
-    //ToastAndroid.show(`This store is ${nextApp}`, ToastAndroid.LONG);
+    //ToastAndroid.show(`nextApp is ${nextApp}`, ToastAndroid.SHORT);
     if (this.currentApp !== nextApp || this.currentApp === undefined) {
       this.currentApp = nextApp;
       this.startApp(nextApp);
@@ -43,7 +58,7 @@ export default class App extends React.Component {
       case 'login':
         Navigation.startSingleScreenApp({
           screen: {
-            screen: 'tracksome.Login',
+            screen: 'tracksome.MainLogin',
             title: 'photoDrops',
             navigatorStyle: {
               navBarHidden: true,

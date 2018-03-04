@@ -1,18 +1,22 @@
+import { ToastAndroid } from 'react-native';
 import { 
+  LOGIN_USER,
   EMAIL_CHANGED, 
+  LOGOUT_USER_OK,
+  LOGIN_USER_FAIL,
+  LOGIN_ERROR_MSG,
   PASSWORD_CHANGED,
   LOGIN_USER_SUCCESS,
-  LOGIN_USER_FAIL,
-  LOGIN_USER,
   SET_SAVE_MODE
 } from '../actions/actionTypes';
 
 const INITIAL_STATE = { 
-  email: '',
+  email: 'markus@profiphotos.com',
   password: '',
-  error: '',
+  errorMsg: '',
+  errorCode: 0,
   user: null,
-  loading: false,
+  loading: true,        // ... awaiting login state from firebase ...
   saveMode: 'local',    // ... none, local, cloud, liveSync ...
   didLogin: false
 };
@@ -21,17 +25,67 @@ export default (state = INITIAL_STATE, action) => {
   switch (action.type) { 
 
     case EMAIL_CHANGED:
-      return { ...state, email: action.payload };
+      return { 
+        ...state, 
+        errorMsg: '',
+        email: action.payload 
+      };
+
     case PASSWORD_CHANGED:
-      return { ...state, password: action.payload };
+      return { 
+        ...state, 
+        errorMsg: '',
+        password: action.payload
+      };
+
     case SET_SAVE_MODE:
-      return { ...state, saveMode: action.payload };
+      return { 
+        ...state, 
+        saveMode: action.payload 
+      };
+
+    case LOGIN_ERROR_MSG:
+      return { 
+        ...state, 
+        errorMsg: action.payload 
+      };
+
     case LOGIN_USER:
-      return { ...state, loading: true, error: '' };
+      return { 
+        ...state, 
+        loading: true 
+      };
+
     case LOGIN_USER_SUCCESS:
-      return { ...state, ...INITIAL_STATE, user: action.payload };
+      // ... this should start the spinner rotating ...
+      return { 
+        ...state, 
+        user: action.payload, 
+        errorMsg: '',
+        errorCode: 0,
+        loading: false 
+      };
+
+    case LOGOUT_USER_OK:
+      //ToastAndroid.show(`inside dispatch login_User: ${action.payload}`, ToastAndroid.LONG);
+      return { 
+        ...state, 
+        user: action.payload, 
+        email: '',
+        password: '',
+        errorMsg: '',
+        errorCode: 0,
+        loading: false
+      };
+
     case LOGIN_USER_FAIL:
-      return { ...state, error: 'Authentication Failed!', password: '', loading: false };
+      return { 
+        ...state, 
+        errorMsg: action.payload.code + ': ' + action.payload.message, 
+        errorCode: action.payload.code, 
+        password: '', 
+        loading: false 
+      };
 
     default: 
       return state;

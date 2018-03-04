@@ -1,5 +1,5 @@
 import { Navigation } from 'react-native-navigation';
-import Login from './Login';
+import MainLogin from './MainLogin';
 import BuildCard from './BuildCard';
 import ShowCards from './ShowCards';
 import ShowLists from './ShowLists';
@@ -14,7 +14,7 @@ import ListEdit from '../components/ListEdit';
 
 // ... register screens ...
 export default (store, Provider) => {
-  Navigation.registerComponent('tracksome.Login', () => Login, store, Provider);
+  Navigation.registerComponent('tracksome.MainLogin', () => MainLogin, store, Provider);
   Navigation.registerComponent('tracksome.BuildCard', () => BuildCard, store, Provider);
   Navigation.registerComponent('tracksome.ShowCards', () => ShowCards, store, Provider);
   Navigation.registerComponent('tracksome.ShowNotes', () => ShowNotes, store, Provider);

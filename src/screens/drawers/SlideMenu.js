@@ -24,41 +24,37 @@ import menuBackgroundImage from '../../images/menu-Background-1000w.jpg';
 import loginBackgroundImage from '../../images/login-Background.jpg';
 import AppColors from '../../templates/appColors';
 import Login from '../../components/Login';
-
-/*
-import { 
-  setSaveMode, 
-  saveMyEmojis, 
-  loadMyEmojis, 
-  emojiLoadSuccess
-} from '../../store/actions';
-*/
-
 import {
-  //loadMyEmojis,
-  //saveMyEmojis
+  loginUser,
+  logoutUser,
+  emailChanged,
+  passwordChanged,
+  loginErrorMessage
 } from '../../store/actions';
 
 //import { EMOJIS_STORAGE_KEY } from '../../store/actions/actionTypes';
 
 const whatDoYouNeed = state => {
   return {
-    login: state.login,
+    login: state.login,     // ... the whole login state - see comment following ...
     myEmojis: state.emojis.myEmojis
   };
 };
 
 /*
 state.login = { 
-  email: '',
+  email: 'markus@profiphotos.com',
   password: '',
-  error: '',
+  errorMsg: '',
+  errorCode: 0,
   user: null,
-  loading: false,
-  saveMode: 'local',    // ... none, local, cloud. liveSync ...
+  loading: true,        // ... awaiting login state from firebase ...
+  saveMode: 'local',    // ... none, local, cloud, liveSync ...
   didLogin: false
 };
 */
+
+//this.props.login.user !== null
 
 //const EMOJIS_STORAGE_KEY = '@track!some:my_emojis';
 
@@ -69,12 +65,10 @@ class TrackSomeConfig extends Component {
   constructor(props) {
     super(props);
     this.onPressLogin = this.onPressLogin.bind(this);
+    this.onPressLogout = this.onPressLogout.bind(this);
     this.state = {
-      email: '',
-      password: '',
       verify: '',
       toggled: false,
-      loggedIn: false,
       scrWidth: Dimensions.get('window').width,
       scrHeight: Dimensions.get('window').height,
       viewMode: this.scrHeight > this.scrWidth ? 'portrait' : 'landscape'
@@ -99,13 +93,30 @@ class TrackSomeConfig extends Component {
   }
 
   onPressLogin() {
-    ToastAndroid.show(`Login: ${this.state.email}`, ToastAndroid.SHORT);
+    ToastAndroid.show(`Login: ${this.props.login.email}`, ToastAndroid.SHORT);
+    const tooShort = 'The password must be at least 10 alphanumeric characters!';
+    if (this.props.login.password === '' || this.props.login.password.length < 10) {
+      this.props.dispatch(loginErrorMessage(tooShort));
+      return;
+    }
+    this.props.dispatch(loginUser(this.props.login.email, this.props.login.password));
+    //ToastAndroid.show('Login / Logout the user ...', ToastAndroid.SHORT);
+  }
+
+  onPressLogout() {
+    //ToastAndroid.show(`Logout: ${this.state.email}`, ToastAndroid.SHORT);
+    this.props.dispatch(logoutUser());
     //ToastAndroid.show('Login / Logout the user ...', ToastAndroid.SHORT);
   }
 
   emailChanged(text) {
-    ToastAndroid.show(`Login Text: ${text}`, ToastAndroid.SHORT);
-    this.setState({ email: text });
+    //ToastAndroid.show(`Login Text: ${text}`, ToastAndroid.SHORT);
+    this.props.dispatch(emailChanged(text));
+  }
+
+  passwordChanged(text) {
+    //ToastAndroid.show(`Login Text: ${text}`, ToastAndroid.SHORT);
+    this.props.dispatch(passwordChanged(text));
   }
 
   handleSaveMode(newMode) {
@@ -114,9 +125,8 @@ class TrackSomeConfig extends Component {
   }
 
   renderLogin() {
-    if (this.state.loggedIn) return;
+    if (this.props.login.user !== null) return;   // ... we are logged in ...
     const imgHeight = this.state.scrHeight / 1.5;
-    const btnText = this.state.loggedIn ? 'Logout' : 'Login';
     return (
       <ImageBackground 
         source={loginBackgroundImage} 
@@ -124,15 +134,18 @@ class TrackSomeConfig extends Component {
         imageStyle={{ resizeMode: 'cover' }}
       >
         <Login 
-          verify
-          email={this.state.email}
+          //verify
+          email={this.props.login.email}
+          password={this.props.login.password}
+          errorMsg={this.props.login.errorMsg}
           onEmailChange={text => this.emailChanged(text)}
+          onPasswordChange={text => this.passwordChanged(text)}
         />
         <View style={styles.buttonContainer}>
           <View style={styles.loginButtons}>
             <TouchableNativeFeedback onPress={this.onPressLogin}>
               <View style={styles.warmButton}>
-                <Text style={styles.warmText}>{btnText}</Text>
+                <Text style={styles.warmText}>Login</Text>
               </View>
             </TouchableNativeFeedback>
           </View>
@@ -149,9 +162,8 @@ class TrackSomeConfig extends Component {
   }
 
   renderTopBanner() {
-    if (this.state.loggedIn === false) return;
+    if (this.props.login.user === null) return;   // ... we are not logged in ...
     const imgHeight = this.state.scrHeight / 3;
-    const btnText = this.state.loggedIn ? 'Logout' : 'Login';
     return (
       <ImageBackground 
         source={menuBackgroundImage} 
@@ -171,9 +183,9 @@ class TrackSomeConfig extends Component {
               <Text style={styles.warmText}>Sync / Backup</Text>
             </View>
           </TouchableNativeFeedback> 
-          <TouchableNativeFeedback onPress={this.onPressLogin}>
+          <TouchableNativeFeedback onPress={this.onPressLogout}>
             <View style={styles.warmButton}>
-              <Text style={styles.warmText}>{btnText}</Text>
+              <Text style={styles.warmText}>Logout</Text>
             </View>
           </TouchableNativeFeedback>
         </View> 
@@ -196,8 +208,8 @@ class TrackSomeConfig extends Component {
               <View style={styles.optionRow}>
                 <Text style={styles.optionText}>User successfully logged in</Text>
                 <Switch 
-                  onValueChange={(value) => this.setState({ loggedIn: value })}
-                  value={this.state.loggedIn} 
+                  //onValueChange={(value) => this.setState({ loggedIn: value })}
+                  value={this.props.login.user !== null}   // ... we are logged in ...
                 /> 
               </View>
               <View style={styles.optionRow}>
@@ -382,6 +394,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     width: '100%',
+    paddingVertical: 7,
     paddingHorizontal: 10,
     flexDirection: 'row',
     alignItems: 'center',

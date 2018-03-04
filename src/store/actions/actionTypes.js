@@ -1,11 +1,12 @@
-export const INITIALIZED = 'TRACKSOME_INITIALIZED';
-export const ROOT_CHANGED = 'TRACKSOME_ROOT_CHANGED';
-
-//export const EMAIL_CHANGED = 'email_changed';
-//export const PASSWORD_CHANGED = 'password_changed';
-//export const LOGIN_USER_SUCCESS = 'login_user_success';
-//export const LOGIN_USER_FAIL = 'login_user_fail';
-//export const LOGIN_USER = 'login_user';
+export const LOGIN_USER = 'LOGIN_USER';
+export const INITIALIZED = 'INITIALIZED';
+export const ROOT_CHANGED = 'ROOT_CHANGED';
+export const EMAIL_CHANGED = 'EMAIL_CHANGED';
+export const LOGOUT_USER_OK = 'LOGOUT_USER_OK';
+export const LOGIN_ERROR_MSG = 'LOGIN_ERROR_MSG';
+export const LOGIN_USER_FAIL = 'LOGIN_USER_FAIL';
+export const PASSWORD_CHANGED = 'PASSWORD_CHANGED';
+export const LOGIN_USER_SUCCESS = 'LOGIN_USER_SUCCESS';
 
 //export const FETCH_PROFILE_REQUEST = 'FETCH_PROFILE_REQUEST';
 //export const FETCH_PROFILE_SUCCESS = 'FETCH_PROFILE_SUCCESS';
