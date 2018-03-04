@@ -19,9 +19,11 @@ import {
 //import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 //import profiGraphicsLogo from '../../images/profiGraphics-logo-257w.png';
-import photoDropsLogo from '../../images/photo-drops.png';
+import photoDropsLogo from '../../images/photoDrops.png';
 import menuBackgroundImage from '../../images/menu-Background-1000w.jpg';
+import loginBackgroundImage from '../../images/login-Background.jpg';
 import AppColors from '../../templates/appColors';
+import Login from '../../components/Login';
 
 /*
 import { 
@@ -66,7 +68,11 @@ state.login = {
 class TrackSomeConfig extends Component {
   constructor(props) {
     super(props);
+    this.onPressLogin = this.onPressLogin.bind(this);
     this.state = {
+      email: '',
+      password: '',
+      verify: '',
       toggled: false,
       loggedIn: false,
       scrWidth: Dimensions.get('window').width,
@@ -93,7 +99,13 @@ class TrackSomeConfig extends Component {
   }
 
   onPressLogin() {
-    ToastAndroid.show('Login / Logout the user ...', ToastAndroid.SHORT);
+    ToastAndroid.show(`Login: ${this.state.email}`, ToastAndroid.SHORT);
+    //ToastAndroid.show('Login / Logout the user ...', ToastAndroid.SHORT);
+  }
+
+  emailChanged(text) {
+    ToastAndroid.show(`Login Text: ${text}`, ToastAndroid.SHORT);
+    this.setState({ email: text });
   }
 
   handleSaveMode(newMode) {
@@ -101,38 +113,81 @@ class TrackSomeConfig extends Component {
     //this.props.setNewSaveMode((newMode ? 'local' : 'none'));
   }
 
-  render() {
+  renderLogin() {
+    if (this.state.loggedIn) return;
+    const imgHeight = this.state.scrHeight / 1.5;
+    const btnText = this.state.loggedIn ? 'Logout' : 'Login';
+    return (
+      <ImageBackground 
+        source={loginBackgroundImage} 
+        style={[styles.loginImage, { height: imgHeight }]}
+        imageStyle={{ resizeMode: 'cover' }}
+      >
+        <Login 
+          verify
+          email={this.state.email}
+          onEmailChange={text => this.emailChanged(text)}
+        />
+        <View style={styles.buttonContainer}>
+          <View style={styles.loginButtons}>
+            <TouchableNativeFeedback onPress={this.onPressLogin}>
+              <View style={styles.warmButton}>
+                <Text style={styles.warmText}>{btnText}</Text>
+              </View>
+            </TouchableNativeFeedback>
+          </View>
+        </View>
+        <View style={styles.logoSignup}>
+          <Image 
+            source={photoDropsLogo} 
+            style={styles.logoContainer} 
+            imageStyle={styles.logoStyle} 
+          />
+        </View>
+      </ImageBackground>
+    );
+  }
+
+  renderTopBanner() {
+    if (this.state.loggedIn === false) return;
     const imgHeight = this.state.scrHeight / 3;
+    const btnText = this.state.loggedIn ? 'Logout' : 'Login';
+    return (
+      <ImageBackground 
+        source={menuBackgroundImage} 
+        style={[styles.backgroundImage, { height: imgHeight }]}
+        imageStyle={{ resizeMode: 'cover' }}
+      >
+        <View style={styles.buttonContainer}>
+          <View style={styles.identityContainer}>
+            <Image 
+              source={photoDropsLogo} 
+              style={styles.logoContainer} 
+              imageStyle={styles.logoStyle} 
+            />
+          </View>
+          <TouchableNativeFeedback onPress={this.onPressBackup}>
+            <View style={styles.warmButton}>
+              <Text style={styles.warmText}>Sync / Backup</Text>
+            </View>
+          </TouchableNativeFeedback> 
+          <TouchableNativeFeedback onPress={this.onPressLogin}>
+            <View style={styles.warmButton}>
+              <Text style={styles.warmText}>{btnText}</Text>
+            </View>
+          </TouchableNativeFeedback>
+        </View> 
+      </ImageBackground>
+    );
+  }
+
+  render() {
     return (
         <ScrollView style={{ flex: 1, backgroundColor: 'white' }}>
           <View style={styles.container}>
 
-            <ImageBackground 
-              source={menuBackgroundImage} 
-              style={[styles.backgroundImage, { height: imgHeight }]}
-              imageStyle={{ resizeMode: 'cover' }}
-            >
-              <View style={styles.buttonContainer}>
-                <View style={styles.identityContainer}>
-                  <Image 
-                    source={photoDropsLogo} 
-                    style={styles.logoContainer} 
-                    imageStyle={styles.logoStyle} 
-                  />
-                </View>
-                <TouchableNativeFeedback onPress={this.onPressBackup}>
-                  <View style={styles.warmButton}>
-                    <Text style={styles.warmText}>Sync / Backup</Text>
-                  </View>
-                </TouchableNativeFeedback> 
-                <TouchableNativeFeedback onPress={this.onPressLogin}>
-                  <View style={styles.warmButton}>
-                    <Text style={styles.warmText}>Logout</Text>
-                  </View>
-                </TouchableNativeFeedback>
-              </View> 
-            </ImageBackground>
-
+            { this.renderLogin() }
+            { this.renderTopBanner() }
             <View style={[styles.lineStyle, { width: '75%' }]} />
 
             <View style={styles.configContainer}>
@@ -259,9 +314,25 @@ const styles = StyleSheet.create({
 */
 
 const styles = StyleSheet.create({
+  loginImage: {
+    flex: 1,
+    //position: 'absolute',
+    width: '100%',
+    marginBottom: 3,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  loginButtons: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20
+    //backgroundColor: 'red'
+    //alignSelf: 'center',
+  },
   logoContainer: {
-    width: 70,
-    height: 70,
+    width: 85,
+    height: 85,
     //backgroundColor: 'blue'
   },
   logoText: {
@@ -271,6 +342,7 @@ const styles = StyleSheet.create({
     color: AppColors.darkerColor
   },
   logoStyle: {
+    elevation: 5,
     resizeMode: 'contain' 
   },
   lineStyle: {
@@ -279,13 +351,20 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     borderColor: '#aaa'
   },
+  logoSignup: {
+    right: 10,
+    bottom: 10,
+    position: 'absolute',
+  },
   identityContainer: {
     //flexDirection: 'row',
-    //alignItems: 'center',
+    //alignItems: 'stretch',
     paddingRight: 10,
-    //justifyContent: 'center'
+    //justifyContent: 'flex-end'
   },
   warmText: {
+    fontSize: 14,
+    fontWeight: '500',
     color: AppColors.hiliteColor
   },
   warmButton: {
@@ -293,7 +372,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     paddingBottom: 6,       // ... just looks better ...
     paddingHorizontal: 15,
-    borderRadius: 3,
+    borderRadius: 5,
     margin: 3,              // ... so we can see shadow ...
     marginHorizontal: 7,
     backgroundColor: AppColors.mainDarkColor
@@ -302,6 +381,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
   },
   buttonContainer: {
+    width: '100%',
+    paddingHorizontal: 10,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between'
