@@ -23,11 +23,13 @@ import photoDropsLogo from '../../images/photoDrops.png';
 import menuBackgroundImage from '../../images/menu-Background-1000w.jpg';
 import loginBackgroundImage from '../../images/login-Background.jpg';
 import AppColors from '../../templates/appColors';
+import Loader from '../../components/common/Loader';
 import Login from '../../components/Login';
 import {
   loginUser,
   logoutUser,
   emailChanged,
+  subscribeUser,
   passwordChanged,
   loginErrorMessage
 } from '../../store/actions';
@@ -65,10 +67,13 @@ class TrackSomeConfig extends Component {
   constructor(props) {
     super(props);
     this.onPressLogin = this.onPressLogin.bind(this);
+    this.onPressSwitch = this.onPressSwitch.bind(this);
     this.onPressLogout = this.onPressLogout.bind(this);
     this.state = {
       verify: '',
       toggled: false,
+      doLogin: false,
+      subscribe: false,
       scrWidth: Dimensions.get('window').width,
       scrHeight: Dimensions.get('window').height,
       viewMode: this.scrHeight > this.scrWidth ? 'portrait' : 'landscape'
@@ -93,13 +98,22 @@ class TrackSomeConfig extends Component {
   }
 
   onPressLogin() {
-    ToastAndroid.show(`Login: ${this.props.login.email}`, ToastAndroid.SHORT);
+    //ToastAndroid.show(`Login: ${this.props.login.email}`, ToastAndroid.SHORT);
+    const notValid = 'The email address entered is not valid!';
+    if (!this.isValidEmail(this.props.login.email)) {
+      this.props.dispatch(loginErrorMessage(notValid));
+      return;
+    }
     const tooShort = 'The password must be at least 10 alphanumeric characters!';
     if (this.props.login.password === '' || this.props.login.password.length < 10) {
       this.props.dispatch(loginErrorMessage(tooShort));
       return;
     }
-    this.props.dispatch(loginUser(this.props.login.email, this.props.login.password));
+    if (this.state.subscribe) {
+      this.props.dispatch(subscribeUser(this.props.login.email, this.props.login.password));
+    } else {
+      this.props.dispatch(loginUser(this.props.login.email, this.props.login.password));
+    }
     //ToastAndroid.show('Login / Logout the user ...', ToastAndroid.SHORT);
   }
 
@@ -107,6 +121,10 @@ class TrackSomeConfig extends Component {
     //ToastAndroid.show(`Logout: ${this.state.email}`, ToastAndroid.SHORT);
     this.props.dispatch(logoutUser());
     //ToastAndroid.show('Login / Logout the user ...', ToastAndroid.SHORT);
+  }
+
+  onPressSwitch(register) {
+    this.setState({ doLogin: !register, subscribe: !register });
   }
 
   emailChanged(text) {
@@ -124,8 +142,68 @@ class TrackSomeConfig extends Component {
     //this.props.setNewSaveMode((newMode ? 'local' : 'none'));
   }
 
+  doLogin(register) {
+    this.setState({ doLogin: true, subscribe: register });
+  }
+
+  isValidEmail(email) {
+    return email.match(/^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/);
+  }
+
+  showSpinner() {
+    return <Loader size='large' />;
+  }
+
   renderLogin() {
-    if (this.props.login.user !== null) return;   // ... we are logged in ...
+    if (this.props.login.user !== null) return;   // ... exit if we are already logged in ...
+    const imgHeight = this.state.scrHeight / 1.5;
+    const btnText = this.state.subscribe ? 'Register' : 'Login';
+    const otherOptions = this.state.subscribe ? 
+      'Show All Signup Options' : 'Switch to Create Account';
+    return (
+      <ImageBackground 
+        source={loginBackgroundImage} 
+        style={[styles.loginImage, { height: imgHeight }]}
+        imageStyle={{ resizeMode: 'cover' }}
+      >
+        <View style={styles.clearBackground}>
+          <Login 
+            //verify
+            email={this.props.login.email}
+            password={this.props.login.password}
+            errorMsg={this.props.login.errorMsg}
+            onEmailChange={text => this.emailChanged(text)}
+            onPasswordChange={text => this.passwordChanged(text)}
+          />
+          { this.props.login.loading ? this.showSpinner() : null }
+          <View style={styles.buttonContainer}>
+            <View style={styles.loginButtons}>
+              <TouchableNativeFeedback onPress={this.onPressLogin}>
+                <View style={styles.warmButton}>
+                  <Text style={styles.warmText}>{btnText}</Text>
+                </View>
+              </TouchableNativeFeedback>
+              <TouchableNativeFeedback onPress={() => this.onPressSwitch(this.state.subscribe)}>
+                <View style={styles.whiteButton}>
+                  <Text style={styles.commandText}>{otherOptions}</Text>
+                </View>
+              </TouchableNativeFeedback>
+            </View>
+          </View>
+          <View style={styles.logoSignup}>
+            <Image 
+              source={photoDropsLogo} 
+              style={styles.logoContainer} 
+              imageStyle={styles.logoStyle} 
+            />
+          </View>
+        </View>
+      </ImageBackground>
+    );
+  }
+
+  renderChooseLogin() {
+    if (this.props.login.user !== null) return;   // ... exit if we we are already logged in ...
     const imgHeight = this.state.scrHeight / 1.5;
     return (
       <ImageBackground 
@@ -133,36 +211,45 @@ class TrackSomeConfig extends Component {
         style={[styles.loginImage, { height: imgHeight }]}
         imageStyle={{ resizeMode: 'cover' }}
       >
-        <Login 
-          //verify
-          email={this.props.login.email}
-          password={this.props.login.password}
-          errorMsg={this.props.login.errorMsg}
-          onEmailChange={text => this.emailChanged(text)}
-          onPasswordChange={text => this.passwordChanged(text)}
-        />
-        <View style={styles.buttonContainer}>
-          <View style={styles.loginButtons}>
-            <TouchableNativeFeedback onPress={this.onPressLogin}>
+        <View style={styles.backgroundCover}>
+
+          <View style={{ alignItems: 'center' }}>
+            <Image 
+              source={photoDropsLogo} 
+              style={{ height: 130, width: 130 }} 
+              imageStyle={styles.logoStyle} 
+            />
+          </View>
+
+          <View style={styles.explainContainer}>
+            <Text style={styles.signupText}>
+              Create an account and login to enable additional features within this app.
+            </Text>
+            <Text style={styles.linkText}>
+              Further details can be found here.
+            </Text>
+          </View>
+
+          <View style={styles.buttonContainer}>
+            <TouchableNativeFeedback onPress={() => this.doLogin(true)}>
               <View style={styles.warmButton}>
-                <Text style={styles.warmText}>Login</Text>
+                <Text style={styles.warmText}>Create Account with Email</Text>
+              </View>
+            </TouchableNativeFeedback>
+            <TouchableNativeFeedback onPress={() => this.doLogin(false)}>
+              <View style={styles.warmButton}>
+                <Text style={styles.warmText}>Login with Email</Text>
               </View>
             </TouchableNativeFeedback>
           </View>
-        </View>
-        <View style={styles.logoSignup}>
-          <Image 
-            source={photoDropsLogo} 
-            style={styles.logoContainer} 
-            imageStyle={styles.logoStyle} 
-          />
+
         </View>
       </ImageBackground>
     );
   }
 
   renderTopBanner() {
-    if (this.props.login.user === null) return;   // ... we are not logged in ...
+    if (this.props.login.user === null) return;   // ... exit if NOT logged in ...
     const imgHeight = this.state.scrHeight / 3;
     return (
       <ImageBackground 
@@ -170,7 +257,7 @@ class TrackSomeConfig extends Component {
         style={[styles.backgroundImage, { height: imgHeight }]}
         imageStyle={{ resizeMode: 'cover' }}
       >
-        <View style={styles.buttonContainer}>
+        <View style={styles.mainContainer}>
           <View style={styles.identityContainer}>
             <Image 
               source={photoDropsLogo} 
@@ -193,12 +280,18 @@ class TrackSomeConfig extends Component {
     );
   }
 
+/*
+            <View style={styles.loginButtons}>
+            { this.renderLogin() }
+*/
+
   render() {
+    //ToastAndroid.show(`Logged in User: ${this.props.login.user}`, ToastAndroid.SHORT);
     return (
         <ScrollView style={{ flex: 1, backgroundColor: 'white' }}>
           <View style={styles.container}>
 
-            { this.renderLogin() }
+            { this.state.doLogin ? this.renderLogin() : this.renderChooseLogin() }
             { this.renderTopBanner() }
             <View style={[styles.lineStyle, { width: '75%' }]} />
 
@@ -326,8 +419,53 @@ const styles = StyleSheet.create({
 */
 
 const styles = StyleSheet.create({
+  commandText: {
+    fontSize: 11,
+    fontWeight: '500',
+    margin: 5,
+    textAlign: 'center',
+    //borderBottomWidth: 1.25,
+    color: '#333',
+    //borderBottomColor: AppColors.darkerColor,
+  },
+  linkText: {
+    fontSize: 13,
+    fontWeight: '500',
+    margin: 5,
+    textAlign: 'center',
+    borderBottomWidth: 1.25,
+    color: AppColors.accentColor,
+    borderBottomColor: AppColors.accentColor,
+  },
+  signupText: {
+    fontSize: 13,
+    fontWeight: '500',
+    textAlign: 'center',
+    color: AppColors.paperColor
+  },
+  explainContainer: {
+    width: '90%',
+    marginTop: 18,
+    marginBottom: 6,
+    alignItems: 'center'
+  },
+  clearBackground: {
+    flex: 1,
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  backgroundCover: {
+    flex: 1,
+    width: '100%',
+    //marginTop: 3,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.65)'
+  },
   loginImage: {
     flex: 1,
+    //opacity: 0.5,
     //position: 'absolute',
     width: '100%',
     marginBottom: 3,
@@ -364,7 +502,7 @@ const styles = StyleSheet.create({
     borderColor: '#aaa'
   },
   logoSignup: {
-    right: 10,
+    left: 10,
     bottom: 10,
     position: 'absolute',
   },
@@ -379,24 +517,41 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: AppColors.hiliteColor
   },
+  whiteButton: {
+    elevation: 2,
+    paddingVertical: 0,
+    paddingBottom: 1,       // ... just looks better ...
+    paddingHorizontal: 5,
+    borderRadius: 3,
+    margin: 3,              // ... so we can see shadow ...
+    backgroundColor: 'rgba(255,255,255,.70)'
+  },
   warmButton: {
     elevation: 2,
     paddingVertical: 5,
     paddingBottom: 6,       // ... just looks better ...
     paddingHorizontal: 15,
     borderRadius: 5,
-    margin: 3,              // ... so we can see shadow ...
-    marginHorizontal: 7,
+    margin: 5,              // ... so we can see shadow ...
+    //marginHorizontal: 7,
     backgroundColor: AppColors.mainDarkColor
   },
   configContainer: {
     paddingHorizontal: 15,
   },
+  mainContainer: {
+    width: '100%',
+    //paddingVertical: 15,
+    //paddingHorizontal: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around'
+  },
   buttonContainer: {
     width: '100%',
-    paddingVertical: 7,
-    paddingHorizontal: 10,
-    flexDirection: 'row',
+    //paddingVertical: 15,
+    //paddingHorizontal: 10,
+    //flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between'
   },

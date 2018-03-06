@@ -1,6 +1,7 @@
 import { ToastAndroid } from 'react-native';
 import { 
   LOGIN_USER,
+  LOGIN_START,
   EMAIL_CHANGED, 
   LOGOUT_USER_OK,
   LOGIN_USER_FAIL,
@@ -16,7 +17,7 @@ const INITIAL_STATE = {
   errorMsg: '',
   errorCode: 0,
   user: null,
-  loading: true,        // ... awaiting login state from firebase ...
+  loading: false,        // ... awaiting login state from firebase ...
   saveMode: 'local',    // ... none, local, cloud, liveSync ...
   didLogin: false
 };
@@ -50,10 +51,26 @@ export default (state = INITIAL_STATE, action) => {
         errorMsg: action.payload 
       };
 
-    case LOGIN_USER:
+    case LOGIN_START:
       return { 
         ...state, 
         loading: true 
+      };
+
+    case LOGIN_USER:
+      return { 
+        ...state, 
+        user: action.payload, 
+        loading: false 
+      };
+
+    case LOGIN_USER_FAIL:
+      return { 
+        ...state, 
+        errorMsg: action.payload.code + ': ' + action.payload.message, 
+        errorCode: action.payload.code, 
+        password: '', 
+        loading: false 
       };
 
     case LOGIN_USER_SUCCESS:
@@ -66,6 +83,9 @@ export default (state = INITIAL_STATE, action) => {
         loading: false 
       };
 
+    //-----------------------------------------
+    // ... next one is just for the logout ...
+    //-----------------------------------------
     case LOGOUT_USER_OK:
       //ToastAndroid.show(`inside dispatch login_User: ${action.payload}`, ToastAndroid.LONG);
       return { 
@@ -76,15 +96,6 @@ export default (state = INITIAL_STATE, action) => {
         errorMsg: '',
         errorCode: 0,
         loading: false
-      };
-
-    case LOGIN_USER_FAIL:
-      return { 
-        ...state, 
-        errorMsg: action.payload.code + ': ' + action.payload.message, 
-        errorCode: action.payload.code, 
-        password: '', 
-        loading: false 
       };
 
     default: 

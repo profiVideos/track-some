@@ -219,7 +219,7 @@ Do you really want to do this?`,
     return (
       <View style={styles.bannerContainer}>
         <Text style={styles.bannerText}>
-          photo!Drops is ready to create your first list ...
+          photoDrops is ready to create your first list ...
         </Text>
         <Image style={styles.imageStyle} source={PaintSplash} />
         <Text style={styles.bannerText}>

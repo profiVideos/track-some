@@ -10,11 +10,11 @@ import { ActivityIndicator, View } from 'react-native';
 const styles = {
   loader: {
     //flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: 'rgba(255,255,255,0.75)',
     borderRadius: 5,
     padding: 3,
     elevation: 5,
-    margin: 20,
+    margin: 10,
     justifyContent: 'center',
     alignItems: 'center',
   },

@@ -2,6 +2,7 @@ import { ToastAndroid } from 'react-native';
 import firebase from 'react-native-firebase';
 import { 
   LOGIN_USER,
+  LOGIN_START,
   ROOT_CHANGED,
   EMAIL_CHANGED, 
   LOGOUT_USER_OK,
@@ -57,6 +58,12 @@ export const logoutUserOK = (nullCode) => {
   };
 };
 
+export const loginStart = () => {
+  return {
+    type: LOGIN_START 
+  };
+};
+
 export const setUserLogin = (user) => {
   //ToastAndroid.show(`inside loginUser: ${user}`, ToastAndroid.LONG);
   return {
@@ -81,35 +88,63 @@ export const logoutUser = () => {
 
 const translateErrorMessage = (code, message) => {
   switch (code) {
+    case 'auth/user-disabled':
+      return 'The account associated with this email address has been disabled.  Please contact support.';
+    case 'auth/invalid-email':
+      return 'The email address entered is not valid.';
     case 'auth/wrong-password':
       return 'The password entered does not match the one on file.';
+    case 'auth/user-not-found':
+      return 'The account associated with this email address could not be found.';
+    case 'auth/email-already-in-use':
     default: 
       return message;
   }
 };
 
-export const loginUser = (email, password) => {
+export const subscribeUser = (email, password) => {
   return dispatch => {
-    firebase.auth().signInWithEmailAndPassword(email, password)
+    dispatch(loginStart());
+    firebase.auth().createUserWithEmailAndPassword(email, password)
     .then(user => {
-      dispatch(loginUserOK(user));
-      // If you need to do anything with the user, do it here
-      // The user will be logged in automatically by the 
-      // `onAuthStateChanged` listener we set up in App.js earlier
+      // ... send user verification email & do anything else here with user info ...
+      firebase.auth().currentUser.sendEmailVerification()
+      .then(() => {
+        ToastAndroid.show(`Email sent to: ${email}`, ToastAndroid.LONG);
+        dispatch(loginUserOK(user));
+      })
+      .catch(error => {
+        const { code, message } = error;
+        const myMessage = translateErrorMessage(code, message);
+        dispatch(loginUserFail(code, myMessage));
+      });
     })
     .catch(error => {
       const { code, message } = error;
       const myMessage = translateErrorMessage(code, message);
       dispatch(loginUserFail(code, myMessage));
-      // For details of error codes, see the docs
-      // The message contains the default Firebase string
-      // representation of the error
+    });
+  };
+};
+
+export const loginUser = (email, password) => {
+  return dispatch => {
+    dispatch(loginStart());
+    firebase.auth().signInWithEmailAndPassword(email, password)
+    .then(user => {
+      dispatch(loginUserOK(user));
+      // If you need to do anything with the user, do it here
+    })
+    .catch(error => {
+      const { code, message } = error;
+      const myMessage = translateErrorMessage(code, message);
+      dispatch(loginUserFail(code, myMessage));
     });
   };
 };
 
 export const checkUserStatus = () => {
-  ToastAndroid.show('inside checkUserStatus', ToastAndroid.SHORT);
+  //ToastAndroid.show('inside checkUserStatus', ToastAndroid.SHORT);
   return dispatch => {
     firebase.auth().onAuthStateChanged(user => {
       dispatch(setUserLogin(user));

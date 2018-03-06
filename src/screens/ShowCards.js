@@ -333,7 +333,7 @@ Do you really what to do this?`,
     if (this.props.activeList.key === '') {
       Alert.alert('Create Card', 
         `Please select / create a list in order to add cards to that list.\n
-There are some excellent benefits in keeping your cards within a list!`,
+There are some excellent benefits to be had in storing your cards in a list!`,
           [{ text: 'Got It' }]);
       this.props.navigator.switchToTab({ tabIndex: 0 });
     } else {
@@ -372,7 +372,7 @@ There are some excellent benefits in keeping your cards within a list!`,
     return (
       <View style={styles.bannerContainer}>
         <Text style={styles.bannerText}>
-          Your photo!Drops list is ready for your first card ...
+          Your photoDrops list is ready for your first card ...
         </Text>
         <Image style={styles.imageStyle} source={PaintSplash} />
         <Text style={styles.bannerText}>

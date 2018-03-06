@@ -23,6 +23,8 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     paddingVertical: 4.5,
     paddingHorizontal: 10,
+    paddingBottom: 6,
+    marginBottom: 5,
     borderRadius: 5,
     borderColor: AppColors.accentColor,
     borderWidth: 1.75,
@@ -30,12 +32,14 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     //width: '100%',
+    elevation: 2,
+    margin: 3,
     paddingHorizontal: 10,
     borderRadius: 7,
-    borderColor: '#aaa',
-    borderWidth: 0.75,
+    borderColor: '#999',
+    borderWidth: 1.75,
     marginBottom: 10,
-    backgroundColor: 'rgba(255,255,255,0.80)'
+    backgroundColor: 'rgba(255,255,255,0.90)'
   },
   outerContainer: {
     width: '87%'

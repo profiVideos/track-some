@@ -1,4 +1,5 @@
 export const LOGIN_USER = 'LOGIN_USER';
+export const LOGIN_START = 'LOGIN_START';
 export const INITIALIZED = 'INITIALIZED';
 export const ROOT_CHANGED = 'ROOT_CHANGED';
 export const EMAIL_CHANGED = 'EMAIL_CHANGED';
