@@ -111,7 +111,8 @@ android {
         targetSdkVersion 25
         versionCode 6
         versionName "0.86 alpha"
-        vectorDrawables.useSupportLibrary = true      // ... image crop picker ...
+        multiDexEnabled true                       // ... added after firestore - fixed we can now compile ...
+        vectorDrawables.useSupportLibrary = true   // ... image crop picker ...
         ndk {
             abiFilters "armeabi-v7a", "x86"
         }
@@ -157,8 +158,9 @@ dependencies {
     compile project(':realm')
     // Firebase dependencies
     compile 'com.google.firebase:firebase-core:11.8.0'
-    compile "com.google.firebase:firebase-auth:11.8.0"
-    compile "com.google.android.gms:play-services-base:11.8.0"
+    compile 'com.google.firebase:firebase-auth:11.8.0'
+    compile 'com.google.firebase:firebase-firestore:11.8.0'
+    compile 'com.google.android.gms:play-services-base:11.8.0'
     compile(project(':react-native-firebase')) { transitive = false }
 }
 

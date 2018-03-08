@@ -5,6 +5,7 @@ import android.app.Application;
 import com.facebook.react.ReactApplication;
 import io.invertase.firebase.RNFirebasePackage;
 import io.invertase.firebase.auth.RNFirebaseAuthPackage;
+import io.invertase.firebase.firestore.RNFirebaseFirestorePackage;
 import io.realm.react.RealmReactPackage;
 import com.reactnative.ivpusic.imagepicker.PickerPackage;
 import com.facebook.react.ReactNativeHost;
@@ -35,7 +36,8 @@ public class MainApplication extends NavigationApplication {
         new PickerPackage(),
         new RealmReactPackage(),
         new RNFirebasePackage(),
-        new RNFirebaseAuthPackage()
+        new RNFirebaseAuthPackage(),
+        new RNFirebaseFirestorePackage()
      );
   }
 
