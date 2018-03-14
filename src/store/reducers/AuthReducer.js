@@ -1,4 +1,4 @@
-import { ToastAndroid } from 'react-native';
+//import { ToastAndroid } from 'react-native';
 import { 
   LOGIN_USER,
   LOGIN_START,
@@ -6,18 +6,26 @@ import {
   LOGOUT_USER_OK,
   LOGIN_USER_FAIL,
   LOGIN_ERROR_MSG,
+  USERNAME_CHANGED,
   PASSWORD_CHANGED,
+  CONNECTION_STATE,
+  BACKUP_SYNC_START,
+  BACKUP_SYNC_FINISH,
   LOGIN_USER_SUCCESS,
   SET_SAVE_MODE
 } from '../actions/actionTypes';
 
 const INITIAL_STATE = { 
-  email: 'markus@profiphotos.com',
+  //email: 'markus@profiphotos.com',
+  email: '',
   password: '',
+  username: '',
   errorMsg: '',
   errorCode: 0,
   user: null,
-  loading: false,        // ... awaiting login state from firebase ...
+  connected: false,     // ... shows we have an internet connection ...
+  loading: false,       // ... awaiting login state from firebase ...
+  syncing: false,       // ... doing a backup / sync with firebase ...
   saveMode: 'local',    // ... none, local, cloud, liveSync ...
   didLogin: false
 };
@@ -39,6 +47,13 @@ export default (state = INITIAL_STATE, action) => {
         password: action.payload
       };
 
+    case USERNAME_CHANGED:
+      return { 
+        ...state, 
+        errorMsg: '',
+        username: action.payload
+      };
+
     case SET_SAVE_MODE:
       return { 
         ...state, 
@@ -57,6 +72,26 @@ export default (state = INITIAL_STATE, action) => {
         loading: true 
       };
 
+    case CONNECTION_STATE:
+      return { 
+        ...state, 
+        connected: action.payload 
+      };
+
+    case BACKUP_SYNC_START:
+      //ToastAndroid.show('Start Backup', ToastAndroid.SHORT);
+      return { 
+        ...state, 
+        syncing: true 
+      };
+
+    case BACKUP_SYNC_FINISH:
+      //ToastAndroid.show('Finish Backup', ToastAndroid.SHORT);
+      return { 
+        ...state, 
+        syncing: false
+      };
+
     case LOGIN_USER:
       return { 
         ...state, 
@@ -70,6 +105,7 @@ export default (state = INITIAL_STATE, action) => {
         errorMsg: action.payload.code + ': ' + action.payload.message, 
         errorCode: action.payload.code, 
         password: '', 
+        username: '',
         loading: false 
       };
 
@@ -93,6 +129,7 @@ export default (state = INITIAL_STATE, action) => {
         user: action.payload, 
         email: '',
         password: '',
+        username: '',
         errorMsg: '',
         errorCode: 0,
         loading: false

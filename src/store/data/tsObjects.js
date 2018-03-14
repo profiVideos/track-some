@@ -117,5 +117,23 @@ List.schema = {
   }
 };
 
+class Config extends Realm.Object {}
+Config.schema = {
+  name: 'Config',
+  primaryKey: 'userid',
+  properties: {
+    userid: 'string',
+    nickname: 'string',
+    email: 'string?',
+    phone: 'string?',
+    photoURI: 'string?',
+    dbVersion: 'float',
+    signup: 'string',
+    created: 'date',
+    lastSync: 'date?'
+  }
+};
+//export default Config;
+
 export const tsRealm = new Realm({ schema: [Emoji, Category, Note, Card, List] });
-//export const imageRealm = new Realm({ schema: [Image] });
+export const cfgRealm = new Realm({ path: 'config.realm', schema: [Config] });

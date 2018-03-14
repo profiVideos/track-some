@@ -34,16 +34,18 @@ import {
   //searchCardsChanged,        // ... brand, spanking NEW ...
   //searchNotesChanged,        // ... brand, spanking NEW ...
 } from '../store/actions';
-import realmDB from '../store';
+import store from '../store';
 
 import PlusIcon from '../images/PlusIcon.png';
 
-const listsLiveResults = realmDB.getAllLists();     // ... Realm updates this in real time ...
+const dropsConfig = store.getConfig();
+const listsLiveResults = store.getAllLists();     // ... Realm updates this in real time ...
 const itemWidth = 170;  // ... add this to state - used to calculate column spacing ...
 
 const whatDoYouNeed = state => {
   return {
     myLists: listsLiveResults,
+    appConfig: dropsConfig,
     saveMode: state.login.saveMode,
     thisList: state.lists.thisList,
     activeList: state.lists.activeList,
@@ -93,6 +95,7 @@ class ShowLists extends PureComponent<{}> {
 
   componentWillMount() {
     console.log('inside show lists ...');
+    //ToastAndroid.show(`inside loginUser: ${user}`, ToastAndroid.LONG);
     this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
   }
 
@@ -162,6 +165,10 @@ Do you really want to do this?`,
       }
       default: break;
     }  // ... switch ...
+  }
+
+  showResult(result) {
+    ToastAndroid.show(`Inside Timer Props: ${result}`, ToastAndroid.LONG);
   }
 
   doListRemoval(item) {

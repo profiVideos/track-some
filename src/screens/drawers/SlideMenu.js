@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import firebase from 'react-native-firebase';
 import { 
   View, 
   Text,
@@ -7,6 +8,7 @@ import {
   //Alert,
   Switch,
   //Button,
+  NetInfo,
   ScrollView,
   StyleSheet,
   Dimensions,
@@ -30,7 +32,11 @@ import {
   logoutUser,
   emailChanged,
   subscribeUser,
+  usernameChanged,
   passwordChanged,
+  startBackupSync,
+  connectionState,
+  finishBackupSync,
   loginErrorMessage
 } from '../../store/actions';
 
@@ -49,7 +55,7 @@ state.login = {
   password: '',
   errorMsg: '',
   errorCode: 0,
-  user: null,
+  user: null,           // ... this is where the firebase user info is kept ...
   loading: true,        // ... awaiting login state from firebase ...
   saveMode: 'local',    // ... none, local, cloud, liveSync ...
   didLogin: false
@@ -69,6 +75,7 @@ class TrackSomeConfig extends Component {
     this.onPressLogin = this.onPressLogin.bind(this);
     this.onPressSwitch = this.onPressSwitch.bind(this);
     this.onPressLogout = this.onPressLogout.bind(this);
+    this.onPressBackup = this.onPressBackup.bind(this);
     this.state = {
       verify: '',
       toggled: false,
@@ -80,8 +87,13 @@ class TrackSomeConfig extends Component {
     };
   }
   
+  componentWillMount() {
+    this.props.dispatch(connectionState(NetInfo.isConnected));
+  }
+
   componentDidMount() {
     console.log('Slide Menu Props: ', this.props);
+    NetInfo.isConnected.addEventListener('change', this.handleConnectionChange);    
     //Dimensions.addEventListener('change', () => {
     //  this.setState({
     //    scrWidth: Dimensions.get('window').width,
@@ -92,9 +104,22 @@ class TrackSomeConfig extends Component {
     //});
   }
 
+  componentWillUnmount() {
+    NetInfo.isConnected.removeEventListener('change', this.handleConnectionChange);
+  }
+
   onPressBackup() {
-    //ToastAndroid.show(`Inside Show Note Screen: ${note.key}`, ToastAndroid.SHORT);
-    ToastAndroid.show('Do the Backup ...', ToastAndroid.SHORT);
+    //ToastAndroid.show('Do the Backup ...', ToastAndroid.SHORT);
+    if (this.props.login.connected) {
+      // ... a crude sync for now ...
+      this.props.dispatch(startBackupSync());
+      this.deleteCloudFiles();  // ... deletes the whole userid collection ...
+      //this.backupMainFiles();
+      this.props.dispatch(finishBackupSync());
+      ToastAndroid.show('Sync Complete', ToastAndroid.SHORT);
+    } else {
+      ToastAndroid.show('No Internet Connection!', ToastAndroid.SHORT);
+    }
   }
 
   onPressLogin() {
@@ -110,7 +135,11 @@ class TrackSomeConfig extends Component {
       return;
     }
     if (this.state.subscribe) {
-      this.props.dispatch(subscribeUser(this.props.login.email, this.props.login.password));
+      this.props.dispatch(subscribeUser(
+        this.props.login.email, 
+        this.props.login.password,
+        this.props.login.username
+      ));
     } else {
       this.props.dispatch(loginUser(this.props.login.email, this.props.login.password));
     }
@@ -128,13 +157,117 @@ class TrackSomeConfig extends Component {
   }
 
   emailChanged(text) {
-    //ToastAndroid.show(`Login Text: ${text}`, ToastAndroid.SHORT);
     this.props.dispatch(emailChanged(text));
   }
 
   passwordChanged(text) {
-    //ToastAndroid.show(`Login Text: ${text}`, ToastAndroid.SHORT);
     this.props.dispatch(passwordChanged(text));
+  }
+
+  usernameChanged(text) {
+    this.props.dispatch(usernameChanged(text));
+  }
+
+/*
+// ... how to check if a document exists ...
+var cityRef = db.collection('cities').doc('SF');
+
+var getDoc = cityRef.get()
+    .then(doc => {
+        if (!doc.exists) {
+            console.log('No such document!');
+        } else {
+            console.log('Document data:', doc.data());
+        }
+    })
+    .catch(err => {
+        console.log('Error getting document', err);
+    });
+*/
+
+  handleConnectionChange = (isConnected) => {
+    this.props.dispatch(connectionState(isConnected));
+  };
+  
+/*
+$scope.deleteClip = function(docId) {
+if (docId === undefined) {
+docId = $scope.movieOrTvShow + '_' + $scope.clipInMovieModel;
+}
+$scope.languageVideos = longLanguageFactory.toController($scope.language) + 'Videos';
+var promises = [];
+firebase.firestore().collection($scope.languageVideos).doc($scope.movieOrTvShow)
+  .collection('Video Clips').doc(docId).collection('SentenceTranslations').get()
+.then(function(translations) {
+  translations.forEach(function(doc) {
+    console.log(doc.id);
+    promises.push(firebase.firestore().collection($scope.languageVideos)
+      .doc($scope.movieOrTvShow).collection('Video Clips').doc(docId)
+      .collection('SentenceTranslations').doc(doc.id).delete());
+  });
+});
+firebase.firestore().collection($scope.languageVideos).doc($scope.movieOrTvShow)
+  .collection('Video Clips').doc(docId).collection('SentenceExplanations').get()
+.then(function(explanations) {
+  explanations.forEach(function(doc) {
+    console.log(doc.id);
+    promises.push(firebase.firestore().collection($scope.languageVideos)
+    .doc($scope.movieOrTvShow).collection('Video Clips').doc(docId)
+    .collection('SentenceExplanations').doc(doc.id).delete());
+  });
+});
+Promise.all(promises).then(function() {
+  console.log("All subcollections deleted.");
+  firebase.firestore().collection($scope.languageVideos).doc($scope.movieOrTvShow)
+  .collection('Video Clips').doc(docId).delete()
+  .then(function() {
+    console.log("Collection deleted.");
+    $scope.clipInMovieModel = null;
+    $scope.$apply();
+  })
+  .catch(function(error) {
+    console.log("Remove failed: " + error.message);
+  });
+})
+.catch(function(error){
+  console.log("Error deleting subcollections: " + error);
+});
+};
+*/
+
+  deleteCloudFiles() {
+    // ... deletes the whole userid collection ...
+    const userId = this.props.login.user.uid;
+    ToastAndroid.show(`UserId: ${userId}`, ToastAndroid.SHORT);
+    const userData = firebase.firestore().collection('photoDrops').doc(userId);
+    //const emojiData = userData.collections('Emojis');
+    userData.collection('Emojis').doc('21e2-53dd-3a38').delete();
+    //emojiData.delete();
+    //userData.delete();  // ... finally delete the main collection ...
+  }
+
+  backupMainFiles() {
+    //----------------------------------------------------------------
+    // ... backup all the realm data files to the firestore cloud ...
+    //----------------------------------------------------------------
+    const userId = this.props.login.user.uid;
+    const userData = firebase.firestore().collection('photoDrops').doc(userId);
+    // ... first the emojis (still stored in redux) ...
+    this.props.myEmojis.forEach(emoji => {
+      userData.collection('Emojis').doc(emoji.key).set({
+        key: emoji.key,
+        emoji: emoji.emoji,
+        name: emoji.name,
+        selected: emoji.selected,
+        numUsed: emoji.numUsed,
+        createdTimestamp: emoji.createdTimestamp
+      })
+      .catch(error => {
+        const { code, message } = error;
+        ToastAndroid.show(`Error: ${code} - ${message}`, ToastAndroid.SHORT);
+      });
+      //ToastAndroid.show(`Emoji: ${emoji}`, ToastAndroid.SHORT);
+    });
   }
 
   handleSaveMode(newMode) {
@@ -168,11 +301,13 @@ class TrackSomeConfig extends Component {
       >
         <View style={styles.clearBackground}>
           <Login 
-            //verify
+            verify={this.state.subscribe}
             email={this.props.login.email}
+            username={this.props.login.username}
             password={this.props.login.password}
             errorMsg={this.props.login.errorMsg}
             onEmailChange={text => this.emailChanged(text)}
+            onUsernameChange={text => this.usernameChanged(text)}
             onPasswordChange={text => this.passwordChanged(text)}
           />
           { this.props.login.loading ? this.showSpinner() : null }
@@ -248,6 +383,9 @@ class TrackSomeConfig extends Component {
     );
   }
 
+/*
+*/
+
   renderTopBanner() {
     if (this.props.login.user === null) return;   // ... exit if NOT logged in ...
     const imgHeight = this.state.scrHeight / 3;
@@ -257,6 +395,7 @@ class TrackSomeConfig extends Component {
         style={[styles.backgroundImage, { height: imgHeight }]}
         imageStyle={{ resizeMode: 'cover' }}
       >
+        { this.props.login.syncing ? this.showSpinner() : null }
         <View style={styles.mainContainer}>
           <View style={styles.identityContainer}>
             <Image 

@@ -46,27 +46,26 @@ const styles = StyleSheet.create({
   }
 });
 const inputs = {};
-const passVerify = () => {
+const signupName = (props) => {
   return (
     <TextField
       //style={styles.nameInput}
-      label='Verify Password*'
-      title='Enter the same password again to verify.'
+      label='Username*'
+      title='A friendly name - to personalize the app.'
       lineWidth={0.75}
       labelHeight={20}
       animationDuration={375}
       inputContainerPadding={6}
       blurOnSubmit
-      secureTextEntry
-      ref={input => { inputs.verify = input; }}
+      ref={input => { inputs.username = input; }}
       //onSubmitEditing={() => { inputs.password.focus(); }}
       titleTextStyle={{ fontStyle: 'italic', marginTop: -2 }}
       enablesReturnKeyAutomatically
       //characterRestriction={32}
       returnKeyType='done'
       disableFullscreenUI
-      //value={props.email}
-      //onChangeText={text => props.itemChanged(text)}
+      value={props.username}
+      onChangeText={text => props.onUsernameChange(text)}
     />      
   );
 };
@@ -115,7 +114,7 @@ const Login = (props) => {
             inputContainerPadding={6}
             blurOnSubmit={props.verify}
             ref={input => { inputs.password = input; }}
-            onSubmitEditing={props.verify ? () => { inputs.verify.focus(); } : ''}
+            onSubmitEditing={props.verify ? () => { inputs.username.focus(); } : ''}
             titleTextStyle={{ fontStyle: 'italic', marginTop: -2 }}
             enablesReturnKeyAutomatically
             secureTextEntry
@@ -125,7 +124,7 @@ const Login = (props) => {
             value={props.password}
             onChangeText={text => props.onPasswordChange(text)}
           />      
-          { props.verify ? passVerify() : <View /> }
+          { props.verify ? signupName(props) : <View /> }
         </View>
       </View>
       { errorBox(props.errorMsg) }

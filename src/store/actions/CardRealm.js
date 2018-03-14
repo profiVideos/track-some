@@ -61,6 +61,11 @@ export const getCard = (key) => {
   return thisItem;
 };
 
+export const getCards = () => {
+  const thisItem = tsRealm.objects('Card')[0];
+  return thisItem;
+};
+
 export const createCard = 
   (cList, cName, cDesc, cIcon, cType, cRating, cCat, cThumb, cMime, cBarcode, cTags, cNotes) => {
   tsRealm.write(() => {

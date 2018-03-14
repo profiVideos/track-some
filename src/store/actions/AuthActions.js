@@ -8,10 +8,22 @@ import {
   LOGOUT_USER_OK,
   LOGIN_USER_FAIL,
   LOGIN_ERROR_MSG,
+  USERNAME_CHANGED,
   PASSWORD_CHANGED,
+  CONNECTION_STATE,
+  BACKUP_SYNC_START,
+  BACKUP_SYNC_FINISH,
   LOGIN_USER_SUCCESS,
     //SET_SAVE_MODE
 } from './actionTypes';
+import realmDB from '../../store';   // ... Realm DB Routines ...
+
+export const usernameChanged = (text) => {
+  return {
+    type: USERNAME_CHANGED,
+    payload: text
+  };
+};
 
 export const passwordChanged = (text) => {
   return {
@@ -64,8 +76,26 @@ export const loginStart = () => {
   };
 };
 
+export const startBackupSync = () => {
+  return {
+    type: BACKUP_SYNC_START 
+  };
+};
+
+export const finishBackupSync = () => {
+  return {
+    type: BACKUP_SYNC_FINISH
+  };
+};
+
 export const setUserLogin = (user) => {
-  //ToastAndroid.show(`inside loginUser: ${user}`, ToastAndroid.LONG);
+  const dropsConfig = realmDB.getConfig();
+  //ToastAndroid.show(`inside setUserLogin: ${dropsConfig}`, ToastAndroid.LONG);
+  // ... see if we need to do a database sync ...
+  if (dropsConfig === undefined) {
+    realmDB.saveConfig(user);
+    ToastAndroid.show('Config created', ToastAndroid.SHORT);
+  }
   return {
     type: LOGIN_USER, 
     payload: user
@@ -89,7 +119,7 @@ export const logoutUser = () => {
 const translateErrorMessage = (code, message) => {
   switch (code) {
     case 'auth/user-disabled':
-      return 'The account associated with this email address has been disabled.  Please contact support.';
+      return 'The account with this email address has been disabled.  Please contact support.';
     case 'auth/invalid-email':
       return 'The email address entered is not valid.';
     case 'auth/wrong-password':
@@ -102,15 +132,30 @@ const translateErrorMessage = (code, message) => {
   }
 };
 
-export const subscribeUser = (email, password) => {
+// ... firebase auth:export photo-drops-users.json
+
+export const subscribeUser = (email, password, username) => {
   return dispatch => {
     dispatch(loginStart());
     firebase.auth().createUserWithEmailAndPassword(email, password)
     .then(user => {
-      // ... send user verification email & do anything else here with user info ...
+      firebase.auth().currentUser.updateProfile({ displayName: username });
       firebase.auth().currentUser.sendEmailVerification()
       .then(() => {
         ToastAndroid.show(`Email sent to: ${email}`, ToastAndroid.LONG);
+        // ... add this users details to the firestore database ...
+        const userData = firebase.firestore().collection('users');
+        userData.doc(user.uid).set({
+          userid: user.uid,
+          email,
+          nickname: username,
+          phone: user.phoneNumber,
+          signup: user.providerId,
+          photoURI: user.photoURL,
+          lastSync: null,
+          created: user.metadata.creationTime
+        });
+        //ToastAndroid.show(`User: ${JSON.stringify(user)}`, ToastAndroid.LONG);
         dispatch(loginUserOK(user));
       })
       .catch(error => {
@@ -133,7 +178,7 @@ export const loginUser = (email, password) => {
     firebase.auth().signInWithEmailAndPassword(email, password)
     .then(user => {
       dispatch(loginUserOK(user));
-      // If you need to do anything with the user, do it here
+      // ... see if we need to do a database sync ...
     })
     .catch(error => {
       const { code, message } = error;
@@ -143,14 +188,17 @@ export const loginUser = (email, password) => {
   };
 };
 
+export const connectionState = (isOnline) => {
+  return {
+    type: CONNECTION_STATE, 
+    payload: isOnline
+  };
+};
+
 export const checkUserStatus = () => {
-  //ToastAndroid.show('inside checkUserStatus', ToastAndroid.SHORT);
   return dispatch => {
     firebase.auth().onAuthStateChanged(user => {
       dispatch(setUserLogin(user));
-      //dispatch(changeApp('mainApp'));
-      //if (user === null) dispatch(changeApp('login'));
-      //else dispatch(changeApp('mainApp'));
     });
   };
 };
