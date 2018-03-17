@@ -17,6 +17,7 @@ import {
   ToastAndroid, 
 } from 'react-native';
 import { connect } from 'react-redux';
+import firebase from 'react-native-firebase';
 import {
   MenuProvider
 } from 'react-native-popup-menu';
@@ -46,6 +47,7 @@ const whatDoYouNeed = state => {
   return {
     myLists: listsLiveResults,
     appConfig: dropsConfig,
+    login: state.login,     // ... the whole login state - firebase user info in user ...
     saveMode: state.login.saveMode,
     thisList: state.lists.thisList,
     activeList: state.lists.activeList,
@@ -97,6 +99,22 @@ class ShowLists extends PureComponent<{}> {
     console.log('inside show lists ...');
     //ToastAndroid.show(`inside loginUser: ${user}`, ToastAndroid.LONG);
     this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
+  }
+
+  componentDidMount() {
+    if (this.props.login.user !== null) {
+      //ToastAndroid.show(`Email Verified: ${this.props.login.user.emailVerified}`, 
+      //  ToastAndroid.SHORT);
+      // ... see if the email was verified ...
+      if (this.props.login.user.emailVerified === false) {
+        Alert.alert('Email Verification', 
+          `Please verify your Email address by responding to the email that was sent to you when you signed up for this app!\n
+Once verified, please logout and then login again to ensure the changes to your profile take effect.\n          
+After successful verification, this message will no longer display.`,
+          [{ text: 'Resend Email', onPress: () => this.resendEmail() },
+           { text: 'Got It' }]);
+      }
+    }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -169,6 +187,12 @@ Do you really want to do this?`,
 
   showResult(result) {
     ToastAndroid.show(`Inside Timer Props: ${result}`, ToastAndroid.LONG);
+  }
+
+  resendEmail() {
+    const emailUser = firebase.auth().currentUser;
+    emailUser.sendEmailVerification();
+    ToastAndroid.show(`Email sent to: ${emailUser.email}`, ToastAndroid.LONG);
   }
 
   doListRemoval(item) {

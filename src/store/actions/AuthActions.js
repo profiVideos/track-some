@@ -1,4 +1,4 @@
-import { ToastAndroid } from 'react-native';
+import { Alert, ToastAndroid } from 'react-native';
 import firebase from 'react-native-firebase';
 import { 
   LOGIN_USER,

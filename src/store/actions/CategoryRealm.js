@@ -6,7 +6,7 @@ import { ToastAndroid } from 'react-native';
 // ... Each property has a name and is described by either a string containing the property’s type, 
 // ... or an object with name, type, objectType, optional, default, and indexed fields.
 
-export const getAllCategories = (activeList = '', searchFor) => {
+export const getCategories = (activeList = '', searchFor) => {
   let catItems = '';
   if (searchFor !== null && searchFor !== undefined) {
     //ToastAndroid.show(`Matching Notes: ${queryStr}\n${foundCards}`, ToastAndroid.SHORT);
@@ -24,6 +24,11 @@ export const getAllCategories = (activeList = '', searchFor) => {
         .sorted('name');  // + ,true for reverse sorting ...
     //}      
   }
+  return catItems;
+};
+
+export const getAllCategories = () => {
+  const catItems = tsRealm.objects('Category').sorted('name');  // + ,true for reverse sorting ...
   return catItems;
 };
 

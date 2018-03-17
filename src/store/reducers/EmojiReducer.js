@@ -2,10 +2,9 @@ import {
   ADD_EMOJI,
   CLEAR_EMOJI,
   UPDATE_EMOJI, 
-  REMOVE_EMOJI,
   CURRENT_EMOJI,
-  DELETE_ALL_EMOJIS,  
   LOAD_EMOJIS_SUCCESS,    // ... gets the current emojis database ...
+  CLEAR_SELECTED_EMOJIS,
   DELETE_SELECTED_EMOJIS
 } from '../actions/actionTypes';
 
@@ -28,25 +27,12 @@ const EmojiReducer = (state = initialState, action) => {
         lastUpdated: Date.now()
       };
 
-    case DELETE_ALL_EMOJIS:
+    case CLEAR_SELECTED_EMOJIS:
     case DELETE_SELECTED_EMOJIS:
       return {
         ...state,
         myEmojis: action.payload.emojis,
         detailView: false,
-        lastUpdated: Date.now()
-      };
-
-    case REMOVE_EMOJI:
-      // ... fix this one for Realm DB ...
-      return {
-        ...state,
-        myEmojis: state.myEmojis.filter(item => {
-          return item.key !== action.payload.key;
-        }),
-        emojiCode: '',
-        emojiName: '',
-        detailview: false,
         lastUpdated: Date.now()
       };
 
@@ -86,6 +72,19 @@ export default EmojiReducer;
         ...state,
         myEmojis: state.myEmojis.slice().sort((a, b) => compareNum(a.numUsed, b.numUsed)),
         emojisDirty: true
+      };
+
+    case REMOVE_EMOJI:
+      // ... fix this one for Realm DB ...
+      return {
+        ...state,
+        myEmojis: state.myEmojis.filter(item => {
+          return item.key !== action.payload.key;
+        }),
+        emojiCode: '',
+        emojiName: '',
+        detailview: false,
+        lastUpdated: Date.now()
       };
 
     case FIND_EMOJI:

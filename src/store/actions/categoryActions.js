@@ -106,7 +106,7 @@ export const categoriesLoadSuccess = (catData) => {
 
 export const loadCategories = () => {
   return dispatch => {
-    const catData = store.getAllCategories();
+    const catData = store.getCategories();
     dispatch(categoriesLoadSuccess(catData));
   };
 };

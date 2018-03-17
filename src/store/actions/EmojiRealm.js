@@ -46,17 +46,34 @@ export const createEmoji = (addEmoji, addName) => {
   });
 };
 
-export const deleteSelectedEmojis = () => {
+export const clearSelectedEmojis = () => {
   tsRealm.write(() => {
     const allSelected = tsRealm.objects('Emoji').filtered('selected = true');
-    tsRealm.delete(allSelected);
+    if (allSelected !== undefined) {
+      const snapShot = allSelected.snapshot();
+      snapShot.forEach(emoji => {
+        tsRealm.create('Emoji', { key: emoji.key, selected: false }, true);
+      });
+    }
   });
 };
 
+export const deleteSelectedEmojis = () => {
+  tsRealm.write(() => {
+    const allSelected = tsRealm.objects('Emoji').filtered('selected = true');
+    if (allSelected !== undefined) {
+      tsRealm.delete(allSelected);
+    }
+  });
+};
+
+/*
 export const deleteAllEmojis = () => {
   tsRealm.write(() => {
     const purgeEmojis = tsRealm.objects('Emoji');
-    tsRealm.delete(purgeEmojis);
+    if (purgeEmojis !== undefined) {
+      tsRealm.delete(purgeEmojis);
+    }
   });
 };
 
@@ -65,3 +82,4 @@ export const deleteEmoji = (key) => {
     tsRealm.delete(key);  // ... check on the correct syntax for this ...
   });
 };
+*/

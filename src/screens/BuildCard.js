@@ -44,7 +44,7 @@ import {
 } from '../store/actions';
 import store from '../store';
 
-let catListLive = store.getAllCategories('');
+let catListLive = store.getCategories('');
 
 // location of Java runtime - U:\AppDev\Android\Android Studio\jre
 
@@ -127,7 +127,7 @@ class BuildCard extends PureComponent {
     this.listener.register();
     //this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     this.cleanTempSpace();  // ... cleans up images in tmp directory ...
-    catListLive = store.getAllCategories(this.props.activeList.key);
+    catListLive = store.getCategories(this.props.activeList.key);
     if (catListLive !== undefined) {
       //ToastAndroid.show('catList has been loaded', ToastAndroid.SHORT);
       this.buildPickerItems(catListLive);

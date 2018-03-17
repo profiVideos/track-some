@@ -11,7 +11,7 @@ import { UniqueId } from '../../components/common/UniqueId';
 //      .filtered('name CONTAINS[c] $0 OR tags CONTAINS[c] $0', searchFor)
 //      .filtered('name CONTAINS[c] $0 OR desc CONTAINS[c] $0', searchFor)
 
-export const getAllCards = (activeList = '', lookFor) => {
+export const getMatchingCards = (activeList = '', lookFor) => {
   let cardList = '';
   let foundCards = '';
   //searchFor = '';
@@ -44,7 +44,6 @@ export const getAllCards = (activeList = '', lookFor) => {
   return cardList;
 };
 
-//export default connect(whatDoYouNeed)(getAllCards);
 /*
 // ... proper way to write values ...
 try {
@@ -61,9 +60,9 @@ export const getCard = (key) => {
   return thisItem;
 };
 
-export const getCards = () => {
-  const thisItem = tsRealm.objects('Card')[0];
-  return thisItem;
+export const getAllCards = () => {
+  const cardList = tsRealm.objects('Card').sorted('name');
+  return cardList;
 };
 
 export const createCard = 

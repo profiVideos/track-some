@@ -68,7 +68,7 @@ md-arrow-dropup - descending sort
 --------------------------------------------------------------------------------------
 */
 
-let notesLiveResults = store.getAllNotes('');     // ... Realm updates this in real time ...
+let notesLiveResults = store.getMatchingNotes('');     // ... Realm updates this in real time ...
 
 const whatDoYouNeed = state => {
   return {
@@ -77,7 +77,7 @@ const whatDoYouNeed = state => {
     thisCard: state.cards.thisCard,
     activeList: state.lists.activeList,
     noteList: (state.notes.searchFor === '' ? 
-      notesLiveResults : store.getAllNotes(state.notes.searchFor)),
+      notesLiveResults : store.getMatchingNotes(state.notes.searchFor)),
     highlighted: state.notes.highlighted,
     notesUpdated: state.notes.lastUpdated,
     cardNoteLinksChanged: state.cards.notesChanged,
@@ -135,7 +135,7 @@ class ShowNotes extends React.PureComponent {
       const scrTitle = (nextProps.activeList.name === '' ? 
         'Notes' : nextProps.activeList.name);
       this.props.navigator.setTitle({ title: scrTitle });
-      notesLiveResults = store.getAllNotes(nextProps.activeList.key);
+      notesLiveResults = store.getMatchingNotes(nextProps.activeList.key);
       // ... this next line is VERY IMPORTANT - otherwise the flatlist would update much later ...
       this.props.dispatch(propertyNoteChanged('list', nextProps.activeList.key));
     }

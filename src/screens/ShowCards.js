@@ -48,14 +48,14 @@ To Restart the currently running App;
 adb shell am broadcast -a react.native.RELOAD
 */
 
-let cardsLiveResults = store.getAllCards('');     // ... Realm updates this in real time ...
+let cardsLiveResults = store.getMatchingCards('');     // ... Realm updates this in real time ...
 
 const whatDoYouNeed = state => {
   return {
     //saveMode: state.login.saveMode,
     //emojiCode: state.emojis.emojiCode,
     cardList: (state.cards.searchFor === '' ? cardsLiveResults : 
-      store.getAllCards(state.cards.searchFor)),
+      store.getMatchingCards(state.cards.searchFor)),
     thisCard: state.cards.thisCard,
     isLoading: state.lists.loading,
     activeList: state.lists.activeList,
@@ -124,7 +124,7 @@ class ShowCards extends React.PureComponent {
       const scrTitle = (nextProps.activeList.name === '' ? 
         'Show Cards' : nextProps.activeList.name);
       this.props.navigator.setTitle({ title: scrTitle });
-      cardsLiveResults = store.getAllCards(nextProps.activeList.key);
+      cardsLiveResults = store.getMatchingCards(nextProps.activeList.key);
       // ... this next line is VERY IMPORTANT - otherwise the flatlist would never update ...
       this.props.dispatch(itemCardChanged('list', nextProps.activeList.key));
     }

@@ -174,8 +174,6 @@ class CardDisplay extends React.Component {
   }
 
   renderCardNotes() {
-    //const cardNotesResults = store.getAllNotes('ABCD');
-    //const cardNotesResults = store.getAllNotes(this.props.activeList.key);
     const cardNotesResults = store.getCardNotes(this.props.item.key);
     return (
       <FlatList

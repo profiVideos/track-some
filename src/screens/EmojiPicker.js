@@ -27,10 +27,12 @@ import emojiData from '../store/data/sorted-emojis.json';
 import EmojiTabBar from './EmojiTabBar';
 import EmojiItem from '../components/EmojiItem';
 import { 
-  addEmoji, 
+  addEmoji,
+  clearEmojis,
   updateEmoji, 
   currentEmoji,
-  loadMyEmojis
+  loadMyEmojis,
+  deleteEmojis 
 } from '../store/actions';
 
 //console.warn('Emojis are loading ... ');
@@ -152,16 +154,6 @@ class EmojiPicker extends PureComponent {
     }
   }
 
-/*
-  onTouchPress = () => { 
-    this.props.onSelectItem(this.props.emojiName, this.props.emojiString);
-  } 
-
-  onTouchLongPress = () => { 
-    this.props.onToggleItem(this.props.emojiName, this.props.emojiString);
-  } 
-*/
-
   onSelectItem = (name, emoji) => {  // ... a normal selected item (press and go) ...
     this.setState({ emojisClicked: `${emoji} ${this.state.emojisClicked}` });
     const dataStore = this.props;
@@ -239,18 +231,22 @@ class EmojiPicker extends PureComponent {
   onMenuOptionSelect = (value) => {
     switch (value) {
       case 'clearEmojis': {
-        // ... delete all selected emojis without asking ...
-        Alert.alert('We need to unselect ALL selected Emojis!');
+        // ... clear all selected emojis without asking ...
+        this.props.dispatch(clearEmojis());
         break;
       }
       case 'deleteSelected': {
-        // ... delete all selected emojis without asking ...
-        Alert.alert('We need to delete all selected Emojis!');
-        break;
-      }
-      case 'deleteAllEmojis': {
-        // ... delete all selected emojis without asking ...
-        Alert.alert('We are going to delete ALL Emojis!');
+        const numSelected = this.countSelectedItems();
+        if (numSelected > 0) {
+          Alert.alert('Delete Selected Emojis', 
+            `You are about to remove ${numSelected} Emoji favorites.\nIs this what you wish to do?`,
+            [{ text: 'Cancel', style: 'cancel' },
+             { text: 'OK', 
+             onPress: () => this.props.dispatch(deleteEmojis()) }]);
+        } else {
+          Alert.alert('Delete Selected Emojis', 
+          'There were no Emojis selected for removal!');
+        }        
         break;
       }
       default: break;
@@ -264,6 +260,10 @@ class EmojiPicker extends PureComponent {
   setEditFlag = (allowEdits) => {
     this.setState({ canEdit: allowEdits });
   };
+
+  countSelectedItems() {
+    return this.props.myEmojis.filter(item => item.selected === true).length;
+  }
 
   findEmojiByKey(key) {
     return this.props.myEmojis.findIndex((element) => { return element.key === key; });
@@ -337,7 +337,6 @@ class EmojiPicker extends PureComponent {
           </MenuOption>
           <IconMenuOption value={'clearEmojis'} icon='🔄' text='Clear All Selected' />
           <IconMenuOption value={'deleteSelected'} icon='🗑️' text='Delete All Selected' />
-          <IconMenuOption value={'deleteAllEmojis'} icon='✂' text='Remove Your Emojis' />
         </MenuOptions>
       </Menu>
     //);
@@ -427,7 +426,7 @@ export default connect(whatDoYouNeed)(EmojiPicker);
 
 const menuOptionsStyles = {
   optionsContainer: {
-    width: 180,
+    width: 200,
     padding: 2,
     paddingLeft: 5,
     paddingRight: 5,

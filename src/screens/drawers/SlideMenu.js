@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import firebase from 'react-native-firebase';
 import { 
   View, 
   Text,
@@ -14,12 +13,12 @@ import {
   Dimensions,
   ToastAndroid,
   ImageBackground,
+  ActivityIndicator,
   TouchableNativeFeedback
 } from 'react-native';
 
 //import Icon from 'react-native-vector-icons/FontAwesome';
 //import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-
 //import profiGraphicsLogo from '../../images/profiGraphics-logo-257w.png';
 import photoDropsLogo from '../../images/photoDrops.png';
 import menuBackgroundImage from '../../images/menu-Background-1000w.jpg';
@@ -27,6 +26,7 @@ import loginBackgroundImage from '../../images/login-Background.jpg';
 import AppColors from '../../templates/appColors';
 import Loader from '../../components/common/Loader';
 import Login from '../../components/Login';
+import BackupMainFiles from '../../components/SyncDataFiles';
 import {
   loginUser,
   logoutUser,
@@ -36,11 +36,9 @@ import {
   passwordChanged,
   startBackupSync,
   connectionState,
-  finishBackupSync,
+  //finishBackupSync,
   loginErrorMessage
 } from '../../store/actions';
-
-//import { EMOJIS_STORAGE_KEY } from '../../store/actions/actionTypes';
 
 const whatDoYouNeed = state => {
   return {
@@ -61,13 +59,6 @@ state.login = {
   didLogin: false
 };
 */
-
-//this.props.login.user !== null
-
-//const EMOJIS_STORAGE_KEY = '@track!some:my_emojis';
-
-//    dispatch(actionCreators.fetchPosts())
-//    loadSuccess: (jsonData) => dispatch(emojiLoadSuccess(jsonData)),
 
 class TrackSomeConfig extends Component {
   constructor(props) {
@@ -94,14 +85,6 @@ class TrackSomeConfig extends Component {
   componentDidMount() {
     console.log('Slide Menu Props: ', this.props);
     NetInfo.isConnected.addEventListener('change', this.handleConnectionChange);    
-    //Dimensions.addEventListener('change', () => {
-    //  this.setState({
-    //    scrWidth: Dimensions.get('window').width,
-    //    scrHeight: Dimensions.get('window').height,
-    //    viewMode: Dimensions.get('window').height > Dimensions.get('window').width 
-    //      ? 'portrait' : 'landscape'
-    //  });
-    //});
   }
 
   componentWillUnmount() {
@@ -109,14 +92,12 @@ class TrackSomeConfig extends Component {
   }
 
   onPressBackup() {
-    //ToastAndroid.show('Do the Backup ...', ToastAndroid.SHORT);
     if (this.props.login.connected) {
       // ... a crude sync for now ...
       this.props.dispatch(startBackupSync());
-      this.deleteCloudFiles();  // ... deletes the whole userid collection ...
-      //this.backupMainFiles();
-      this.props.dispatch(finishBackupSync());
-      ToastAndroid.show('Sync Complete', ToastAndroid.SHORT);
+      BackupMainFiles(this.props.login.user.uid, this.props.dispatch);
+      //this.props.dispatch(finishBackupSync());
+      //ToastAndroid.show(allDone, ToastAndroid.SHORT);
     } else {
       ToastAndroid.show('No Internet Connection!', ToastAndroid.SHORT);
     }
@@ -147,9 +128,7 @@ class TrackSomeConfig extends Component {
   }
 
   onPressLogout() {
-    //ToastAndroid.show(`Logout: ${this.state.email}`, ToastAndroid.SHORT);
     this.props.dispatch(logoutUser());
-    //ToastAndroid.show('Login / Logout the user ...', ToastAndroid.SHORT);
   }
 
   onPressSwitch(register) {
@@ -170,6 +149,10 @@ class TrackSomeConfig extends Component {
 
 /*
 // ... how to check if a document exists ...
+// ... used as part of a deletion check which is a problem for firestore ...
+// ... perhaps I need to keep a local copy of stuff that we need to delete from ...
+// ... the server and then when we have an internet connectionm delete the backlog ...
+// ... of stuff that's been deleted on the device but not yet in the cloud ...
 var cityRef = db.collection('cities').doc('SF');
 
 var getDoc = cityRef.get()
@@ -188,87 +171,6 @@ var getDoc = cityRef.get()
   handleConnectionChange = (isConnected) => {
     this.props.dispatch(connectionState(isConnected));
   };
-  
-/*
-$scope.deleteClip = function(docId) {
-if (docId === undefined) {
-docId = $scope.movieOrTvShow + '_' + $scope.clipInMovieModel;
-}
-$scope.languageVideos = longLanguageFactory.toController($scope.language) + 'Videos';
-var promises = [];
-firebase.firestore().collection($scope.languageVideos).doc($scope.movieOrTvShow)
-  .collection('Video Clips').doc(docId).collection('SentenceTranslations').get()
-.then(function(translations) {
-  translations.forEach(function(doc) {
-    console.log(doc.id);
-    promises.push(firebase.firestore().collection($scope.languageVideos)
-      .doc($scope.movieOrTvShow).collection('Video Clips').doc(docId)
-      .collection('SentenceTranslations').doc(doc.id).delete());
-  });
-});
-firebase.firestore().collection($scope.languageVideos).doc($scope.movieOrTvShow)
-  .collection('Video Clips').doc(docId).collection('SentenceExplanations').get()
-.then(function(explanations) {
-  explanations.forEach(function(doc) {
-    console.log(doc.id);
-    promises.push(firebase.firestore().collection($scope.languageVideos)
-    .doc($scope.movieOrTvShow).collection('Video Clips').doc(docId)
-    .collection('SentenceExplanations').doc(doc.id).delete());
-  });
-});
-Promise.all(promises).then(function() {
-  console.log("All subcollections deleted.");
-  firebase.firestore().collection($scope.languageVideos).doc($scope.movieOrTvShow)
-  .collection('Video Clips').doc(docId).delete()
-  .then(function() {
-    console.log("Collection deleted.");
-    $scope.clipInMovieModel = null;
-    $scope.$apply();
-  })
-  .catch(function(error) {
-    console.log("Remove failed: " + error.message);
-  });
-})
-.catch(function(error){
-  console.log("Error deleting subcollections: " + error);
-});
-};
-*/
-
-  deleteCloudFiles() {
-    // ... deletes the whole userid collection ...
-    const userId = this.props.login.user.uid;
-    ToastAndroid.show(`UserId: ${userId}`, ToastAndroid.SHORT);
-    const userData = firebase.firestore().collection('photoDrops').doc(userId);
-    //const emojiData = userData.collections('Emojis');
-    userData.collection('Emojis').doc('21e2-53dd-3a38').delete();
-    //emojiData.delete();
-    //userData.delete();  // ... finally delete the main collection ...
-  }
-
-  backupMainFiles() {
-    //----------------------------------------------------------------
-    // ... backup all the realm data files to the firestore cloud ...
-    //----------------------------------------------------------------
-    const userId = this.props.login.user.uid;
-    const userData = firebase.firestore().collection('photoDrops').doc(userId);
-    // ... first the emojis (still stored in redux) ...
-    this.props.myEmojis.forEach(emoji => {
-      userData.collection('Emojis').doc(emoji.key).set({
-        key: emoji.key,
-        emoji: emoji.emoji,
-        name: emoji.name,
-        selected: emoji.selected,
-        numUsed: emoji.numUsed,
-        createdTimestamp: emoji.createdTimestamp
-      })
-      .catch(error => {
-        const { code, message } = error;
-        ToastAndroid.show(`Error: ${code} - ${message}`, ToastAndroid.SHORT);
-      });
-      //ToastAndroid.show(`Emoji: ${emoji}`, ToastAndroid.SHORT);
-    });
-  }
 
   handleSaveMode(newMode) {
     console.log(newMode);
@@ -285,6 +187,17 @@ Promise.all(promises).then(function() {
 
   showSpinner() {
     return <Loader size='large' />;
+  }
+
+  showSyncState() {
+    return (
+      <View style={styles.syncActivity}>
+        <ActivityIndicator size={'small'} />
+        <View style={styles.syncText}>
+          <Text style={{ fontSize: 11 }}>Syncing your files ...</Text>
+        </View>
+      </View>
+    );
   }
 
   renderLogin() {
@@ -395,7 +308,7 @@ Promise.all(promises).then(function() {
         style={[styles.backgroundImage, { height: imgHeight }]}
         imageStyle={{ resizeMode: 'cover' }}
       >
-        { this.props.login.syncing ? this.showSpinner() : null }
+        { this.props.login.syncing ? this.showSyncState() : null }
         <View style={styles.mainContainer}>
           <View style={styles.identityContainer}>
             <Image 
@@ -420,8 +333,6 @@ Promise.all(promises).then(function() {
   }
 
 /*
-            <View style={styles.loginButtons}>
-            { this.renderLogin() }
 */
 
   render() {
@@ -481,32 +392,7 @@ Promise.all(promises).then(function() {
 
 export default connect(whatDoYouNeed)(TrackSomeConfig);
 
-//export default connect(whatDoYouNeed, whatShouldIDo)(TrackSomeConfig);
 /*
-              <View style={[styles.lineStyle, { width: '35%' }]} />
-
-      <ImageBackground 
-        source={menuBackgroundImage} 
-        style={styles.backgroundImage}
-        imageStyle={{ resizeMode: 'cover' }}
-      >
-      </ImageBackground>
-
-          <View style={styles.logoContainer}>
-            <Image 
-              source={profiGraphicsLogo} 
-              imageStyle={this.state.viewMode === 'portrait' ? styles.portrait : styles.landscape} 
-            />
-          </View>
-
-export default connect(whatDoYouNeed, whatShouldIDo)(Configurator);
-
-const mapStateToProps = state => {
-  return {
-    saveData: getSaveMode()
-  };
-};
-
 
 ACTION IS;
 export const getSaveMode = () => {
@@ -523,15 +409,6 @@ export const getSaveMode = () => {
 </keyboardavoidingview>
 </imagebackground>
 
-<CustomCachedImage
-    component={ImageBackground}
-    source={{ uri: 'http://loremflickr.com/640/480/dog' }} 
-/>
-
-*/
-
-
-/*
 const AppColors = {
   paperColor: '#e2e2e2',      // ... off white ...
   hiliteColor: '#fff8b2',     // ... light yellow ...
@@ -558,6 +435,20 @@ const styles = StyleSheet.create({
 */
 
 const styles = StyleSheet.create({
+  syncActivity: {
+    backgroundColor: 'rgba(255,255,255,0.75)',
+    borderRadius: 5,
+    paddingTop: 6,
+    elevation: 5,
+    margin: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  syncText: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    //backgroundColor: AppColors.paperColor
+  },
   commandText: {
     fontSize: 11,
     fontWeight: '500',
@@ -747,3 +638,60 @@ const styles = StyleSheet.create({
     height: 38
   }
 });
+
+/*
+  deleteCloudFiles() {
+    // ... deletes the whole userid collection ...
+    const userId = this.props.login.user.uid;
+    ToastAndroid.show(`UserId: ${userId}`, ToastAndroid.SHORT);
+    const userData = firebase.firestore().collection('photoDrops').doc(userId);
+    //const emojiData = userData.collections('Emojis');
+    userData.collection('Emojis').doc('21e2-53dd-3a38').delete();
+    //emojiData.delete();
+    //userData.delete();  // ... finally delete the main collection ...
+  }
+
+$scope.deleteClip = function(docId) {
+if (docId === undefined) {
+docId = $scope.movieOrTvShow + '_' + $scope.clipInMovieModel;
+}
+$scope.languageVideos = longLanguageFactory.toController($scope.language) + 'Videos';
+var promises = [];
+firebase.firestore().collection($scope.languageVideos).doc($scope.movieOrTvShow)
+  .collection('Video Clips').doc(docId).collection('SentenceTranslations').get()
+.then(function(translations) {
+  translations.forEach(function(doc) {
+    console.log(doc.id);
+    promises.push(firebase.firestore().collection($scope.languageVideos)
+      .doc($scope.movieOrTvShow).collection('Video Clips').doc(docId)
+      .collection('SentenceTranslations').doc(doc.id).delete());
+  });
+});
+firebase.firestore().collection($scope.languageVideos).doc($scope.movieOrTvShow)
+  .collection('Video Clips').doc(docId).collection('SentenceExplanations').get()
+.then(function(explanations) {
+  explanations.forEach(function(doc) {
+    console.log(doc.id);
+    promises.push(firebase.firestore().collection($scope.languageVideos)
+    .doc($scope.movieOrTvShow).collection('Video Clips').doc(docId)
+    .collection('SentenceExplanations').doc(doc.id).delete());
+  });
+});
+Promise.all(promises).then(function() {
+  console.log("All subcollections deleted.");
+  firebase.firestore().collection($scope.languageVideos).doc($scope.movieOrTvShow)
+  .collection('Video Clips').doc(docId).delete()
+  .then(function() {
+    console.log("Collection deleted.");
+    $scope.clipInMovieModel = null;
+    $scope.$apply();
+  })
+  .catch(function(error) {
+    console.log("Remove failed: " + error.message);
+  });
+})
+.catch(function(error){
+  console.log("Error deleting subcollections: " + error);
+});
+};
+*/

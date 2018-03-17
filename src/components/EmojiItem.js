@@ -7,6 +7,7 @@ import {
   StyleSheet,
   TouchableNativeFeedback
 } from 'react-native';
+import RenderCheckedBadge from './DropsUtility';
 
 //const uri = 'http://profigraphics.com/images/Christina-100px.jpg';
 
@@ -62,6 +63,8 @@ class EmojiItem extends PureComponent {
           >
             {this.props.emojiName}
           </Text>
+          {this.props.canEdit && this.props.isChecked ? 
+             <RenderCheckedBadge marginLeft={1} marginTop={-30} /> : <View />}
         </View>
       </TouchableNativeFeedback>
     );
@@ -95,7 +98,7 @@ const styles = StyleSheet.create({
     width: '16.66666666666667%',  // ... 100 / 6 items across ...
     //width: '14.28571428571429%',  // ... 100 / 7 items across ...
     height: itemHeight,           // ... used to calculate faster scrolls ...
-    margin: 0,
+    //margin: 1,
     padding: 2,
     backgroundColor: 'white',
     shadowColor: '#121212',

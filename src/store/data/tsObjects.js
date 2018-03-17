@@ -34,6 +34,9 @@ Category.schema = {
   }
 };
 
+//-----------------------------------------------------------
+// ... 15.03.2018 - MG - Image is not used at the moment ...
+//-----------------------------------------------------------
 class Image extends Realm.Object {}
 Image.schema = {
   name: 'Image',

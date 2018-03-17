@@ -33,7 +33,7 @@ import {
 } from '../store/actions';
 import store from '../store';
 
-let categoryLiveResults = store.getAllCategories('');  // ... Realm updates this in real time ...
+let categoryLiveResults = store.getCategories('');  // ... Realm updates this in real time ...
 
 const mapStateToProps = state => {
   return {
@@ -92,7 +92,7 @@ class EditCategories extends PureComponent {
       const scrTitle = (nextProps.activeList.name === '' ? 
         'Categories' : nextProps.activeList.name);
       this.props.navigator.setTitle({ title: scrTitle });
-      categoryLiveResults = store.getAllCategories(nextProps.activeList.key);
+      categoryLiveResults = store.getCategories(nextProps.activeList.key);
       // ... this next line is VERY IMPORTANT - otherwise the flatlist would not update ...
       this.props.dispatch(itemTextChanged('list', nextProps.activeList.key));
     }

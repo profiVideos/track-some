@@ -1,12 +1,10 @@
 import {
   ADD_EMOJI,
   CLEAR_EMOJI,
-  //SORT_EMOJIS,
   UPDATE_EMOJI, 
-  REMOVE_EMOJI,
   CURRENT_EMOJI,
-  DELETE_ALL_EMOJIS,  
   LOAD_EMOJIS_SUCCESS,    // ... gets the current emojis database ...
+  CLEAR_SELECTED_EMOJIS,  
   DELETE_SELECTED_EMOJIS
 } from './actionTypes';
 import store from '../../store';   // ... Realm DB Routines ...
@@ -38,11 +36,11 @@ export const deleteEmojis = () => {
   };
 };
 
-export const deleteAllEmojis = () => {
-  store.deleteAllEmojis();
+export const clearEmojis = () => {
+  store.clearSelectedEmojis();
   const emojiData = store.getMyEmojis();    // ... retrieves the newly updated list ...
   return {
-    type: DELETE_ALL_EMOJIS,
+    type: CLEAR_SELECTED_EMOJIS,
     payload: { emojis: emojiData }
   };
 };
@@ -65,13 +63,6 @@ export const loadMyEmojis = () => {
 // ... the following functions need to be adjusted for Realm ...
 //---------------------------------------------------------------
 
-export const removeEmoji = (key) => {
-  return {
-    type: REMOVE_EMOJI,
-    payload: { key }
-  };
-};
-
 export const clearEmoji = () => {
   return {
     type: CLEAR_EMOJI
@@ -90,6 +81,14 @@ export const currentEmoji = (emoji, name) => {
 // ... Future: if additional sorts are needed / requested ...
 //----------------------------------------------------------------------
 /*
+
+export const removeEmoji = (key) => {
+  return {
+    type: REMOVE_EMOJI,
+    payload: { key }
+  };
+};
+
 export const sortMyEmojis = () => {
   return {
     type: SORT_EMOJIS

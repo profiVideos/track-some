@@ -12,7 +12,7 @@ NEW:***********************************************************************
 
 */
 
-export const getAllNotes = (activeList = '', searchFor) => {
+export const getMatchingNotes = (activeList = '', searchFor) => {
   let noteList = '';
   //searchFor = '';
   if (searchFor !== null && searchFor !== undefined) {
@@ -31,6 +31,11 @@ export const getAllNotes = (activeList = '', searchFor) => {
         .sorted('updatedTimestamp', true);  
     //}      
   }
+  return noteList;
+};
+
+export const getAllNotes = () => {
+  const noteList = tsRealm.objects('Note').sorted('updatedTimestamp', true);
   return noteList;
 };
 
