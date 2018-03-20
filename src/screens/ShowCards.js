@@ -122,7 +122,7 @@ class ShowCards extends React.PureComponent {
     if (this.props.activeList.key !== nextProps.activeList.key) {
       this.setState({ loading: true });
       const scrTitle = (nextProps.activeList.name === '' ? 
-        'Show Cards' : nextProps.activeList.name);
+        'Show Drops' : nextProps.activeList.name);
       this.props.navigator.setTitle({ title: scrTitle });
       cardsLiveResults = store.getMatchingCards(nextProps.activeList.key);
       // ... this next line is VERY IMPORTANT - otherwise the flatlist would never update ...
@@ -158,7 +158,7 @@ class ShowCards extends React.PureComponent {
   }
 
   onCardItemPress(key) {
-    console.log('The main item was pressed with this key: ', key);
+    //console.log('The main item was pressed with this key: ', key);
     // ... if item was already selected - and user presses again - deselect ...
     if (this.props.highlighted === key) {
       this.props.dispatch(highlightCard(''));
@@ -194,9 +194,9 @@ class ShowCards extends React.PureComponent {
       }
       case 'delete': {
         // ... make this message more severe and also delete all notes & tags ...
-        Alert.alert('Delete Card', 
-          `You are about to permanently remove this card.\n
-You will also be deleting all tags and notes associated with this card!  
+        Alert.alert('Delete Drop', 
+          `You are about to permanently remove this drop.\n
+You will also be deleting all tags and notes associated with this drop!  
 Do you really what to do this?`,
           [{ text: 'Cancel', style: 'cancel' },
            { text: 'OK', onPress: () => this.onDeleteCardAndNotes(card.key, card.list) }]);
@@ -207,7 +207,7 @@ Do you really what to do this?`,
   }
 
   onCardsRefresh() {
-    ToastAndroid.show('Cards: Refresh', ToastAndroid.SHORT);
+    ToastAndroid.show('Drops: Refresh', ToastAndroid.SHORT);
   }
 
   onSearchChanged(text) {
@@ -217,7 +217,7 @@ Do you really what to do this?`,
 
   onSearchFocusChange() {
     Keyboard.dismiss();  // ... does not seem to work ...
-    ToastAndroid.show('Cards: Focus Lost', ToastAndroid.SHORT);
+    ToastAndroid.show('Drops: Focus Lost', ToastAndroid.SHORT);
     // ... ensure the keyboard is closed ...
     // ... make sure we stop the other searches from looking for new matches ...
     this.props.dispatch(searchNotesChanged(''));
@@ -271,7 +271,7 @@ Do you really what to do this?`,
   }
 
   processTag(tag) {
-    console.log('This tag is = ', tag);
+    //console.log('This tag is = ', tag);
     //ToastAndroid.show(`This tag is ${tag}`, ToastAndroid.SHORT);
     // ... don't add empty tags please ...
     // ... if not already in the list for this card - add it ...
@@ -290,7 +290,7 @@ Do you really what to do this?`,
   }
 
   showNoteEditScreen(note = '', card) {
-    ToastAndroid.show(`Inside Show Note Screen: ${note.key}`, ToastAndroid.SHORT);
+    //ToastAndroid.show(`Inside Show Note Screen: ${note.key}`, ToastAndroid.SHORT);
     this.props.navigator.showLightBox({
       screen: 'tracksome.NoteEdit',
       passProps: {
@@ -309,7 +309,7 @@ Do you really what to do this?`,
   }
 
   openNoteEditModal(note = '', card) {
-    ToastAndroid.show(`Open Note: ${note.key}`, ToastAndroid.SHORT);
+    //ToastAndroid.show(`Open Note: ${note.key}`, ToastAndroid.SHORT);
     if (note.key === '' || note.key === undefined) {
       this.props.dispatch(clearNote());
     } 
@@ -331,9 +331,9 @@ Do you really what to do this?`,
   openBuildCardModal(card = '') {
     //ToastAndroid.show(`Card: ${card}`, ToastAndroid.SHORT);
     if (this.props.activeList.key === '') {
-      Alert.alert('Create Card', 
-        `Please select / create a list in order to add cards to that list.\n
-There are some excellent benefits to be had in storing your cards in a list!`,
+      Alert.alert('Create Drop', 
+        `Please select / create a story in order to add drops to your story.\n
+The whole idea is to tell your story with a collection of individual photoDrops!`,
           [{ text: 'Got It' }]);
       this.props.navigator.switchToTab({ tabIndex: 0 });
     } else {
@@ -372,7 +372,7 @@ There are some excellent benefits to be had in storing your cards in a list!`,
     return (
       <View style={styles.bannerContainer}>
         <Text style={styles.bannerText}>
-          Your photoDrops list is ready for your first card ...
+          Your photoDrops story is ready for your first drop ...
         </Text>
         <Image style={styles.imageStyle} source={PaintSplash} />
         <Text style={styles.bannerText}>

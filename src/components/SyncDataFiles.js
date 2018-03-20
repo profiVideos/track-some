@@ -3,6 +3,9 @@ import firebase from 'react-native-firebase';
 import { 
   loadMyEmojis,
   finishBackupSync,
+  cardsRestoreSuccess,
+  listsRestoreSuccess,
+  notesRestoreSuccess,
   categoryRestoreSuccess
 } from '../store/actions';
 import realmDB from '../store';
@@ -74,6 +77,20 @@ const onNotesRestore = (querySnapshot) => {
   });
 };
 
+const onListsRestore = (querySnapshot) => {
+  querySnapshot.forEach((doc) => {
+    // ... if the list in the cloud is newer then restore it ...
+    realmDB.restoreList(doc.id, doc.data());
+  });
+};
+
+const onCardsRestore = (querySnapshot) => {
+  querySnapshot.forEach((doc) => {
+    // ... if the list in the cloud is newer then restore it ...
+    realmDB.restoreCard(doc.id, doc.data());
+  });
+};
+
 function findDataKey(key) {
   return cloudData.findIndex((element) => { return element.key === key; });
 }
@@ -112,10 +129,70 @@ function restoreNotesData(userData, dispatch) {
   const notesRef = userData.collection('Notes');
   promises.push(notesRef.get());
   Promise.all(promises).then(() => {
-    notesUnsubscribe();  // ... no more category updates please ...
-    dispatch(categoryRestoreSuccess());
+    notesUnsubscribe();  // ... no more note updates please ...
+    dispatch(notesRestoreSuccess());
   });
 }
+
+function restoreListsData(userData, dispatch) {
+  //-----------------------------------------------------------------
+  // ... get the lists loaded in cloud firestore & wait for them ...
+  //-----------------------------------------------------------------
+  const listsUnsubscribe = userData.collection('Lists').onSnapshot(onListsRestore);
+  const listsRef = userData.collection('Lists');
+  promises.push(listsRef.get());
+  Promise.all(promises).then(() => {
+    listsUnsubscribe();  // ... no more list updates please ...
+    dispatch(listsRestoreSuccess());
+  });
+}
+
+function restoreCardsData(userData, dispatch) {
+  //-----------------------------------------------------------------
+  // ... get the cards loaded in cloud firestore & wait for them ...
+  //-----------------------------------------------------------------
+  const cardsUnsubscribe = userData.collection('Cards').onSnapshot(onCardsRestore);
+  const cardsRef = userData.collection('Cards');
+  promises.push(cardsRef.get());
+  Promise.all(promises).then(() => {
+    cardsUnsubscribe();  // ... no more card updates please ...
+    dispatch(cardsRestoreSuccess());
+  });
+}
+
+function restoreConfigData(userId, dropsData, dispatch) {
+  //-----------------------------------------------------------------------
+  // ... get the config info from cloud firestore & wait to restore it ...
+  //-----------------------------------------------------------------------
+  firebase.firestore().collection('users').doc(userId).get()
+  .then((documentSnapshot) => {
+    // ... got the user profile - now write it to local realm config ...
+    const userProfile = documentSnapshot.data();
+    //ToastAndroid.show(`Date for Local Config: ${userProfile.lastSync}`, ToastAndroid.LONG);
+    realmDB.updateUserConfig(userId, userProfile.lastSync);
+  });
+  //const cfgRef = dropsData.collection('Config');   // ... collection of user config params ...
+  //const userData = firebase.firestore().collection('users');
+  //promises.push(cardsRef.get());
+  //Promise.all(promises).then(() => {
+  //  dispatch(cardsRestoreSuccess());
+  //});
+}
+
+/*
+  newPromise = userData.doc(userId).set({
+    userid: userId,
+    nickname: myConfig.nickname,
+    email: myConfig.email,
+    phone: myConfig.phone,
+    photoURI: myConfig.photoURI,
+    dbVersion: myConfig.dbVersion,
+    signup: myConfig.signup,
+    created: myConfig.created,
+    lastSync: syncDate
+  }, { merge: true });
+  promises.push(newPromise);
+*/
 
 function backupEmojiData(userData, debug) {
   //---------------------------
@@ -537,17 +614,24 @@ export function RestoreMainFiles(userId, dispatch) {
   //-------------------------------------------------------------------
   // ... restore all the cloud data files to the realm local files ...
   //-------------------------------------------------------------------
-  //const debugShow = false;  // ... display debugging info ...
   const userData = firebase.firestore().collection('photoDrops').doc(userId);
-  //ToastAndroid.show('Sync Started!', ToastAndroid.SHORT);
   restoreEmojiData(userData, dispatch);
   Promise.all(promises).then(() => {
     restoreCategoryData(userData, dispatch);
     Promise.all(promises).then(() => {
       restoreNotesData(userData, dispatch);
       Promise.all(promises).then(() => {
-        dispatch(finishBackupSync());
-        ToastAndroid.show('Sync Complete!', ToastAndroid.SHORT);
+        restoreListsData(userData, dispatch);
+        Promise.all(promises).then(() => {
+          restoreCardsData(userData, dispatch);
+          Promise.all(promises).then(() => {
+            restoreConfigData(userId, userData, dispatch);
+            Promise.all(promises).then(() => {
+              dispatch(finishBackupSync());
+              ToastAndroid.show('Sync Complete!', ToastAndroid.SHORT);
+            });
+          });
+        });
       });
     });
   });

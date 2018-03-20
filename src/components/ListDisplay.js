@@ -106,7 +106,7 @@ class ListItemDisplay extends PureComponent {
             </View>
 
             <View style={styles.statusPanel}>
-              <Text style={styles.numberText}>Cards: {this.props.item.numCards}</Text>
+              <Text style={styles.numberText}>Drops: {this.props.item.numCards}</Text>
               <Text style={styles.numberText}>Notes: {this.props.item.numNotes}</Text>
               <View style={styles.menuWrapper}>
                 <TouchableNativeFeedback>

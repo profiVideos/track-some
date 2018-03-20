@@ -15,16 +15,14 @@ import {
   DELETE_CARD_NOTE,           // ... VERY NEW ...
   OPEN_TAGS_MODAL,
   CLOSE_TAGS_MODAL,
-
   OPEN_CARDS_MODAL,           // ... VERY, VERY NEW ...
   CLOSE_CARDS_MODAL,          // ... VERY, VERY NEW ...
-
   CARD_EDIT_CHANGE,
   UPDATE_CARD_TAGS,
   UPDATE_CARD_NOTES,          // ... VERY NEW ...
+  LOAD_CARDS_SUCCESS,
   //SAVE_CARDS_SUCCESS,
   //SAVE_CARDS_FAILURE,
-  //LOAD_CARDS_SUCCESS,
   //LOAD_CARDS_FAILURE
   SEARCH_CARDS_CHANGED,       // ... brand, spanking NEW ...
   UPDATE_CARD_SELECTED,
@@ -117,6 +115,12 @@ export const updateCardTags = (key, tags) => {
   store.updateCardTags(key, tags);
   return {
     type: UPDATE_CARD_TAGS
+  };
+};
+
+export const cardsRestoreSuccess = () => {
+  return {
+    type: LOAD_CARDS_SUCCESS
   };
 };
 

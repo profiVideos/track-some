@@ -16,6 +16,7 @@ import {
   LIST_EDIT_CHANGE,
   OPEN_LISTS_MODAL,
   CLOSE_LISTS_MODAL,
+  LOAD_LISTS_SUCCESS,
   //SEARCH_LISTS_CHANGED,
   UPDATE_LIST_SELECTED,
   DELETE_SELECTED_LISTS
@@ -112,6 +113,7 @@ const ListReducer = (state = initialState, action) => {
         editChange: true
       };
 
+    case LOAD_LISTS_SUCCESS:
     case UPDATE_LIST_SELECTED:
       // ... added in Realm DB - just update date to get a list refresh ...
       return {

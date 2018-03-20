@@ -10,6 +10,7 @@ import {
   CLOSE_NOTES_MODAL,          // ... NEW ...
   NOTE_EDIT_CHANGE,
   DELETE_CARD_NOTES,
+  LOAD_NOTES_SUCCESS,         // ... NEW - Restore Notes from Cloud ...
   TOGGLE_COLOR_PICKER,        // ... NEW ...
   TOGGLE_PHOTO_VIEWER,        // ... super brand spanking NEW ...
   SEARCH_NOTES_CHANGED,       // ... brand, spanking NEW ...
@@ -55,6 +56,12 @@ export const setNoteSelected = (key, isSelected) => {
   store.updateNoteSelected(key, isSelected);
   return {
     type: UPDATE_NOTE_SELECTED
+  };
+};
+
+export const notesRestoreSuccess = () => {
+  return {
+    type: LOAD_NOTES_SUCCESS
   };
 };
 

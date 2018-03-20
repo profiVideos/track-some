@@ -98,6 +98,32 @@ export const createCard =
   });
 };
 
+export const restoreCard = (cardKey, card) => {
+  //-----------------------------------------------------
+  // ... write the data back into the realm database ...
+  //-----------------------------------------------------
+  tsRealm.write(() => {
+    tsRealm.create('Card', {
+      key: cardKey,
+      list: card.list,
+      name: card.name,
+      desc: card.desc,
+      icon: card.icon,
+      iconType: card.iconType,
+      rating: card.rating,
+      category: card.category,
+      imageThumb: card.imageThumb,
+      mimeType: card.mimeType,
+      barcode: card.barcode,
+      tags: card.tags,
+      notes: Object.values(card.notes),
+      selected: card.selected,
+      createdTimestamp: card.createdTimestamp,
+      updatedTimestamp: card.updatedTimestamp
+    }, true);
+  });
+};
+
 export const updateCardSelected = (key, isSelected) => {
   tsRealm.write(() => {
     // ... update this card based on the key ...

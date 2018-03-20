@@ -35,6 +35,7 @@ import {
   connectionState,
   //searchCardsChanged,        // ... brand, spanking NEW ...
   //searchNotesChanged,        // ... brand, spanking NEW ...
+  requestCloudUserData
 } from '../store/actions';
 import store from '../store';
 
@@ -97,20 +98,19 @@ class ShowLists extends PureComponent<{}> {
   }
 
   componentWillMount() {
-    console.log('inside show lists ...');
+    //console.log('inside show lists ...');
     //ToastAndroid.show(`inside loginUser: ${user}`, ToastAndroid.LONG);
     this.props.dispatch(connectionState(NetInfo.isConnected));
     this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
   }
 
   componentDidMount() {
-    // ... see if we have a mis-synced condtion (i.e. server has data we don't) ...
-    if (this.props.login.connected) {
-      // ... get the local realm config file ...
-      ToastAndroid.show('Internet Available', ToastAndroid.SHORT);
+    if ((this.props.login.connected) && (this.props.login.user !== null)) {
+      // ... we should be checking if device is out of sync with cloud data ...
+      requestCloudUserData(this.props.login.user, this.props.dispatch); 
     }
-    // ... see if the email was verified ...
     if (this.props.login.user !== null) {
+      // ... see if the email was verified ...
       //ToastAndroid.show(`Email Verified: ${this.props.login.user.emailVerified}`, 
       //  ToastAndroid.SHORT);
       if (this.props.login.user.emailVerified === false) {
@@ -127,7 +127,7 @@ After successful verification, this message will no longer display.`,
   componentWillReceiveProps(nextProps) {
     if (this.props.highlighted !== '' || nextProps.highlighted !== '') {
       const scrTitle = (nextProps.activeList.name === '' ? 
-        'Choose List' : nextProps.activeList.name);
+        'Choose a Story' : nextProps.activeList.name);
       this.props.navigator.setTitle({ title: scrTitle });
     }
   }
@@ -180,9 +180,9 @@ After successful verification, this message will no longer display.`,
         break;
       }
       case 'delete': {
-        Alert.alert('Delete List', 
-          `You are about to delete this list.
-All of the cards, notes and associated settings of this list will also be removed!\n
+        Alert.alert('Delete a Story', 
+          `You are about to delete this story.
+All of the drops, notes and associated settings of this story will also be removed!\n
 Do you really want to do this?`,
           [{ text: 'Cancel', style: 'cancel' },
            { text: 'OK', onPress: () => this.doListRemoval(item) }]);
@@ -257,7 +257,7 @@ Do you really want to do this?`,
     return (
       <View style={styles.bannerContainer}>
         <Text style={styles.bannerText}>
-          photoDrops is ready to create your first list ...
+          photoDrops is ready to create your first story ...
         </Text>
         <Image style={styles.imageStyle} source={PaintSplash} />
         <Text style={styles.bannerText}>

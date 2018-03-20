@@ -69,6 +69,26 @@ export const createList = (cKey, cName, cDesc, cIcon, cType, cThumb, cMime, cBco
   });
 };
 
+export const restoreList = (listKey, list) => {
+  tsRealm.write(() => {
+    tsRealm.create('List', {
+      key: listKey,
+      name: list.name,
+      desc: list.desc,
+      icon: list.icon,
+      iconType: list.iconType,
+      imageThumb: list.imageThumb,
+      mimeType: list.mimeType,
+      barcode: list.barcode,
+      numCards: list.numCards,
+      numNotes: list.numNotes,
+      selected: list.selected,
+      createdTimestamp: list.createdTimestamp,
+      updatedTimestamp: list.updatedTimestamp
+    }, true);
+  });
+};
+
 export const updateList = (item) => {
   tsRealm.write(() => {
     // ... update this list based on the key ...

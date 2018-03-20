@@ -49,6 +49,27 @@ export const addUserConfig = (firebaseUser) => {
   // ... clean up and go home ...
 };
 
+/*
+export const restoreUserConfig = (userId, user) => {
+  //-----------------------------------------------------
+  // ... write the data back into the realm database ...
+  //-----------------------------------------------------
+  cfgRealm.write(() => {
+    cfgRealm.create('Config', {
+      userid: userId,   // ... primary key - needed for update ...
+      nickname: user.nickname,
+      email: user.email,
+      phone: user.phone,
+      photoURI: user.photoURI,
+      dbVersion: user.dbVersion,
+      signup: user.signup,
+      created: user.created,
+      lastSync: user.lastSync
+    }, true);
+  });
+};
+*/
+
 export const updateUserConfig = (userId, lastSync) => {
   // ... update this user's information in realm file ...
   try {

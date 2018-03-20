@@ -11,6 +11,7 @@ import {
   OPEN_LISTS_MODAL,           // ... NEW ...
   LIST_EDIT_CHANGE,
   CLOSE_LISTS_MODAL,          // ... NEW ...
+  LOAD_LISTS_SUCCESS,         // ... NEW - Restore Lists from Cloud ...
   UPDATE_LIST_SELECTED,       // ... NEW ...
   DELETE_SELECTED_LISTS
 } from './actionTypes';
@@ -89,6 +90,12 @@ export const closeListsModal = (key) => {
   return {
     type: CLOSE_LISTS_MODAL,
     payload: { key }
+  };
+};
+
+export const listsRestoreSuccess = () => {
+  return {
+    type: LOAD_LISTS_SUCCESS
   };
 };
 

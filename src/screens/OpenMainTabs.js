@@ -17,7 +17,7 @@ const OpenMainTabs = () => {
     Promise.all([
         getImageSource('md-thumbs-up', 26),         // ... emojis ...
         getImageSource('md-albums', 26),           // ... show cards ...
-        getImageSource('md-paper', 26),           // ... lists ...
+        getImageSource('md-paper', 26),           // ... story ...
         getImageSource('logo-buffer', 26),       // ... categories ...
         getImageSource('md-menu', 26),          // ... the menu button ...
         getImageSource('md-more', 26),         // ... the options button ...
@@ -29,8 +29,8 @@ const OpenMainTabs = () => {
           tabs: [
             {
               screen: 'tracksome.ShowLists',
-              label: 'Lists',
-              title: 'Choose List',
+              label: 'Story',
+              title: 'Choose a Story',
               icon: sources[2],  // ... paper ...
               leftButtons: [{ icon: sources[4], id: 'menu' }],
               rightButtons: [
@@ -41,8 +41,8 @@ const OpenMainTabs = () => {
             },
             {
               screen: 'tracksome.ShowCards',
-              label: 'Cards',
-              title: 'Show Cards',
+              label: 'Drops',
+              title: 'Show Drops',
               icon: sources[1],
               leftButtons: [{ icon: sources[4], id: 'menu' }],
               rightButtons: [

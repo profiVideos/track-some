@@ -22,9 +22,10 @@ import {
   DELETE_CARD_TAG,
   DELETE_CARD_NOTE,
   UPDATE_CARD_NOTES,
+  LOAD_CARDS_SUCCESS,
+
   //SAVE_CARDS_SUCCESS,
   //SAVE_CARDS_FAILURE,
-  //LOAD_CARDS_SUCCESS,
   //LOAD_CARDS_FAILURE
   SEARCH_CARDS_CHANGED,
   UPDATE_CARD_SELECTED,
@@ -126,6 +127,7 @@ const CardReducer = (state = initialState, action) => {
         cardChanged: true,
       };
 
+    case LOAD_CARDS_SUCCESS:
     case UPDATE_CARD_SELECTED:
       // ... added in Realm DB - just update date to get a list refresh ...
       return {

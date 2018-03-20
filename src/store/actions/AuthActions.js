@@ -166,17 +166,19 @@ const gotCloudUserData = (cloudData, dispatch) => {
   // ... & see if we need to do a database sync ...
   //-------------------------------------------------
   const userConfig = realmDB.getUserConfig(cloudData.userid);
+  //ToastAndroid.show(`Cloud Sync: ${cloudData.lastSync}\nLocal Sync: ${userConfig.lastSync}`, 
+  //  ToastAndroid.LONG);
   if (userConfig.lastSync === null && cloudData.lastSync !== null) {
     dispatch(startBackupSync());
     RestoreMainFiles(cloudData.userid, dispatch);
     //ToastAndroid.show(`Need to download data: ${cloudData.lastSync}`, ToastAndroid.SHORT);
+  } else if (userConfig.lastSync < cloudData.lastSync) {
+    dispatch(startBackupSync());
+    RestoreMainFiles(cloudData.userid, dispatch);
   }
-  //if (userConfig.lastSync < cloudData.lastSync) {
-  //  
-  //}
 };
 
-const requestCloudUserData = (userData, dispatch) => {
+export const requestCloudUserData = (userData, dispatch) => {
   firebase.firestore().collection('users').doc(userData.uid).get()
   .then((documentSnapshot) => {
     gotCloudUserData(documentSnapshot.data(), dispatch);

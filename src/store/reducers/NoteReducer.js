@@ -11,6 +11,7 @@ import {
   OPEN_NOTES_MODAL,
   CLOSE_NOTES_MODAL,
   DELETE_CARD_NOTES,
+  LOAD_NOTES_SUCCESS,
   TOGGLE_COLOR_PICKER,
   TOGGLE_PHOTO_VIEWER,
   SEARCH_NOTES_CHANGED,
@@ -102,6 +103,7 @@ const NoteReducer = (state = initialState, action) => {
         editChange: true
       };
 
+    case LOAD_NOTES_SUCCESS:
     case UPDATE_NOTE_SELECTED:
       // ... added in Realm DB - just update date to get a list refresh ...
       return {
