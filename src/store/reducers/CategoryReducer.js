@@ -7,18 +7,20 @@ import {
   REMOVE_CATEGORY,
   CURRENT_CATEGORY,
   HIGHLIGHT_CATEGORY,
+  SHOW_ALL_CATEGORIES,
   UPDATE_CAT_SELECTED,
   DELETE_SELECTED_CATS,
   CATEGORY_EDIT_CHANGE,
+  LOAD_CATEGORIES_SUCCESS,
   //SAVE_CATEGORIES_SUCCESS,
   //SAVE_CATEGORIES_FAILURE,
-  //LOAD_CATEGORIES_SUCCESS,
   //LOAD_CATEGORIES_FAILURE
 } from '../actions/actionTypes';
 
 const initialState = {
   //itemList: [],
   loading: false,   // ... not used at the moment ...
+  showAll: false,   // ... display all categories - regardless of list selected ...
   detailView: false,
   editChange: false,
   lastUpdated: null,
@@ -60,6 +62,14 @@ const CategoryReducer = (state = initialState, action) => {
       return { 
         ...state,
         highlighted: action.payload.key,
+        lastUpdated: Date.now()
+      };
+
+    case SHOW_ALL_CATEGORIES:
+      // ... toggle the display of all categories on the category page ...
+      return { 
+        ...state,
+        showAll: action.payload.displayAll,
         lastUpdated: Date.now()
       };
 
@@ -145,14 +155,12 @@ const CategoryReducer = (state = initialState, action) => {
         editChange: false
       };
 
-/*
     case LOAD_CATEGORIES_SUCCESS:
       // ... restore the user's category list ...
       return { 
         ...state,
-        itemList: action.payload.itemList
+        lastUpdated: Date.now()
       };
-*/
 
     default: return state;
   

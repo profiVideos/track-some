@@ -62,6 +62,25 @@ export const getNote = (key) => {
   return thisItem;
 };
 
+export const restoreNote = (noteKey, note) => {
+  tsRealm.write(() => {
+    tsRealm.create('Note', {
+      key: noteKey,
+      list: note.list,
+      card: note.card,
+      icon: note.icon,
+      title: note.title,
+      note: note.note,
+      color: note.color,
+      priority: note.priority,
+      reminder: note.reminder,
+      selected: note.selected,
+      createdTimestamp: note.createdTimestamp,
+      updatedTimestamp: note.updatedTimestamp
+    }, true);
+  });
+};
+
 export const createNote = (cKey, cList, cCard, cIcon, cTitle, cNote, cColor, cPrior, cRemind) => {
   console.log('saving note: ', cKey);
   tsRealm.write(() => {

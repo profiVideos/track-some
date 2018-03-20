@@ -16,9 +16,10 @@ import {
 } from '../actions/actionTypes';
 
 const INITIAL_STATE = { 
-  //email: 'markus@profiphotos.com',
-  email: '',
-  password: '',
+  email: 'markus@profiphotos.com',
+  password: 'holycow854',
+  //email: '',
+  //password: '',
   username: '',
   errorMsg: '',
   errorCode: 0,
@@ -26,7 +27,7 @@ const INITIAL_STATE = {
   connected: false,     // ... shows we have an internet connection ...
   loading: false,       // ... awaiting login state from firebase ...
   syncing: false,       // ... doing a backup / sync with firebase ...
-  saveMode: 'local',    // ... none, local, cloud, liveSync ...
+  saveMode: 'cloud',    // ... none, local, cloud, liveSync ...
   didLogin: false
 };
 

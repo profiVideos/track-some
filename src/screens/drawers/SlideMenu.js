@@ -26,7 +26,7 @@ import loginBackgroundImage from '../../images/login-Background.jpg';
 import AppColors from '../../templates/appColors';
 import Loader from '../../components/common/Loader';
 import Login from '../../components/Login';
-import BackupMainFiles from '../../components/SyncDataFiles';
+import { BackupMainFiles } from '../../components/SyncDataFiles';
 import {
   loginUser,
   logoutUser,
@@ -96,8 +96,6 @@ class TrackSomeConfig extends Component {
       // ... a crude sync for now ...
       this.props.dispatch(startBackupSync());
       BackupMainFiles(this.props.login.user.uid, this.props.dispatch);
-      //this.props.dispatch(finishBackupSync());
-      //ToastAndroid.show(allDone, ToastAndroid.SHORT);
     } else {
       ToastAndroid.show('No Internet Connection!', ToastAndroid.SHORT);
     }
@@ -105,6 +103,7 @@ class TrackSomeConfig extends Component {
 
   onPressLogin() {
     //ToastAndroid.show(`Login: ${this.props.login.email}`, ToastAndroid.SHORT);
+    //ToastAndroid.show('Login / Logout the user ...', ToastAndroid.SHORT);
     const notValid = 'The email address entered is not valid!';
     if (!this.isValidEmail(this.props.login.email)) {
       this.props.dispatch(loginErrorMessage(notValid));
@@ -124,7 +123,6 @@ class TrackSomeConfig extends Component {
     } else {
       this.props.dispatch(loginUser(this.props.login.email, this.props.login.password));
     }
-    //ToastAndroid.show('Login / Logout the user ...', ToastAndroid.SHORT);
   }
 
   onPressLogout() {

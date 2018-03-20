@@ -46,6 +46,19 @@ export const createEmoji = (addEmoji, addName) => {
   });
 };
 
+export const restoreEmoji = (myKey, emoji) => {
+  tsRealm.write(() => {
+    tsRealm.create('Emoji', {
+      key: myKey,
+      emoji: emoji.emoji,
+      name: emoji.name,
+      selected: emoji.selected,
+      numUsed: emoji.numUsed,
+      createdTimestamp: emoji.createdTimestamp
+    }, true);   // ... in case this is an update ...
+  });
+};
+
 export const clearSelectedEmojis = () => {
   tsRealm.write(() => {
     const allSelected = tsRealm.objects('Emoji').filtered('selected = true');

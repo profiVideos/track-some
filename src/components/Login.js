@@ -113,8 +113,11 @@ const Login = (props) => {
             animationDuration={375}
             inputContainerPadding={6}
             blurOnSubmit={props.verify}
+            //blurOnSubmit={false}
             ref={input => { inputs.password = input; }}
-            onSubmitEditing={props.verify ? () => { inputs.username.focus(); } : ''}
+            onSubmitEditing={props.verify ? 
+              () => { inputs.username.focus(); } : 
+              () => { inputs.password.blur(); }}
             titleTextStyle={{ fontStyle: 'italic', marginTop: -2 }}
             enablesReturnKeyAutomatically
             secureTextEntry

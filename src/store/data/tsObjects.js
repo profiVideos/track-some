@@ -94,7 +94,8 @@ Card.schema = {
     tags: 'string?',                                // ... JSON tags entered for this card ...
     notes: 'string?[]',                             // ... optional keys (links) to 'notes' ...
     selected: { type: 'bool', default: false },
-    createdTimestamp: 'date'
+    createdTimestamp: 'date',
+    updatedTimestamp: 'date'
   }
 };
 
@@ -126,7 +127,7 @@ Config.schema = {
   primaryKey: 'userid',
   properties: {
     userid: 'string',
-    nickname: 'string',
+    nickname: 'string?',
     email: 'string?',
     phone: 'string?',
     photoURI: 'string?',
@@ -136,7 +137,25 @@ Config.schema = {
     lastSync: 'date?'
   }
 };
-//export default Config;
 
-export const tsRealm = new Realm({ schema: [Emoji, Category, Note, Card, List] });
-export const cfgRealm = new Realm({ path: 'config.realm', schema: [Config] });
+class AppConfig extends Realm.Object {}
+AppConfig.schema = {
+  name: 'AppConfig',
+  primaryKey: 'profileKey',
+  properties: {
+    profileKey: 'string',
+    noteTitle: { type: 'bool', default: false },
+    updatedTimestamp: 'date'
+  }
+};
+
+export const tsRealm = new Realm({ 
+  schema: [Emoji, Category, Note, Card, List],
+  schemaVersion: 1
+});
+
+export const cfgRealm = new Realm({ 
+  path: 'config.realm', 
+  schema: [Config, AppConfig],
+  deleteRealmIfMigrationNeeded: true 
+});

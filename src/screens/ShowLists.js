@@ -11,6 +11,7 @@ import {
   Text,
   Alert,
   Image,
+  NetInfo,
   FlatList,
   StyleSheet,
   Dimensions,
@@ -27,11 +28,11 @@ import ListItemDisplay from '../components/ListDisplay';
 import {
   deleteList,
   currentList,
-  //highlightList,
   clearListItem,
   setActiveList,
   openListsModal,
   closeListsModal,
+  connectionState,
   //searchCardsChanged,        // ... brand, spanking NEW ...
   //searchNotesChanged,        // ... brand, spanking NEW ...
 } from '../store/actions';
@@ -39,14 +40,14 @@ import store from '../store';
 
 import PlusIcon from '../images/PlusIcon.png';
 
-const dropsConfig = store.getConfig();
+//const dropsConfig = store.getAppConfig();
 const listsLiveResults = store.getAllLists();     // ... Realm updates this in real time ...
 const itemWidth = 170;  // ... add this to state - used to calculate column spacing ...
 
 const whatDoYouNeed = state => {
   return {
     myLists: listsLiveResults,
-    appConfig: dropsConfig,
+    //appConfig: dropsConfig,
     login: state.login,     // ... the whole login state - firebase user info in user ...
     saveMode: state.login.saveMode,
     thisList: state.lists.thisList,
@@ -98,14 +99,20 @@ class ShowLists extends PureComponent<{}> {
   componentWillMount() {
     console.log('inside show lists ...');
     //ToastAndroid.show(`inside loginUser: ${user}`, ToastAndroid.LONG);
+    this.props.dispatch(connectionState(NetInfo.isConnected));
     this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
   }
 
   componentDidMount() {
+    // ... see if we have a mis-synced condtion (i.e. server has data we don't) ...
+    if (this.props.login.connected) {
+      // ... get the local realm config file ...
+      ToastAndroid.show('Internet Available', ToastAndroid.SHORT);
+    }
+    // ... see if the email was verified ...
     if (this.props.login.user !== null) {
       //ToastAndroid.show(`Email Verified: ${this.props.login.user.emailVerified}`, 
       //  ToastAndroid.SHORT);
-      // ... see if the email was verified ...
       if (this.props.login.user.emailVerified === false) {
         Alert.alert('Email Verification', 
           `Please verify your Email address by responding to the email that was sent to you when you signed up for this app!\n

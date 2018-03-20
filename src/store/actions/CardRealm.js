@@ -83,7 +83,8 @@ export const createCard =
       tags: JSON.stringify(cTags),
       notes: cNotes,
       selected: false,
-      createdTimestamp: new Date()
+      createdTimestamp: new Date(),
+      updatedTimestamp: new Date()
     });
     // ... increment the total cards counter in the lists object ...
     const thisListItem = tsRealm.objectForPrimaryKey('List', cList);
@@ -100,21 +101,32 @@ export const createCard =
 export const updateCardSelected = (key, isSelected) => {
   tsRealm.write(() => {
     // ... update this card based on the key ...
-    tsRealm.create('Card', { key, selected: isSelected }, true);
+    tsRealm.create('Card', { 
+      key, 
+      selected: isSelected 
+    }, true);
   });
 };
 
 export const updateCardTags = (key, newTags) => {
   tsRealm.write(() => {
     // ... update this card based on the key ...
-    tsRealm.create('Card', { key, tags: JSON.stringify(newTags) }, true);
+    tsRealm.create('Card', { 
+      key, 
+      tags: JSON.stringify(newTags), 
+      updatedTimestamp: new Date() 
+    }, true);
   });
 };
 
 export const updateCardNotes = (key, newNotes) => {
   tsRealm.write(() => {
     // ... update this card based on the key ...
-    tsRealm.create('Card', { key, notes: newNotes }, true);
+    tsRealm.create('Card', { 
+      key, 
+      notes: newNotes, 
+      updatedTimestamp: new Date() 
+    }, true);
   });
 };
 
@@ -135,7 +147,8 @@ export const updateCard =
       mimeType: mime,
       barcode: bcode,
       tags: JSON.stringify(cTags),
-      notes
+      notes,
+      updatedTimestamp: new Date()
     }, true);  // ... update based on unique key ...
   });
 };

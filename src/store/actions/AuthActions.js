@@ -1,4 +1,4 @@
-import { Alert, ToastAndroid } from 'react-native';
+import { ToastAndroid } from 'react-native';
 import firebase from 'react-native-firebase';
 import { 
   LOGIN_USER,
@@ -17,6 +17,7 @@ import {
     //SET_SAVE_MODE
 } from './actionTypes';
 import realmDB from '../../store';   // ... Realm DB Routines ...
+import { RestoreMainFiles } from '../../components/SyncDataFiles';
 
 export const usernameChanged = (text) => {
   return {
@@ -85,20 +86,6 @@ export const startBackupSync = () => {
 export const finishBackupSync = () => {
   return {
     type: BACKUP_SYNC_FINISH
-  };
-};
-
-export const setUserLogin = (user) => {
-  const dropsConfig = realmDB.getConfig();
-  //ToastAndroid.show(`inside setUserLogin: ${dropsConfig}`, ToastAndroid.LONG);
-  // ... see if we need to do a database sync ...
-  if (dropsConfig === undefined) {
-    realmDB.saveConfig(user);
-    ToastAndroid.show('Config created', ToastAndroid.SHORT);
-  }
-  return {
-    type: LOGIN_USER, 
-    payload: user
   };
 };
 
@@ -172,13 +159,37 @@ export const subscribeUser = (email, password, username) => {
   };
 };
 
+const gotCloudUserData = (cloudData, dispatch) => {
+  //ToastAndroid.show(`inside gotCloudUserData: ${cloudData.lastSync}`, ToastAndroid.LONG);
+  //-------------------------------------------------
+  // ... compare last cloud sync with local sync ...
+  // ... & see if we need to do a database sync ...
+  //-------------------------------------------------
+  const userConfig = realmDB.getUserConfig(cloudData.userid);
+  if (userConfig.lastSync === null && cloudData.lastSync !== null) {
+    dispatch(startBackupSync());
+    RestoreMainFiles(cloudData.userid, dispatch);
+    //ToastAndroid.show(`Need to download data: ${cloudData.lastSync}`, ToastAndroid.SHORT);
+  }
+  //if (userConfig.lastSync < cloudData.lastSync) {
+  //  
+  //}
+};
+
+const requestCloudUserData = (userData, dispatch) => {
+  firebase.firestore().collection('users').doc(userData.uid).get()
+  .then((documentSnapshot) => {
+    gotCloudUserData(documentSnapshot.data(), dispatch);
+  });
+};
+
 export const loginUser = (email, password) => {
   return dispatch => {
     dispatch(loginStart());
     firebase.auth().signInWithEmailAndPassword(email, password)
-    .then(user => {
+    .then(user => { 
+      requestCloudUserData(user, dispatch); 
       dispatch(loginUserOK(user));
-      // ... see if we need to do a database sync ...
     })
     .catch(error => {
       const { code, message } = error;
@@ -195,6 +206,22 @@ export const connectionState = (isOnline) => {
   };
 };
 
+export const setUserLogin = (user) => {
+  if (user !== null) { 
+    const userConfig = realmDB.getUserConfig(user.uid);
+    //ToastAndroid.show(`inside setUserLogin: ${JSON.stringify(userConfig)}`, ToastAndroid.LONG);
+    // ... if no user config data - create it ...
+    if (userConfig === undefined) {
+      realmDB.addUserConfig(user);
+      ToastAndroid.show('Config created', ToastAndroid.SHORT);
+    }
+  }
+  return {
+    type: LOGIN_USER, 
+    payload: user
+  };
+};
+
 export const checkUserStatus = () => {
   return dispatch => {
     firebase.auth().onAuthStateChanged(user => {
@@ -205,13 +232,14 @@ export const checkUserStatus = () => {
 
 export const appInitialize = () => {
   return dispatch => {
-    //ToastAndroid.show('We are in appInitialize', ToastAndroid.SHORT);
     dispatch(checkUserStatus());    // ... checks if this user is logged in ...
     // ... other initialization code here ...
   };
 };
 
 /*
+    //ToastAndroid.show(`inside setUserLogin: ${JSON.stringify(user)}`, ToastAndroid.LONG);
+
 export const appLogin = () => {
   return dispatch => {
     ToastAndroid.show('We are in appLogin', ToastAndroid.SHORT);

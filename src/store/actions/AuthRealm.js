@@ -14,62 +14,53 @@ https://tracksome-live.us1.cloud.realm.io/
 
 NEW:***********************************************************************
 
-    const snapShot = devConfig.snapshot();
-    snapShot.forEach(config => {
-      found += `"${config.userid}"`;
-    });
-
 */
 
-export const getConfig = () => {
-  //-----------------------------------------------------------------------
-  // ... this is the device config file specific to this mobile device ...
-  //-----------------------------------------------------------------------
-  //ToastAndroid.show(`Look for Key: ${key}`, ToastAndroid.SHORT);
+export const getUserConfig = (userId) => {
+  //---------------------------------------------------------
+  // ... this is the device config file specific to this ... 
+  // ... mobile device and the currently logged in user ...
+  //---------------------------------------------------------
   try {
-    const devConfig = cfgRealm.objects('Config')[0];
-    //ToastAndroid.show(`Config: ${found}`, ToastAndroid.SHORT);
-    return devConfig;
+    const userConfig = cfgRealm.objectForPrimaryKey('Config', userId);
+    return userConfig;
   } catch (error) {
-    // Handle the error here if something went wrong
-    ToastAndroid.show(`Get Config Error: ${error}`, ToastAndroid.LONG);
+    ToastAndroid.show(`User Config Error: ${error}`, ToastAndroid.LONG);
   }
 };
 
-/*
-    // ...use the realm instance here
-    const devConfig = realm.objects('Config');
-    const snapShot = devConfig.snapshot();
-    snapShot.forEach(config => {
-      found += `"${config.userid}"`;
-    });
-    ToastAndroid.show(`Config: ${found}`, ToastAndroid.SHORT);
-    /*
-    if (devConfig !== undefined) {
-      //const myConfig = devConfig.userid;
-      //const devConfig = realm.objectForPrimaryKey('Config');
-      ToastAndroid.show(`Inside GET Config: ${devConfig.userid}`, ToastAndroid.SHORT);
-      return devConfig;
-    }
-*/
-
-export const saveConfig = (firebaseUser) => {
-  // ... add or update this user's information in realm file ...
+export const addUserConfig = (firebaseUser) => {
+  // ... add this user's information in realm file ...
   try {
     cfgRealm.write(() => {
       cfgRealm.create('Config', {
         userid: firebaseUser.uid,
-        nickname: firebaseUser.displayName,
+        nickname: (firebaseUser.displayName !== null ? firebaseUser.displayName : null),
         email: firebaseUser.email,
         dbVersion: 1.0,
         signup: firebaseUser.providerId,
-        //created: new Date(firebaseUser.metadata.creationTime),
         created: new Date()
+      });
+    });
+  } catch (error) {
+    // Handle the error here if something went wrong
+    ToastAndroid.show(`Add Config Error: ${error}`, ToastAndroid.LONG);
+  }
+  // ... clean up and go home ...
+};
+
+export const updateUserConfig = (userId, lastSync) => {
+  // ... update this user's information in realm file ...
+  try {
+    cfgRealm.write(() => {
+      cfgRealm.create('Config', {
+        userid: userId,
+        lastSync
       }, true);  // ... update based on user id ...
     });
   } catch (error) {
     // Handle the error here if something went wrong
-    ToastAndroid.show(`Create Error: ${error}`, ToastAndroid.LONG);
+    ToastAndroid.show(`Config Error: ${error}`, ToastAndroid.LONG);
   }
   // ... clean up and go home ...
 };
@@ -80,8 +71,8 @@ export const saveConfig = (firebaseUser) => {
     email: 'string?',
     phone: 'string?',
     photoURI: 'string?',
-    dbVersion: 'string',
+    dbVersion: 'float',
     signup: 'string',
     created: 'date',
-    lastSync: 'date'
+    lastSync: 'date?'
 */

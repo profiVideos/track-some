@@ -5,9 +5,11 @@ import {
   REMOVE_CATEGORY,
   CURRENT_CATEGORY,
   HIGHLIGHT_CATEGORY,
+  SHOW_ALL_CATEGORIES,
   UPDATE_CAT_SELECTED,
   DELETE_SELECTED_CATS,
   CATEGORY_EDIT_CHANGE,
+  LOAD_CATEGORIES_SUCCESS,
 } from './actionTypes';
 import store from '../../store';   // ... Realm DB Routines ...
 
@@ -50,6 +52,13 @@ export const updateCategory = (item) => {
   };
 };
 
+export const showAllCategories = (displayAll) => {
+  return {
+    type: SHOW_ALL_CATEGORIES,
+    payload: { displayAll }
+  };
+};
+
 export const highlightCategory = (key) => {
   return {
     type: HIGHLIGHT_CATEGORY,
@@ -80,10 +89,16 @@ export const deleteCategory = (key) => {
   };
 };
 
-export const deleteCategories = (list) => {
-  store.deleteSelectedCategories(list);
+export const deleteCategories = (list, doAll) => {
+  store.deleteSelectedCategories(list, doAll);
   return {
     type: DELETE_SELECTED_CATS
+  };
+};
+
+export const categoryRestoreSuccess = () => {
+  return {
+    type: LOAD_CATEGORIES_SUCCESS
   };
 };
 
@@ -96,13 +111,6 @@ export const deleteCategories = (list) => {
     icon: { type: 'string', optional: true },
     selected: { type: 'bool', default: false },
     createdTimestamp: 'date'
-
-export const categoriesLoadSuccess = (catData) => {
-  return {
-    type: LOAD_CATEGORIES_SUCCESS,
-    payload: { itemList: catData }
-  };
-};
 
 export const loadCategories = () => {
   return dispatch => {

@@ -6,14 +6,16 @@ import { ToastAndroid } from 'react-native';
 // ... Each property has a name and is described by either a string containing the property’s type, 
 // ... or an object with name, type, objectType, optional, default, and indexed fields.
 
-export const getCategories = (activeList = '', searchFor) => {
+export const getCategories = (activeList, searchFor, displayAll) => {
   let catItems = '';
-  if (searchFor !== null && searchFor !== undefined) {
+  if (searchFor !== '') {
     //ToastAndroid.show(`Matching Notes: ${queryStr}\n${foundCards}`, ToastAndroid.SHORT);
     //ToastAndroid.show(`Getting Notes: ${searchFor}`, ToastAndroid.SHORT);
     //catItems = tsRealm.objects('Category')
     //  .filtered('name CONTAINS[c] $0 OR desc CONTAINS[c] $0', searchFor)
     //  .sorted('name');
+  } else if (displayAll) {
+      catItems = tsRealm.objects('Category').sorted('name');
   } else {
     //ToastAndroid.show(`Notes: ${activeList}`, ToastAndroid.SHORT);
     //if (activeList !== null && activeList !== undefined && activeList !== '') {
@@ -52,6 +54,20 @@ export const updateCatSelected = (key, isSelected) => {
   tsRealm.write(() => {
     // ... update this category based on the key ...
     tsRealm.create('Category', { key, selected: isSelected }, true);
+  });
+};
+
+export const restoreCategory = (myKey, category) => {
+  tsRealm.write(() => {
+    tsRealm.create('Category', {
+      key: myKey,
+      name: category.name,
+      list: category.list, 
+      desc: category.desc,
+      icon: category.icon, 
+      selected: category.selected,
+      createdTimestamp: category.createdTimestamp
+    }, true);
   });
 };
 
@@ -96,13 +112,17 @@ export const deleteCategory = (key) => {
   });
 };
 
-export const deleteSelectedCategories = (list) => {
-  //ToastAndroid.show(`Deleting Categories: ${list}`, ToastAndroid.SHORT);
+export const deleteSelectedCategories = (list, selectAll) => {
+  let allSelected = null;
   tsRealm.write(() => {
-    const allSelected = tsRealm.objects('Category')
-      .filtered('(list = $0 OR list = "") AND selected = true', list);
+    if (selectAll) {
+      allSelected = tsRealm.objects('Category')
+        .filtered('selected = true');
+    } else {
+      allSelected = tsRealm.objects('Category')
+        .filtered('(list = $0 OR list = "") AND selected = true', list);
+    } 
     if (allSelected !== undefined) {
-      //ToastAndroid.show(`Now Deleting ... ${list}`, ToastAndroid.SHORT);
       tsRealm.delete(allSelected);
     }
   });

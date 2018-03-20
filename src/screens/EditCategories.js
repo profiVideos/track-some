@@ -29,12 +29,12 @@ import {
   setCatSelected,
   itemTextChanged,
   deleteCategories,
-  highlightCategory
+  highlightCategory,
+  showAllCategories
 } from '../store/actions';
 import store from '../store';
 
-let categoryLiveResults = store.getCategories('');  // ... Realm updates this in real time ...
-
+let categoryLiveResults = store.getCategories('', '', false);  // ... Realm updates in real time ...
 const mapStateToProps = state => {
   return {
     saveMode: state.login.saveMode,
@@ -42,6 +42,7 @@ const mapStateToProps = state => {
     activeList: state.lists.activeList,
     catList: categoryLiveResults,
     emojiCode: state.emojis.emojiCode,          // ... current emoji selected in PickEmojis ...
+    showAll: state.categories.showAll,          // ... displays all categories ...
     highlighted: state.categories.highlighted,
     listUpdated: state.categories.lastUpdated   // ... tells FlatList we have updated Realm data ...
   };
@@ -88,11 +89,12 @@ class EditCategories extends PureComponent {
     //------------------------------------------------------------------------------------
     // ... make sure we are aware of a list change so we can get the right categories ...
     //------------------------------------------------------------------------------------
-    if (this.props.activeList.key !== nextProps.activeList.key) {
+    if ((this.props.activeList.key !== nextProps.activeList.key) ||
+        (this.props.showAll !== nextProps.showAll)) {
       const scrTitle = (nextProps.activeList.name === '' ? 
         'Categories' : nextProps.activeList.name);
       this.props.navigator.setTitle({ title: scrTitle });
-      categoryLiveResults = store.getCategories(nextProps.activeList.key);
+      categoryLiveResults = store.getCategories(nextProps.activeList.key, '', nextProps.showAll);
       // ... this next line is VERY IMPORTANT - otherwise the flatlist would not update ...
       this.props.dispatch(itemTextChanged('list', nextProps.activeList.key));
     }
@@ -138,8 +140,9 @@ class EditCategories extends PureComponent {
 
   onMenuOptionSelect = (value) => {
     switch (value) {
-      case 'somethingNew': {
-        // ... sort the categories by name ...
+      case 'showAll': {
+        // ... show just list specific categories or all of them ...
+        this.props.dispatch(showAllCategories(!this.props.showAll));
         break;
       }
       case 'deleteAll': {
@@ -150,7 +153,8 @@ class EditCategories extends PureComponent {
             `You are about to remove ${numSelected} categories.\nIs this what you wish to do?`,
             [{ text: 'Cancel', style: 'cancel' },
              { text: 'OK', 
-             onPress: () => this.props.dispatch(deleteCategories(this.props.activeList.key)) }]);
+             onPress: () => this.props.dispatch(deleteCategories(
+              this.props.activeList.key, this.props.showAll)) }]);
             //{ cancelable: false });
         } else {
           Alert.alert('Delete Selected Categories', 
@@ -232,6 +236,11 @@ class EditCategories extends PureComponent {
         <MenuOption value={0} disabled>
           <Text style={styles.menuTitle}>Category Options</Text>
         </MenuOption>
+        <IconMenuOption 
+          value={'showAll'} 
+          icon={this.props.showAll ? '🎀' : '   '} 
+          text='Show All Categories' 
+        />
         <IconMenuOption value={'deleteAll'} icon='🗑️' text='Delete All Selected' />
       </MenuOptions>
     </Menu>
