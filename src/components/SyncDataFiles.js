@@ -16,7 +16,7 @@ var numAdded = 0;
 var numUpdated = 0;
 var numDeleted = 0;
 
-//function SyncFilesWithCloud(userId, dispatch) {
+export function SyncFilesWithCloud(userId, dispatch) {
   //---------------------------------------------------
   // ... determine which type of sync we are doing ...
   //---------------------------------------------------
@@ -28,7 +28,25 @@ var numDeleted = 0;
   //    the cloud config file for the logged in user has a last sync date.
   // 4) "Update from Cloud" occurs when the cloud config file has a last sync date that
   //    is more recent than the last sync date on the mobile device.
-//}
+  //----------------------------------------------------------------------------
+  // ... first make sure that newer stuff in the cloud gets updated locally ...
+  //----------------------------------------------------------------------------
+  firebase.firestore().collection('users').doc(userId).get()
+  .then((documentSnapshot) => {
+    //----------------------------------------------------------------------------
+    // ... compare last cloud sync with local sync & see if we need to update ...
+    //----------------------------------------------------------------------------
+    const userConfig = realmDB.getUserConfig(userId);
+    const cloudConfig = documentSnapshot.data();
+    if ((userConfig.lastSync === null && cloudConfig.lastSync !== null) ||
+        (userConfig.lastSync < cloudConfig.lastSync)) {
+      const doBackup = true;  // ... always restore newer cloud files before doing a backup ...
+      RestoreMainFiles(userId, dispatch, doBackup);
+    } else {
+      BackupMainFiles(userId, dispatch);
+    }
+  });
+}
 
 const onEmojisList = (querySnapshot) => {
   cloudData = [];
@@ -610,10 +628,11 @@ function backupConfigData(userId) {
   //--------------------------------------------------------
 }
 
-export function RestoreMainFiles(userId, dispatch) {
+export function RestoreMainFiles(userId, dispatch, doBackup) {
   //-------------------------------------------------------------------
   // ... restore all the cloud data files to the realm local files ...
   //-------------------------------------------------------------------
+  //ToastAndroid.show('Doing Restore!', ToastAndroid.SHORT);
   const userData = firebase.firestore().collection('photoDrops').doc(userId);
   restoreEmojiData(userData, dispatch);
   Promise.all(promises).then(() => {
@@ -627,8 +646,12 @@ export function RestoreMainFiles(userId, dispatch) {
           Promise.all(promises).then(() => {
             restoreConfigData(userId, userData, dispatch);
             Promise.all(promises).then(() => {
-              dispatch(finishBackupSync());
-              ToastAndroid.show('Sync Complete!', ToastAndroid.SHORT);
+              if (doBackup) {
+                BackupMainFiles(userId, dispatch);
+              } else {
+                dispatch(finishBackupSync());
+                ToastAndroid.show('Sync Complete!', ToastAndroid.SHORT);
+              }
             });
           });
         });
@@ -641,6 +664,7 @@ export function BackupMainFiles(userId, dispatch) {
   //----------------------------------------------------------------
   // ... backup all the realm data files to the firestore cloud ...
   //----------------------------------------------------------------
+  //ToastAndroid.show('Doing Backup!', ToastAndroid.SHORT);
   const debugShow = false;  // ... display debugging info ...
   const userData = firebase.firestore().collection('photoDrops').doc(userId);
   backupEmojiData(userData, debugShow);

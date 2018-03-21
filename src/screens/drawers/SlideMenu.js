@@ -26,7 +26,7 @@ import loginBackgroundImage from '../../images/login-Background.jpg';
 import AppColors from '../../templates/appColors';
 import Loader from '../../components/common/Loader';
 import Login from '../../components/Login';
-import { BackupMainFiles } from '../../components/SyncDataFiles';
+import { SyncFilesWithCloud } from '../../components/SyncDataFiles';
 import {
   loginUser,
   logoutUser,
@@ -93,9 +93,9 @@ class TrackSomeConfig extends Component {
 
   onPressBackup() {
     if (this.props.login.connected) {
-      // ... a crude sync for now ...
+      // ... 21.03.2018 - MG - now backup will first do a restore / sync (if required) ...
       this.props.dispatch(startBackupSync());
-      BackupMainFiles(this.props.login.user.uid, this.props.dispatch);
+      SyncFilesWithCloud(this.props.login.user.uid, this.props.dispatch);
     } else {
       ToastAndroid.show('No Internet Connection!', ToastAndroid.SHORT);
     }
@@ -509,8 +509,8 @@ const styles = StyleSheet.create({
     //alignSelf: 'center',
   },
   logoContainer: {
-    width: 85,
-    height: 85,
+    width: 75,
+    height: 75,
     //backgroundColor: 'blue'
   },
   logoText: {

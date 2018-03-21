@@ -16,10 +16,10 @@ import {
 } from '../actions/actionTypes';
 
 const INITIAL_STATE = { 
-  email: 'markus@profiphotos.com',
-  password: 'holycow854',
-  //email: '',
-  //password: '',
+  //email: 'markus@profiphotos.com',
+  //password: 'holycow854',
+  email: '',
+  password: '',
   username: '',
   errorMsg: '',
   errorCode: 0,

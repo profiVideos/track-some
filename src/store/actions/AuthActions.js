@@ -170,11 +170,11 @@ const gotCloudUserData = (cloudData, dispatch) => {
   //  ToastAndroid.LONG);
   if (userConfig.lastSync === null && cloudData.lastSync !== null) {
     dispatch(startBackupSync());
-    RestoreMainFiles(cloudData.userid, dispatch);
+    RestoreMainFiles(cloudData.userid, dispatch, false);
     //ToastAndroid.show(`Need to download data: ${cloudData.lastSync}`, ToastAndroid.SHORT);
   } else if (userConfig.lastSync < cloudData.lastSync) {
     dispatch(startBackupSync());
-    RestoreMainFiles(cloudData.userid, dispatch);
+    RestoreMainFiles(cloudData.userid, dispatch, false);
   }
 };
 
