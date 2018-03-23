@@ -281,8 +281,8 @@ Do you really what to do this?`,
   }
 
   shareDropWithOthers(card) {
-    const imageStr = `data:${card.mimeType};base64,${card.imageThumb}`;
     const titleStr = `photoDrop - ${card.name}`;
+    const imageStr = `data:${card.mimeType};base64,${card.imageThumb}`;
     shareOptions = {
       title: titleStr,
       message: card.desc,
@@ -293,6 +293,8 @@ Do you really what to do this?`,
     this.setState({ visible: true });
     //social: 'whatsapp' 
   }
+
+//I also had this issue.  Was able to get it resolved by
 
   showSearchBar() {
     this.props.dispatch(searchCardsChanged(this.state.localSearchFor));
@@ -684,10 +686,9 @@ Donnerstag 13:30 – 18:00 Uhr
 
 const styles = StyleSheet.create({
   container: {
-    //flex: 1,
     elevation: 10,
     width: '100%',
-    height: '80%',
+    //height: '80%',
     //justifyContent: 'center',
     //alignItems: 'flex-end',
     backgroundColor: 'rgba(0,0,0,0.60)',
@@ -775,6 +776,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain'
   },
   outerContainer: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 2,
