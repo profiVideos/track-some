@@ -7,7 +7,7 @@ import {
   Picker,
   StyleSheet, 
   ScrollView,
-  //ToastAndroid,
+  ToastAndroid,
   TouchableOpacity,
   TouchableNativeFeedback 
 } from 'react-native';
@@ -127,9 +127,10 @@ class BuildCard extends PureComponent {
     this.listener.register();
     //this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     this.cleanTempSpace();  // ... cleans up images in tmp directory ...
+    //ToastAndroid.show(`catListLive: ${this.props.activeList.key}`, ToastAndroid.LONG);
     catListLive = store.getCategories(this.props.activeList.key);
     if (catListLive !== undefined) {
-      //ToastAndroid.show('catList has been loaded', ToastAndroid.SHORT);
+      //ToastAndroid.show(`catListLive: ${JSON.stringify(catListLive)}`, ToastAndroid.LONG);
       this.buildPickerItems(catListLive);
     }
   }
@@ -287,7 +288,7 @@ class BuildCard extends PureComponent {
       mediaType: 'photo',
       cropping: cropit,
       writeTempFile: false,          // ... only works on IOS ...
-      //freeStyleCropEnabled: true,   // ... only works on Android ...
+      freeStyleCropEnabled: true,   // ... only works on Android ...
       //multiple: true,
       //circular: true,
       cropperCircleOverlay: circular,
@@ -685,6 +686,8 @@ class BuildCard extends PureComponent {
             </TouchableOpacity>
           </View>
 
+      <ScrollView style={{ flex: 1 }} keyboardShouldPersistTaps='always'>
+
 */
 
   //----------------------------------------------------
@@ -692,7 +695,7 @@ class BuildCard extends PureComponent {
   //----------------------------------------------------
   render() {
     return (
-      <ScrollView style={{ flex: 1 }} keyboardShouldPersistTaps='always'>
+      <ScrollView style={{ flex: 1 }}>
 
         <View style={styles.cardContainer}>
           { this.renderActionIcons() }

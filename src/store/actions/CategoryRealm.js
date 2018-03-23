@@ -1,13 +1,15 @@
+import { ToastAndroid } from 'react-native';
 import { tsRealm } from '../data/tsObjects';
 import { UniqueId } from '../../components/common/UniqueId';
-import { ToastAndroid } from 'react-native';
 
 // ... Realm supports the following basic types: bool, int, float, double, string, data, and date.
 // ... Each property has a name and is described by either a string containing the property’s type, 
 // ... or an object with name, type, objectType, optional, default, and indexed fields.
 
-export const getCategories = (activeList, searchFor, displayAll) => {
+export const getCategories = (activeList, searchFor = '', displayAll = false) => {
   let catItems = '';
+  //ToastAndroid.show(`Active List: ${activeList}\nSearch For: ${searchFor}
+  //Display All: ${displayAll} `, ToastAndroid.LONG);
   if (searchFor !== '') {
     //ToastAndroid.show(`Matching Notes: ${queryStr}\n${foundCards}`, ToastAndroid.SHORT);
     //ToastAndroid.show(`Getting Notes: ${searchFor}`, ToastAndroid.SHORT);

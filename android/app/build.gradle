@@ -156,6 +156,7 @@ dependencies {
     compile project(':react-native-vector-icons')
     compile project(':react-native-image-crop-picker')
     compile project(':realm')
+    compile project(':react-native-share')
     // Firebase dependencies
     compile 'com.google.firebase:firebase-core:11.8.0'
     compile 'com.google.firebase:firebase-auth:11.8.0'

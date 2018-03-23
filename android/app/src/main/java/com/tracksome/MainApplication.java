@@ -14,16 +14,25 @@ import com.facebook.react.shell.MainReactPackage;
 import com.facebook.soloader.SoLoader;
 import com.reactnativenavigation.NavigationApplication;
 import com.oblador.vectoricons.VectorIconsPackage;
+import cl.json.RNSharePackage;
+import cl.json.ShareApplication;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class MainApplication extends NavigationApplication {
+public class MainApplication extends NavigationApplication implements ShareApplication {
 
   @Override
   public boolean isDebug() {
      // Make sure you are using BuildConfig from your own application
      return BuildConfig.DEBUG;
+  }
+
+  @Override
+  public String getFileProviderAuthority() {
+     // ... 03.22.2018 - MG - Added for react native share ...
+     //return "${applicationId}.provider";
+     return "com.tracksome.provider";
   }
 
   protected List<ReactPackage> getPackages() {
@@ -34,6 +43,7 @@ public class MainApplication extends NavigationApplication {
         // ... above says we don't need this - new MainReactPackage(),
         new VectorIconsPackage(),
         new PickerPackage(),
+        new RNSharePackage(),
         new RealmReactPackage(),
         new RNFirebasePackage(),
         new RNFirebaseAuthPackage(),

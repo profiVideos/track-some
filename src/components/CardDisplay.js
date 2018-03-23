@@ -231,6 +231,7 @@ class CardDisplay extends React.Component {
         <IconMenuOption value={'edit'} icon='✏️' text='Edit' />
         <IconMenuOption value={'tags'} icon='🏷️' text='Tags' />
         <IconMenuOption value={'note'} icon='📝' text='Add Note' />
+        <IconMenuOption value={'share'} icon='💨' text='Share' />
         <IconMenuOption value={'delete'} icon='🗑️' text='Delete' />
       </MenuOptions>
     </Menu>
