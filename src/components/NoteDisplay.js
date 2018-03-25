@@ -63,6 +63,10 @@ class NoteDisplay extends React.PureComponent {
     this.props.onPressItem(this.props.item.key);
   }
 
+  onLongPressItem = () => {
+    this.props.onMenuPress('edit', this.props.item);
+  }
+
   onToggleCheck = () => { 
     this.props.onToggleItem(this.props.item.key, !this.props.item.selected);
   }
@@ -142,7 +146,10 @@ class NoteDisplay extends React.PureComponent {
             <View />
           </View>
           <View style={[styles.noteWrapper, { backgroundColor: backColor }]}>
-            <TouchableNativeFeedback onPress={this.onTouchablePress}>
+            <TouchableNativeFeedback 
+              onPress={this.onTouchablePress} 
+              onLongPress={this.onLongPressItem}
+            >
               <View style={[styles.infoWrapper, { width: infoWidth }]}>
                 <View style={styles.titleBar}>
                   { this.renderNoteTitle() }

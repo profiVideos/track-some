@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import AppColors from '../templates/appColors';
 import NoteSplash from '../images/Note-Splash.png';
+import PlusIcon from '../images/PlusIcon.png';
 import NoteDisplay from '../components/NoteDisplay';
 import {
   getCard,
@@ -95,6 +96,15 @@ class ShowNotes extends React.PureComponent {
     navBarTranslucent: false
   };
 
+  static navigatorButtons = {
+    fab: {
+      collapsedId: 'addNote',
+      collapsedIcon: PlusIcon,   //require('../../img/ic_share.png'),
+      collapsedIconColor: 'white', // optional
+      backgroundColor: AppColors.darkerColor
+    }
+  };
+
 /* 
   static navigatorButtons = {
     fab: {
@@ -157,6 +167,10 @@ class ShowNotes extends React.PureComponent {
             this.showSearchBar();
           } else this.hideSearchBar(); 
           this.setState({ searchOpen: !this.state.searchOpen });
+          break;
+        }
+        case 'addNote': {
+          this.openNoteEditModal();
           break;
         }
         case 'options': {
@@ -289,7 +303,7 @@ class ShowNotes extends React.PureComponent {
     return (
       <View style={styles.bannerContainer}>
         <Text style={styles.bannerText}>
-          Your list is ready for your first note ...
+          Your photo story is ready for your first note ...
         </Text>
         <Image style={styles.imageStyle} source={NoteSplash} />
         <Text style={styles.bannerText}>
@@ -377,19 +391,15 @@ document.getElementById('counter').addEventListener('click', elapsedTime, false)
     );
   }
 
+  //----------------------------------------------------
+  // ... the main JSX render section for this class ...
+  //----------------------------------------------------
   render() {
     return (
       <MenuProvider>
         <View style={styles.outerContainer}>
           { this.renderMainScreen() }
         </View>
-        <TouchableHighlight 
-          style={styles.addButton}
-          underlayColor='#999' 
-          onPress={() => { this.openNoteEditModal(); }} 
-        >
-          <Text style={{ fontSize: 36, color: 'white', paddingBottom: 3 }}>+</Text>
-        </TouchableHighlight>
       </MenuProvider>
     );
   }
@@ -496,6 +506,15 @@ const styles = StyleSheet.create({
 });
 
 /*
+
+        <TouchableHighlight 
+          style={styles.addButton}
+          underlayColor='#999' 
+          onPress={() => { this.openNoteEditModal(); }} 
+        >
+          <Text style={{ fontSize: 36, color: 'white', paddingBottom: 3 }}>+</Text>
+        </TouchableHighlight>
+
     this.props.navigator.setButtons({
       rightButtons: [{
       //  component: 'tracksome.Menu',

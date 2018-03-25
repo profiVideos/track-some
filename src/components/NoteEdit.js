@@ -8,7 +8,7 @@ import {
   Image,
   TextInput,
   StyleSheet,
-  //ScrollView,
+  ScrollView,
   //ToastAndroid,
   TouchableOpacity,
   //TouchableHighlight,
@@ -260,6 +260,9 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
           keyboardShouldPersistTaps='always'
         >
         </ScrollView>
+
+            { this.renderAddButton(this.props.id) }
+      <View style={styles.outerContainer}>
 */
 
   render() {
@@ -267,7 +270,10 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
     const noteColor = (this.props.thisNote.color !== '' ? this.props.thisNote.color : '#f8f8f8');
     //console.log('Has Photo: ', this.props.mimeType);
     return (
-      <View style={styles.outerContainer}>
+      <ScrollView 
+        style={{ flex: 1, marginTop: 16 }}
+        contentContainerStyle={styles.scrollStyle}
+      >
         <View style={styles.innerContainer}>
           <View style={styles.headerContainer}>
             <View style={{ flexDirection: 'row' }}>
@@ -285,7 +291,7 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
             <View style={styles.inputContainer}>
               <TextInput
                 style={styles.textInputStyle}
-                autoFocus
+                //autoFocus
                 returnKeyType='next'
                 ref={input => { this.inputs.title = input; }}
                 blurOnSubmit={false}
@@ -297,7 +303,6 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
                 onChangeText={text => this.onTitleChange(text)}
               />
             </View>
-            { this.renderAddButton(this.props.id) }
             <TouchableNativeFeedback 
               onPress={() => this.addNote2Card(this.props.thisNote.card, true)}
             >
@@ -317,7 +322,7 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
             <TextInput
               style={styles.noteInputStyle}
               multiline
-              //numberOfLines={3}
+              numberOfLines={5}
               //placeholderTextColor='#aaa'
               returnKeyType='done'
               ref={input => { this.inputs.note = input; }}
@@ -332,7 +337,7 @@ If you DO NOT wish to use note titles, please turn them off in the options panel
             />
           </View>
         </View>
-      </View>
+      </ScrollView>
     );
   }
 
@@ -432,7 +437,8 @@ IMPORTANT TRICK:
 
 const styles = StyleSheet.create({
   scrollStyle: {
-    //flex: 1
+    flex: 1,
+    width: '100%' 
     //marginTop: 40,
   },
   photoStyle: {
@@ -517,11 +523,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 3
   },
+  /*
   outerContainer: {
     flex: 1,
     marginTop: 16,
     //borderRadius: 8,
   },
+  */
   innerContainer: {
     flex: 1,
     //alignItems: 'center',
@@ -548,7 +556,7 @@ const styles = StyleSheet.create({
     fontWeight: '500'
   },
   headerContainer: {
-    width: '100%',
+    //width: '100%',
     backgroundColor: AppColors.mainDarkColor,
     padding: 12,
     paddingTop: 8,

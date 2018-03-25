@@ -6,6 +6,7 @@ import {
   UPDATE_NOTE,
   REMOVE_NOTE,
   CURRENT_NOTE,
+  RENDER_NOTES,
   HIGHLIGHT_NOTE,            // ... NEW ...
   NOTE_EDIT_CHANGE,
   OPEN_NOTES_MODAL,
@@ -27,6 +28,7 @@ const initialState = {
   colorPicker: false,
   photoViewer: false,
   editChange: false,
+  renderNotes: false,
   notesWindowOpen: false,
   editNote: '',             // ... the unique key of the item being edited ...
   searchFor: '',
@@ -123,6 +125,14 @@ const NoteReducer = (state = initialState, action) => {
       return { 
         ...state,
         colorPicker: !action.payload.isActive
+      };
+
+    case RENDER_NOTES:
+      // ... show all the notes on the drop shares to social media ...
+      return { 
+        ...state,
+        renderNotes: action.payload.showNotes
+        //lastUpdated: Date.now()
       };
 
     case HIGHLIGHT_NOTE:

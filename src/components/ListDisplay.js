@@ -64,9 +64,9 @@ class ListItemDisplay extends PureComponent {
     this.props.onItemPress(this.props.item);
   } 
 
-  //onLongPressItem = () => { 
-  //  this.props.onLongPress(this.props.emojiKey);
-  //} 
+  onLongPressItem = () => { 
+    this.props.onMenuPress('edit', this.props.item);
+  } 
 
   onMenuSelect = (value, item) => { 
     this.props.onMenuPress(value, item);
@@ -92,7 +92,10 @@ class ListItemDisplay extends PureComponent {
         style={[styles.outerWrapper, { marginHorizontal: this.state.horizMargin }]} 
         onLayout={this.onLayout.bind(this)}
       >
-        <TouchableNativeFeedback onPress={this.onPressItem}>
+        <TouchableNativeFeedback 
+          onPress={this.onPressItem}
+          onLongPress={this.onLongPressItem}
+        >
           <View style={styles.container}>
 
             <View style={styles.imageWrapper}>

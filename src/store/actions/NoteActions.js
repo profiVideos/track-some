@@ -5,6 +5,7 @@ import {
   UPDATE_NOTE,
   REMOVE_NOTE,
   CURRENT_NOTE,
+  RENDER_NOTES,
   HIGHLIGHT_NOTE,             // ... NEW ...
   OPEN_NOTES_MODAL,           // ... NEW ...
   CLOSE_NOTES_MODAL,          // ... NEW ...
@@ -56,6 +57,13 @@ export const setNoteSelected = (key, isSelected) => {
   store.updateNoteSelected(key, isSelected);
   return {
     type: UPDATE_NOTE_SELECTED
+  };
+};
+
+export const setRenderNotes = (showNotes) => {
+  return {
+    type: RENDER_NOTES,
+    payload: { showNotes }
   };
 };
 

@@ -20,6 +20,7 @@ import { MenuProvider } from 'react-native-popup-menu';
 import Share, { ShareSheet, Button } from 'react-native-share';
 import AppColors from '../templates/appColors';
 import PaintSplash from '../images/Color-Splash.png';
+import PlusIcon from '../images/PlusIcon.png';
 import CardDisplay from '../components/CardDisplay';
 import TagEdit from '../components/TagEdit';
 import Loader from '../components/common/Loader';
@@ -67,6 +68,7 @@ const whatDoYouNeed = state => {
     highlighted: state.cards.highlighted, 
     cardsUpdated: state.cards.lastUpdated,
     cardChanged: state.cards.cardChanged,
+    hideNotes: state.notes.renderNotes,
     cardModalOpen: state.notes.cardWindowOpen,
     tagsChanged: state.cards.tagsChanged,
     tagsModalOpen: state.cards.tagsWindowOpen,
@@ -118,6 +120,15 @@ class ShowCards extends React.PureComponent {
     screenBackgroundColor: AppColors.paperColor,
     navBarBackgroundColor: AppColors.accentColor,
     navBarTranslucent: false
+  };
+
+  static navigatorButtons = {
+    fab: {
+      collapsedId: 'addDrop',
+      collapsedIcon: PlusIcon,   //require('../../img/ic_share.png'),
+      collapsedIconColor: 'white', // optional
+      backgroundColor: AppColors.darkerColor
+    }
   };
 
   constructor(props) {
@@ -188,6 +199,10 @@ class ShowCards extends React.PureComponent {
             this.showSearchBar();
           } else this.hideSearchBar(); 
           this.setState({ searchOpen: !this.state.searchOpen });
+          break;
+        }
+        case 'addDrop': {
+          this.openBuildCardModal();
           break;
         }
         case 'options': {
@@ -280,15 +295,32 @@ Do you really what to do this?`,
     this.setState({ visible: true });
   }
 
+  buildNotesString(notes) {
+    if (this.props.hideNotes) return;
+    const noteString = notes.map((item) => {
+      return (
+          `\n*${item.title.trim()}*\n${item.note}`
+      );
+    });
+    return noteString;
+  }
+
   shareDropWithOthers(card) {
+    let myNotes = '';
     const titleStr = `photoDrop - ${card.name}`;
     const imageStr = `data:${card.mimeType};base64,${card.imageThumb}`;
+    if (this.props.hideNotes === false) {
+      const cardNotes = store.getCardNotes(card.key);
+      if (Object.keys(cardNotes).length > 0) {
+        myNotes = this.buildNotesString(cardNotes);
+      }
+    }
     shareOptions = {
+      message: `${card.desc}\n${myNotes}`,
       title: titleStr,
-      message: card.desc,
       url: imageStr,
       type: card.mimeType,
-      subject: `Shared ${titleStr}`, //  for email
+      subject: `Shared ${titleStr}`  //  for email
     };
     this.setState({ visible: true });
     //social: 'whatsapp' 
@@ -535,6 +567,7 @@ The whole idea is to tell your story with a collection of individual photoDrops!
         onToggleItem={this.onCardItemToggle}    // ... turns the checked status on/off ...
         onMenuPress={this.onCardItemMenuPress}
         openNoteEditModal={this.openNoteEditModal}
+        showShareSheet={() => this.shareDropWithOthers(item)}
       />
     );
   }
@@ -612,9 +645,9 @@ The whole idea is to tell your story with a collection of individual photoDrops!
     );
   }
 
-  //-------------------------------------------------------------------------------
-  // ... replace this "fake" FAB Button with the Navigation FAB button (SOON!) ...
-  //-------------------------------------------------------------------------------
+  //----------------------------------------------------
+  // ... the main JSX render section for this class ...
+  //----------------------------------------------------
   render() {
     return (
       <MenuProvider>
@@ -623,13 +656,6 @@ The whole idea is to tell your story with a collection of individual photoDrops!
           { this.renderTagEditScreen() }
           { this.renderShareSheet() }
         </View>
-        <TouchableHighlight 
-          style={styles.addButton}
-          underlayColor='#999' 
-          onPress={() => { this.openBuildCardModal(); }} 
-        >
-          <Text style={{ fontSize: 36, color: 'white', paddingBottom: 3 }}>+</Text>
-        </TouchableHighlight>
       </MenuProvider>
     );
   }
@@ -639,6 +665,15 @@ The whole idea is to tell your story with a collection of individual photoDrops!
 export default connect(whatDoYouNeed)(ShowCards);
 
 /*
+
+        <TouchableHighlight 
+          style={styles.addButton}
+          underlayColor='#999' 
+          onPress={() => { this.openBuildCardModal(); }} 
+        >
+          <Text style={{ fontSize: 36, color: 'white', paddingBottom: 3 }}>+</Text>
+        </TouchableHighlight>
+
         <ShareSheet visible={this.state.visible} onCancel={this.onCancel.bind(this)}>
           <Button
             iconSrc={{ uri: CLIPBOARD_ICON }}

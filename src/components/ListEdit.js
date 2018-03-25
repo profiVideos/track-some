@@ -305,8 +305,8 @@ Padding below text input line: 4dp
       <View style={styles.nameWidth}>
         <TextField
           //style={styles.nameInput}
-          label='List Name*'
-          title='Please enter a short list name.'
+          label='Story Name*'
+          title='Please enter a short story name.'
           lineWidth={0.75}
           labelHeight={20}
           animationDuration={375}
@@ -332,7 +332,7 @@ Padding below text input line: 4dp
         <TextField
           //style={styles.descInput}
           label='Description (optional)'
-          title='Briefly describe what the list will contain ... '
+          title='Briefly describe what this story will be about ... '
           lineWidth={0.75}
           labelHeight={16}
           animationDuration={375}
@@ -396,13 +396,17 @@ Padding below text input line: 4dp
     );
   }
 
+/*
+ keyboardShouldPersistTaps='always'
+*/
+
   //----------------------------------------------------
   // ... the main JSX render section for this class ...
   //----------------------------------------------------
   render() {
-    const title = (this.props.id === '' ? 'Add a New List' : 'Edit List');
+    const title = (this.props.id === '' ? 'Create a New Story' : 'Edit Story');
     return (
-      <ScrollView style={{ flex: 1 }} keyboardShouldPersistTaps='always'>
+      <ScrollView style={{ flex: 1 }}>
         <View style={styles.listContainer}>
   
           <View style={styles.headerContainer}>
@@ -607,6 +611,8 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   listContainer: {
+    flex: 1,
+    marginTop: 23,
     backgroundColor: 'white',
     paddingBottom: 8,
     shadowColor: '#121212',

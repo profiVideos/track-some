@@ -6,6 +6,7 @@ import {
   Alert,
   Image,
   FlatList,
+  //ScrollView,
   StyleSheet, 
   Dimensions,
   //ToastAndroid,
@@ -30,6 +31,7 @@ import {
   deleteNote,
   currentNote,
   highlightNote,
+  setRenderNotes,
   deleteCardNote,
   setNoteSelected,
 } from '../store/actions';
@@ -61,6 +63,7 @@ const whatDoYouNeed = state => {
     saveMode: state.login.saveMode,
     thisNote: state.notes.thisNote,
     activeList: state.lists.activeList,
+    hideNotes: state.notes.renderNotes,
     highlighted: state.notes.highlighted,
     notesUpdated: state.notes.lastUpdated,
   };
@@ -98,13 +101,42 @@ class CardDisplay extends React.Component {
     this.props.onPressItem(this.props.item.key);
   }
 
+  onLongPressItem = () => {
+    this.props.onMenuPress('edit', this.props.item);
+  }
+
   onToggleCheck = () => { 
     this.props.onToggleItem(this.props.item.key, !this.props.item.selected);
+  }
+
+  onNotesToggle = () => { 
+    this.props.dispatch(setRenderNotes(!this.props.hideNotes));
   }
 
   onMenuSelect = (value, item) => { 
     this.props.onMenuPress(value, item);
   }
+
+/*
+
+Here is how you encode normal text to base64 in Node.js:
+
+//Buffer() requires a number, array or string as the first parameter, 
+and an optional encoding type as the second parameter. 
+// Default is utf8, possible encoding types are ascii, utf8, ucs2, base64, binary, and hex
+var b = new Buffer('JavaScript');
+// If we don't use toString(), JavaScript assumes we want to convert the object to utf8.
+// We can make it convert to other formats by passing the encoding type to toString().
+var s = b.toString('base64');
+And here is how you decode base64 encoded strings:
+
+var b = new Buffer('SmF2YVNjcmlwdA==', 'base64')
+var s = b.toString();
+
+  onShareButton = (item, notes) => {
+    this.props.showShareSheet(item, notes);
+  }
+*/
 
   onNoteDelete(note) {
     // ... if attached to a card - remove the note link from card and update card ...
@@ -129,7 +161,7 @@ class CardDisplay extends React.Component {
       }
       case 'delete': {
         Alert.alert('Delete Note', 
-          'You are about to remove this item.\nDo you really want to do this?',
+          'You are about to remove this note.\nDo you really want to do this?',
           [{ text: 'Cancel', style: 'cancel' },
            { text: 'OK', onPress: () => this.onNoteDelete(note) }]);
         break;
@@ -156,6 +188,19 @@ class CardDisplay extends React.Component {
   itemSeparator = () => {
     return (<View style={{ marginTop: 1 }} />);
   };
+
+  buildNotesString(notes) {
+    if (this.props.hideNotes) return;
+    const noteString = notes.map((item) => {
+      return (
+        <View>
+          <Text style={styles.shareName}>{`${item.title}`}</Text>
+          <Text style={styles.shareDesc}>{`${item.note}`}</Text>
+        </View>
+      );
+    });
+    return noteString;
+  }
 
   renderNoteDisplay = ({ item }) => {
     const noteColor = (item.color !== '' ? item.color : '#f8f8f8');
@@ -205,6 +250,9 @@ class CardDisplay extends React.Component {
         <Tab heading="Tab3" style={styles.tabView}>
           { this.renderCardNotes() }
         </Tab>
+        <Tab heading="Tab4" style={styles.tabView}>
+          { this.renderShareOptions() }
+        </Tab>
       </Tabs>
     );
   }
@@ -236,6 +284,53 @@ class CardDisplay extends React.Component {
       </MenuOptions>
     </Menu>
   )
+
+  renderAllNotes(cardId) {
+    if (this.props.marked === false) return;
+    const cardNotes = store.getCardNotes(cardId);
+    //ToastAndroid.show(`Inside Render All Notes: ${JSON.stringify(cardNotes)}`, ToastAndroid.LONG);
+    if (Object.keys(cardNotes).length === 0) return;
+    return (
+      <View>
+        { this.buildNotesString(cardNotes) }
+        <TouchableOpacity onPress={this.onNotesToggle}>
+          <View style={styles.shareRowStyle}>
+            <Icon 
+              size={20}
+              name={this.props.hideNotes ? 'check-square-o' : 'square-o'} 
+              style={{ width: 24, paddingTop: 2 }} 
+              color={'#c2c2c2'} 
+            />            
+            <Text style={{ color: 'white' }}>Hide Notes on Share</Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  renderShareOptions() {
+    if (this.props.marked === false) return;
+    return (
+      <View style={styles.shareContainer}>
+        <Text style={styles.shareTitle}>Share this photoDrop!</Text>
+        <View style={styles.previewSize}>
+          <Image 
+            style={styles.shareImage}
+            source={{ 
+              uri: `data:${this.props.item.mimeType};base64,${this.props.item.imageThumb}` }} 
+          />
+        </View>
+        <Text style={styles.shareName}>{this.props.item.name}</Text>
+        <Text style={styles.shareDesc}>{this.props.item.desc}</Text>
+        { this.renderAllNotes(this.props.item.key) }
+        <TouchableNativeFeedback onPress={this.props.showShareSheet}>
+          <View style={styles.warmButton}>
+            <Text style={styles.warmText}>OK, Share It</Text>
+          </View>
+        </TouchableNativeFeedback>
+      </View>
+    );
+  }
 
   renderInfoPanel() {
     if (this.props.marked === false) return;
@@ -298,7 +393,10 @@ class CardDisplay extends React.Component {
               }
             </TouchableOpacity>
           </View>
-          <TouchableNativeFeedback onPress={this.onTouchablePress}>
+          <TouchableNativeFeedback 
+            onPress={this.onTouchablePress}
+            onLongPress={this.onLongPressItem}
+          >
             <View style={[styles.infoWrapper, { width: infoWidth }]}>
               <Text 
                 ellipsizeMode='tail' 
@@ -340,6 +438,72 @@ class CardDisplay extends React.Component {
 export default connect(whatDoYouNeed)(CardDisplay);
 
 const styles = StyleSheet.create({
+  previewSize: {
+    //height: '45%',
+    width: '50%',
+    aspectRatio: (1056 / 768),
+    borderRadius: 7,
+    marginTop: 5,
+    marginBottom: 3,
+    borderColor: '#ccc',
+    borderWidth: 1.15
+  },
+  shareImage: {
+    height: '100%',
+    width: '100%',
+    borderRadius: 8,
+    resizeMode: 'contain',    
+  },
+  shareName: {
+    fontSize: 17,
+    fontWeight: '500',
+    paddingTop: 7,
+    paddingBottom: 1,
+    marginHorizontal: 10,
+    textAlign: 'center',
+    color: 'rgba(255,255,255,0.70)'
+  },
+  shareDesc: {
+    fontSize: 14,
+    marginHorizontal: 12,
+    textAlign: 'center',
+    color: '#aaa'
+  },
+  shareTitle: {
+    fontSize: 20,
+    fontWeight: '500',
+    //paddingTop: 7,
+    paddingBottom: 7,
+    opacity: 0.70,
+    color: AppColors.accentColor
+  },
+  shareRowStyle: {
+    width: '100%',
+    paddingTop: 7,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  shareContainer: {
+    margin: 10,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  warmButton: {
+    elevation: 2,
+    paddingVertical: 8,
+    //paddingBottom: 6,       // ... just looks better ...
+    paddingHorizontal: 25,
+    borderRadius: 5,
+    margin: 10,              // ... so we can see shadow ...
+    //marginHorizontal: 7,
+    backgroundColor: AppColors.mainDarkColor
+  },
+  warmText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: AppColors.hiliteColor
+  },
   tagsBar: {
     flexDirection: 'row',
     marginTop: 10,

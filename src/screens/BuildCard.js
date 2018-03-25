@@ -122,7 +122,7 @@ class BuildCard extends PureComponent {
 
   componentWillMount() {
     console.log('inside build cards ...');
-    const scrTitle = (this.props.id === '' ? 'Add a New Card' : 'Edit Card');
+    const scrTitle = (this.props.id === '' ? 'Add a New Drop' : 'Edit Drop');
     this.props.navigator.setTitle({ title: scrTitle });
     this.listener.register();
     //this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
@@ -466,9 +466,9 @@ class BuildCard extends PureComponent {
       <View style={styles.nameWidth}>
         <TextField
           //style={styles.nameInput}
-          autoFocus={this.props.id === ''}    // ... only autofocus on add ...
-          label='Card Name*'
-          title='Please enter a name for this card.'
+          //autoFocus={this.props.id === ''}    // ... only autofocus on add ...
+          label='Drop Name*'
+          title='Please enter a name for this photo drop.'
           lineWidth={0.75}
           labelHeight={20}
           animationDuration={375}
@@ -495,7 +495,7 @@ class BuildCard extends PureComponent {
           //style={styles.descInput}
           multiline
           label='Description (optional)'
-          title='Briefly describe what this card is about ... '
+          title='Briefly describe what this drop is about ... '
           lineWidth={0.75}
           labelHeight={14}
           animationDuration={375}
@@ -559,7 +559,7 @@ class BuildCard extends PureComponent {
     return (
       <MenuProvider>
       <View style={styles.previewCard}>
-        <Text style={styles.cardPreviewText} >Your New Card - List Preview</Text>
+        <Text style={styles.cardPreviewText} >Your New Drop - Story Preview</Text>
         <CardDisplay 
           id={this.props.thisCard.key}
           icon={this.props.thisCard.icon}

@@ -9,6 +9,7 @@ import {
 import PictureFrame from '../images/PictureFrameBare.png';
 import ItemInfo from '../images/ItemInfo.png';
 import ItemNote from '../images/ItemNote.png';
+import CloudShare from '../images/CloudShare.png';
 
 //import Icon from 'react-native-vector-icons/Ionicons';
 //import AppColors from '../templates/appColors';
@@ -45,6 +46,10 @@ class ImageTabBar extends React.Component {
         this.gotoNewPage(2);
         break;
       }
+      case 'share': {
+        this.gotoNewPage(3);
+        break;
+      }
       default: break;
     }  // ... switch ...
   }
@@ -59,6 +64,7 @@ class ImageTabBar extends React.Component {
     const opacity01 = (this.props.activeTab === 0 ? 0.90 : 0.45);
     const opacity02 = (this.props.activeTab === 1 ? 0.90 : 0.45);
     const opacity03 = (this.props.activeTab === 2 ? 0.90 : 0.45);
+    const opacity04 = (this.props.activeTab === 3 ? 0.90 : 0.45);
     return (
       <View style={[styles.tabs, this.props.style]}>
         <TouchableOpacity activeOpacity={0.25} onPress={() => this.pressedButton('photo')}>
@@ -77,6 +83,12 @@ class ImageTabBar extends React.Component {
           <Image 
             style={[styles.imageIconStyle, { opacity: opacity03 }]} 
             source={ItemNote} 
+          />
+        </TouchableOpacity>
+        <TouchableOpacity activeOpacity={0.25} onPress={() => this.pressedButton('share')}>
+          <Image 
+            style={[styles.imageIconStyle, { opacity: opacity04 }]} 
+            source={CloudShare} 
           />
         </TouchableOpacity>
       </View>

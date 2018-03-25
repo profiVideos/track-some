@@ -99,6 +99,7 @@ export const CLEAR_NOTE = 'CLEAR_NOTE';
 export const UPDATE_NOTE = 'UPDATE_NOTE';
 export const REMOVE_NOTE = 'REMOVE_NOTE';
 export const CURRENT_NOTE = 'CURRENT_NOTE';
+export const RENDER_NOTES = 'RENDER_NOTES';
 export const HIGHLIGHT_NOTE = 'HIGHLIGHT_NOTE';
 export const NOTE_EDIT_CHANGE = 'NOTE_EDIT_CHANGE';
 export const DELETE_CARD_NOTES = 'DELETE_CARD_NOTES';

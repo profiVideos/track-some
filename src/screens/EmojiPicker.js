@@ -451,6 +451,7 @@ const styles = StyleSheet.create({
   },
   statusBar: {
     height: 44,
+    elevation: 3,
     flexDirection: 'row',
     padding: (Platform.OS === 'android' ? 2 : 2),
     alignItems: 'center',

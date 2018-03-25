@@ -145,27 +145,6 @@ class TrackSomeConfig extends Component {
     this.props.dispatch(usernameChanged(text));
   }
 
-/*
-// ... how to check if a document exists ...
-// ... used as part of a deletion check which is a problem for firestore ...
-// ... perhaps I need to keep a local copy of stuff that we need to delete from ...
-// ... the server and then when we have an internet connectionm delete the backlog ...
-// ... of stuff that's been deleted on the device but not yet in the cloud ...
-var cityRef = db.collection('cities').doc('SF');
-
-var getDoc = cityRef.get()
-    .then(doc => {
-        if (!doc.exists) {
-            console.log('No such document!');
-        } else {
-            console.log('Document data:', doc.data());
-        }
-    })
-    .catch(err => {
-        console.log('Error getting document', err);
-    });
-*/
-
   handleConnectionChange = (isConnected) => {
     this.props.dispatch(connectionState(isConnected));
   };

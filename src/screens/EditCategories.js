@@ -246,6 +246,17 @@ class EditCategories extends PureComponent {
     </Menu>
   )
 
+/*
+            <TouchableOpacity 
+              disabled={this.props.currentCat.name === ''} 
+              onPress={() => this.addThisItem(false)} 
+            >
+              <View style={{ alignItems: 'center' }}>
+                <Icon size={28} name='plus' color={AppColors.darkerColor} />
+              </View>
+            </TouchableOpacity>
+*/
+
   render() {
     const showIconOrEmoji = (this.props.emojiCode === '' ?
       <Image style={styles.imageStyle} source={HappyGuy} /> :
@@ -285,14 +296,6 @@ class EditCategories extends PureComponent {
               />
             </View>
 
-            <TouchableOpacity 
-              disabled={this.props.currentCat.name === ''} 
-              onPress={() => this.addThisItem(false)} 
-            >
-              <View style={{ alignItems: 'center' }}>
-                <Icon size={28} name='plus' color={AppColors.darkerColor} />
-              </View>
-            </TouchableOpacity>
             <View style={styles.menuTrigger}>
               { this.renderOptionMenu() }
             </View>
@@ -300,7 +303,7 @@ class EditCategories extends PureComponent {
               <View style={styles.buttonFinish}> 
                 <IconIon 
                   name='md-checkmark-circle-outline' 
-                  size={34} 
+                  size={38} 
                   color={AppColors.paperColor} 
                 />
               </View>
@@ -403,7 +406,7 @@ const styles = StyleSheet.create({
     height: 44,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: AppColors.accentColor,  // ... medium orange ...
+    backgroundColor: AppColors.darkerColor,  // ... medium orange ...
     justifyContent: 'space-around',
     shadowColor: '#121212',
     shadowOffset: { width: 1, height: 3 },
