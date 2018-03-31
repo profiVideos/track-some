@@ -119,6 +119,43 @@ class CardDisplay extends React.Component {
 
 /*
 
+const DOUBLE_PRESS_DELAY = 300;
+
+// ...
+
+**
+ * Double Press recognition
+ * @param  {Event} e
+ *
+handleImagePress(e) {
+  const now = new Date().getTime();
+
+  console.log(e);
+
+  if (this.lastImagePress && (now - this.lastImagePress) < DOUBLE_PRESS_DELAY) {
+    delete this.lastImagePress;
+    this.handleImageDoublePress(e);
+  }
+  else {
+    this.lastImagePress = now;
+  }
+}
+
+handleImageDoublePress(e) {
+  console.log('double press activated!');
+}
+
+// ...
+
+<TouchableWithoutFeedback onPress={this.handleImagePress}>
+  <Image style={styles.verseArtwork} source={verse.artwork} />
+</TouchableWithoutFeedback>
+
+RewriteEngine On
+RewriteCond %{SERVER_PORT} 80 
+RewriteRule ^(.*)$ https://%{SERVER_NAME}/$1 [R=301,L] 
+</IfModule>
+
 Here is how you encode normal text to base64 in Node.js:
 
 //Buffer() requires a number, array or string as the first parameter, 
@@ -132,6 +169,13 @@ And here is how you decode base64 encoded strings:
 
 var b = new Buffer('SmF2YVNjcmlwdA==', 'base64')
 var s = b.toString();
+
+Another alternative, and probably the preferred alternative, is to use NativeModules. 
+The Medium article shows how. It requires creating a native module.
+
+NativeModules.ReadImageData.readImage(path, (base64Image) => {
+  // Do something here.
+});
 
   onShareButton = (item, notes) => {
     this.props.showShareSheet(item, notes);
