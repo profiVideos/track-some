@@ -11,9 +11,9 @@ import {
   //ActivityIndicator,
   TouchableNativeFeedback
 } from 'react-native';
-import ScrollableTabView from 'react-native-scrollable-tab-view';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { connect } from 'react-redux';
+import { Tab, Tabs } from 'native-base';
 import {
   Menu,
   MenuOptions,
@@ -23,7 +23,7 @@ import {
 } from 'react-native-popup-menu';
 
 import AppColors from '../templates/appColors';
-import emojiData from '../store/data/sorted-emojis.json';
+//import emojiData from '../store/data/sorted-emojis.json';
 import EmojiTabBar from './EmojiTabBar';
 import EmojiItem from '../components/EmojiItem';
 import { 
@@ -34,6 +34,7 @@ import {
   loadMyEmojis,
   deleteEmojis 
 } from '../store/actions';
+import realmDB from '../store';
 
 //console.warn('Emojis are loading ... ');
 //console.log(emojiData);
@@ -76,6 +77,14 @@ const emojiCats = [
 */
 
 const listItemHeight = 65;          // ... used to calculate faster scrolls (pass to EmojiItem) ...
+const food = realmDB.getEmojiData('FOO').snapshot();
+const flags = realmDB.getEmojiData('FLG').snapshot();
+const travel = realmDB.getEmojiData('TRV').snapshot();
+const objects = realmDB.getEmojiData('OBJ').snapshot();
+const symbols = realmDB.getEmojiData('SYM').snapshot();
+const smileys = realmDB.getEmojiData('SMI').snapshot();
+const animals = realmDB.getEmojiData('ANI').snapshot();
+const activity = realmDB.getEmojiData('ACT').snapshot();
 
 const IconMenuOption = (props) => (
   <MenuOption 
@@ -107,13 +116,18 @@ class EmojiPicker extends PureComponent {
   constructor(props) {
     super(props);
     this.tabBarState = 'hidden';
-    this.onEmojiCloseSelf = this.onEmojiCloseSelf.bind(this);    
+    this.onSearchChanged = this.onSearchChanged.bind(this);
+    this.onSearchFocusChange = this.onSearchFocusChange.bind(this);
+    this.onEmojiCloseSelf = this.onEmojiCloseSelf.bind(this);
+    this.renderMyEmojisOrSearch = this.renderMyEmojisOrSearch.bind(this);  
     this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     this.state = {
       checked: false,   // ... used to test the switch component ...
       loading: false,
       canEdit: false,
       refresh: false,
+      searchOpen: false,
+      localSearch: '',
       emojisClicked: ''
     };
   }
@@ -130,9 +144,14 @@ class EmojiPicker extends PureComponent {
     this.props.dispatch(loadMyEmojis());
   }
 
-  //componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps(nextProps) {
     // ... if the emojis list is dirty (used) then we should save it ...
     //console.log('Emoji List Updated: ', nextProps.listUpdated);
+    if ((this.state.searchOpen) && (this.state.localSearch !== '')) {
+      ToastAndroid.show('Menu Options', ToastAndroid.SHORT);
+    }
+    //ToastAndroid.show('Menu Options', ToastAndroid.SHORT);
+
     //------------------------------------------------------
     // ... do this purely for debugging purposes so we ...
     // ... can see the data being returned from Realm ...
@@ -140,17 +159,35 @@ class EmojiPicker extends PureComponent {
     //if (this.props.listUpdated !== nextProps.listUpdated) {
       //console.log('New MyEmojis: ', JSON.stringify(nextProps.myEmojis));
     //}
-  //}
+  }
 
   onNavigatorEvent(event) {
     if (event.type === 'NavBarButtonPress') { // this is the event type for button presses
-      if (event.id === 'close') { // this is the same id field from the static navigatorButtons
-        this.toggleTabs();
-      }
-      if (event.id === 'menu') {
-        this.props.navigator.toggleDrawer({ side: 'left', animated: true });
-        //this.props.navigator.showModal({ screen: 'tracksome.EmojiPicker' });
-      }
+      switch (event.id) {
+        case 'menu': {
+          this.props.navigator.toggleDrawer({ side: 'left', animated: true });
+          break;
+        }
+        case 'close': {
+          this.toggleTabs();
+          this.props.navigator.toggleDrawer({ side: 'left', animated: true });
+          break;
+        }
+        case 'search': {
+          if (this.state.searchOpen === false) {
+            this.showSearchBar();
+          } else this.hideSearchBar(); 
+          this.setState({ searchOpen: !this.state.searchOpen });
+          break;
+        }
+        case 'options': {
+          ToastAndroid.show('Menu Options', ToastAndroid.SHORT);
+          break;
+        }
+        default: 
+          ToastAndroid.show('Default - Not Defined', ToastAndroid.SHORT);
+          break;
+      }  // ... switch ...
     }
   }
 
@@ -253,6 +290,19 @@ class EmojiPicker extends PureComponent {
     }  // ... switch ...
   }
 
+  onSearchChanged(text) {
+    //console.log('search changed: ', text);
+    //this.props.dispatch(searchNotesChanged(text));
+    this.setState({ localSearch: text });
+  }
+
+  onSearchFocusChange() {
+    ToastAndroid.show('Emoji Search: Focus Lost', ToastAndroid.SHORT);
+    // ... ensure the keyboard is closed ...
+    // ... make sure we stop the other searches from looking for new matches ...
+    //this.props.dispatch(searchCardsChanged(''));
+ }
+
   getItemLayout = (data, index) => (  // ... so flatlist can scroll faster ...
     { length: listItemHeight, offset: listItemHeight * index, index }
   );
@@ -260,6 +310,24 @@ class EmojiPicker extends PureComponent {
   setEditFlag = (allowEdits) => {
     this.setState({ canEdit: allowEdits });
   };
+
+  showSearchBar() {
+    //this.props.dispatch(searchNotesChanged(this.state.localSearchFor));
+    this.props.navigator.setStyle({
+      navBarCustomView: 'tracksome.SearchBar',
+      navBarComponentAlignment: 'fill',
+      navBarCustomViewInitialProps: { 
+        thisSearch: this.state.localSearch,
+        searchLostFocus: this.onSearchFocusChange,
+        searchTextChanged: this.onSearchChanged 
+      }
+    });
+  }
+
+  hideSearchBar() {
+    //this.props.dispatch(searchNotesChanged(''));   // ... se we use the live results again ...
+    this.props.navigator.setStyle({ navBarCustomView: '' });
+  }
 
   countSelectedItems() {
     return this.props.myEmojis.filter(item => item.selected === true).length;
@@ -286,24 +354,59 @@ class EmojiPicker extends PureComponent {
     this.tabBarState = to;
   };
 
-  showEmojis = (emojiGroup) => (
-    <FlatList
-        numColumns={6}
-        horizontal={false}
-        data={emojiGroup}
-        initialNumToRender={3}  // ... 3 ...
-        extraData={this.props.listUpdated}
-        // ... not sure how these work??? refreshing={this.state.refreshing}
-        // ...... Set this true while waiting for new data from a refresh.
-        // legacyImplementation - does not work on multiple columns ...
-        //onRefresh={this.onEmojiListRefresh}
-        removeClippedSubviews
-        getItemLayout={this.getItemLayout}
-        keyExtractor={(item, index) => index}
-        renderItem={this.renderEmojiItem}
-        // ... useful for an activity spinner - ListHeaderComponent={this.renderOptionMenu}
-    />
-  );
+  showEmojis = (emojiGroup) => {
+    let showList = null;
+    if (this.state.searchOpen) {
+      showList = this.props.searchEmojis;
+    } else {
+      switch (emojiGroup) {
+        case 'REC': { showList = this.props.myEmojis; break; }
+        case 'FOO': { showList = food; break; }
+        case 'FLG': { showList = flags; break; }
+        case 'TRV': { showList = travel; break; }
+        case 'OBJ': { showList = objects; break; }
+        case 'SMI': { showList = smileys; break; }
+        case 'SYM': { showList = symbols; break; }
+        case 'ANI': { showList = animals; break; }
+        case 'ACT': { showList = activity; break; }
+        default: 
+          break;
+      }  // ... switch ...
+    }
+    return (
+      <FlatList
+          numColumns={6}
+          horizontal={false}
+          data={showList}
+          initialNumToRender={3}  // ... 3 ...
+          extraData={this.props.listUpdated}
+          // ... not sure how these work??? refreshing={this.state.refreshing}
+          // ...... Set this true while waiting for new data from a refresh.
+          // legacyImplementation - does not work on multiple columns ...
+          //onRefresh={this.onEmojiListRefresh}
+          removeClippedSubviews
+          getItemLayout={this.getItemLayout}
+          keyExtractor={(item, index) => index}
+          renderItem={this.renderEmojiItem}
+          // ... useful for an activity spinner - ListHeaderComponent={this.renderOptionMenu}
+      />
+    );
+  };
+
+  renderMyEmojisOrSearch() {
+    ToastAndroid.show(`Num Emojis: ${this.props.myEmojis.length}`, ToastAndroid.SHORT);
+    if (this.props.myEmojis.length > 0) {
+      this.showEmojis(this.props.myEmojis);
+    } 
+    /*
+    if (this.state.searchOpen) {
+      this.showEmojis(this.props.searchEmojis);
+    } else {
+      ToastAndroid.show('Show myEmojis', ToastAndroid.SHORT);
+      this.showEmojis(this.props.myEmojis);
+    }
+    */
+  }
 
   renderEmojiItem = ({ item }) => {
     return (
@@ -375,7 +478,7 @@ class EmojiPicker extends PureComponent {
             </TouchableNativeFeedback>
           </View>
 
-          <ScrollableTabView
+          <Tabs
             style={{ backgroundColor: '#f2f2f2' }}
             initialPage={0}
             //tabBarPosition='overlayTop'
@@ -383,38 +486,39 @@ class EmojiPicker extends PureComponent {
               <EmojiTabBar 
                 tabGroupTitle={emojiCats}
                 optionMenu={this.renderOptionMenu}
-                canEdit={this.setEditFlag} 
+                canEdit={this.setEditFlag}
+                searching={this.state.searchOpen}
               />
             }
           >
-            <View tabLabel="stopwatch" style={styles.tabView}>
-              {this.showEmojis(this.props.myEmojis)}
-            </View>
-            <View tabLabel="happy" style={styles.tabView}>
-              {this.showEmojis(emojiData.filter((item) => item.cat === 'SMI'))}
-            </View>
-            <View tabLabel="paw" style={styles.tabView}>
-              {this.showEmojis(emojiData.filter((item) => item.cat === 'ANI'))}
-            </View>
-            <View tabLabel="pizza" style={styles.tabView}>
-              {this.showEmojis(emojiData.filter((item) => item.cat === 'FOO'))}
-            </View>
-            <View tabLabel="tennisball" style={styles.tabView}>
-              {this.showEmojis(emojiData.filter((item) => item.cat === 'ACT'))}
-            </View>
-            <View tabLabel="plane" style={styles.tabView}>
-              {this.showEmojis(emojiData.filter((item) => item.cat === 'TRV'))}
-            </View>
-            <View tabLabel="bulb" style={styles.tabView}>
-              {this.showEmojis(emojiData.filter((item) => item.cat === 'OBJ'))}
-            </View>
-            <View tabLabel="star" style={styles.tabView}>
-              {this.showEmojis(emojiData.filter((item) => item.cat === 'SYM'))}
-            </View>
-            <View tabLabel="flag" style={styles.tabView}>
-              {this.showEmojis(emojiData.filter((item) => item.cat === 'FLG'))}
-            </View>
-          </ScrollableTabView>
+            <Tab heading="stopwatch" style={styles.tabView}>
+              {this.showEmojis('REC')}
+            </Tab>
+            <Tab heading="happy" style={styles.tabView}>
+              {this.showEmojis('SMI')}
+            </Tab>
+            <Tab heading="paw" style={styles.tabView}>
+              {this.showEmojis('ANI')}
+            </Tab>
+            <Tab heading="pizza" style={styles.tabView}>
+              {this.showEmojis('FOO')}
+            </Tab>
+            <Tab heading="tennisball" style={styles.tabView}>
+              {this.showEmojis('ACT')}
+            </Tab>
+            <Tab heading="plane" style={styles.tabView}>
+              {this.showEmojis('TRV')}
+            </Tab>
+            <Tab heading="bulb" style={styles.tabView}>
+              {this.showEmojis('OBJ')}
+            </Tab>
+            <Tab heading="star" style={styles.tabView}>
+              {this.showEmojis('SYM')}
+            </Tab>
+            <Tab heading="flag" style={styles.tabView}>
+              {this.showEmojis('FLG')}
+            </Tab>
+          </Tabs>
 
         </View>
       </MenuProvider>
@@ -423,6 +527,13 @@ class EmojiPicker extends PureComponent {
 }
 
 export default connect(whatDoYouNeed)(EmojiPicker);
+
+/*
+              {this.state.searchOpen ? this.showEmojis(this.props.searchEmojis) : 
+                this.showEmojis(this.props.myEmojis)}
+        <Tab heading="Tab1" style={styles.tabView}>
+              {this.showEmojis(this.props.myEmojis)}
+*/
 
 const menuOptionsStyles = {
   optionsContainer: {

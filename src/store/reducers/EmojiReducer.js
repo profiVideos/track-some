@@ -56,7 +56,8 @@ const EmojiReducer = (state = initialState, action) => {
       // ... restore the user's emoji list ...
       return { 
         ...state,
-        myEmojis: action.payload.emojis
+        myEmojis: action.payload.emojis,
+        lastUpdated: Date.now()
       };
 
     default: return state;

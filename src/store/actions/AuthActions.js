@@ -235,7 +235,12 @@ export const checkUserStatus = () => {
 export const appInitialize = () => {
   return dispatch => {
     dispatch(checkUserStatus());    // ... checks if this user is logged in ...
-    // ... other initialization code here ...
+    // ... check if emojis are loaded into Realm - only ever need to do once ...
+    const emojiData = realmDB.getEmojiData('ACT');  // ... try to get a small group ...
+    if ((emojiData === undefined) || (emojiData.length === 0)) {
+      realmDB.loadEmojiData();
+      ToastAndroid.show('Emojis loaded!', ToastAndroid.SHORT);
+    }
   };
 };
 

@@ -1,4 +1,6 @@
-import { tsRealm } from '../data/tsObjects';
+import { ToastAndroid } from 'react-native';
+import { tsRealm, emjRealm } from '../data/tsObjects';
+import sortedEmojiData from '../data/sorted-emojis.json';
 import { UniqueId } from '../../components/common/UniqueId';
 
 // ... Realm supports the following basic types: bool, int, float, double, string, data, and date.
@@ -20,6 +22,26 @@ try {
   console.log("Error on creation");
 }
 */
+
+export const loadEmojiData = () => {
+  //ToastAndroid.show(`Emojis in Source: ${sortedEmojiData.length}`, ToastAndroid.LONG);
+  emjRealm.write(() => {
+    sortedEmojiData.forEach(emoji => {
+      emjRealm.create('EmojiData', { 
+        cat: emoji.cat, 
+        emoji: emoji.emoji, 
+        sort: emoji.sort, 
+        name: emoji.name 
+      });
+    });
+  });
+};
+
+export const getEmojiData = (category) => {
+  //const thisGroup = emjRealm.objects('EmojiData').filtered('cat = $0', category).sorted('sort');
+  const thisGroup = emjRealm.objects('EmojiData').filtered('cat = $0', category);
+  return thisGroup;
+};
 
 export const getEmoji = (key) => {
   const thisItem = tsRealm.objectForPrimaryKey('Emoji', key);

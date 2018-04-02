@@ -18,6 +18,18 @@ Emoji.schema = {
   }
 };
 
+class EmojiData extends Realm.Object {}
+EmojiData.schema = {
+  name: 'EmojiData',
+  primaryKey: 'emoji',
+  properties: {
+    cat: 'string', 
+    emoji: 'string',    // ... contains the two char international emoji string ...
+    sort: 'int',
+    name: 'string'
+  }
+};
+
 class Category extends Realm.Object {}
 Category.schema = {
   name: 'Category',
@@ -157,5 +169,12 @@ export const tsRealm = new Realm({
 export const cfgRealm = new Realm({ 
   path: 'config.realm', 
   schema: [Config, AppConfig],
+  deleteRealmIfMigrationNeeded: true 
+});
+
+export const emjRealm = new Realm({
+  path: 'emoji.realm', 
+  schema: [EmojiData],
+  schemaVersion: 1,
   deleteRealmIfMigrationNeeded: true 
 });

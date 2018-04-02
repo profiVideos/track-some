@@ -54,10 +54,6 @@ const menuOptionsStyles = {
   },
 };
 
-/*
-Cast: Cathy Heaven, Barbara Bieber, Ashley Woods, Jennifer James
-Genres: All Sex, Big Boobs
-*/
 const whatDoYouNeed = state => {
   return {
     saveMode: state.login.saveMode,

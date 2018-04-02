@@ -79,11 +79,14 @@ class EmojiTabBar extends React.Component {
   }
 /*
       const backColor = this.props.activeTab === 0 ? AppColors.mainDarkColor : 'white';
+      
 */
 
   render() {
     const backColor = this.props.activeTab === 0 ? AppColors.hiliteColor : 'white';
     const hasOptionsMenu = this.props.activeTab === 0 ? this.props.optionMenu() : null;
+    const tabTitle = this.props.searching ? 'Found Matching Emojis' :
+      this.props.tabGroupTitle[this.props.activeTab];
     return (
       <View>
         <View style={[styles.tabs, this.props.style]}>
@@ -106,7 +109,7 @@ class EmojiTabBar extends React.Component {
         </View>
         <View style={[styles.titleContainer, { backgroundColor: backColor }]}>
           <View style={styles.titleSection}>
-            <Text style={styles.emojiTitle}>{this.props.tabGroupTitle[this.props.activeTab]}</Text>
+            <Text style={styles.emojiTitle}>{tabTitle}</Text>
           </View>
           <View style={styles.menuTriggers}>
             {hasOptionsMenu}
